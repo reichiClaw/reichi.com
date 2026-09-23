@@ -23,118 +23,131 @@ booking section. References are set as typographic line-ups, not cards.
 ## Structure
 
 ```
-app/
-  bootstrap.php          shared entry (config, helpers, content, security headers)
-  config.example.php     example configuration – copy to config.php
-  config.php             your real configuration (not versioned)
-  content.php            ALL editable copy, references, links, photo + logo metadata
-  contact.php            form validation, rate limiting, mail()
-  helpers.php            escaping, <picture> rendering, CSRF, session, icons
-  templates/
-    header.php, footer.php
-    sections/            hero, skills, about, portfolio, gallery, projects, hire
-public/                  the web root (document root)
+htdocs/                  <- the web root: upload the CONTENTS of this folder via FTP
   index.php              home page (all sections, legacy anchors preserved)
   contact.php            POST handler (Post/Redirect/Get)
   impressum/index.php    legal notice (existing path kept)
   datenschutz/index.php  privacy statement (new)
-  404.php                error page (wired via .htaccess / nginx error_page)
+  404.php                error page (wired via ErrorDocument in .htaccess)
+  .htaccess              Apache rules: blocks app/ + storage/, caching, old WP redirects
   assets/css/style.css   the stylesheet (design tokens at the top)
   assets/js/main.js      nav toggle, header state, reveal, lightbox
   assets/images/         photos (jpg + webp, several widths), logos, icons
-  robots.txt, sitemap.xml, site.webmanifest, favicon.ico, .htaccess (optional)
-storage/                 writable, outside the web root: ratelimit/ and logs/
-assets-src/originals/    untouched originals downloaded from the old site
+  robots.txt, sitemap.xml, site.webmanifest, favicon.ico
+  app/                   PHP code – not reachable from the browser (.htaccess + PHP guard)
+    bootstrap.php        shared entry (config, helpers, content, security headers)
+    config.example.php   template for config.php
+    config.php           your configuration (in the ZIP; not versioned in git)
+    content.php          ALL editable copy, references, links, photo + logo metadata
+    contact.php          form validation, rate limiting, mail()
+    helpers.php          escaping, <picture> rendering, CSRF, session, icons
+    templates/           header.php, footer.php, sections/ (hero, skills, about, …)
+  storage/               writable runtime data – not reachable from the browser
+    ratelimit/           one small JSON file per sender hash (auto-pruned)
+    logs/mail.log        mail failures (timestamp + error only)
+    secret.php           auto-generated secret for hashing IPs (created on first visit)
+assets-src/originals/    untouched originals downloaded from the old site (do not upload)
 tools/build-images.py    optional dev helper to regenerate image derivatives
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 ```
 
 ## Requirements
 
-- PHP **8.1 or newer** (developed and tested with PHP 8.3) with the `mbstring`,
-  `filter`, `ctype`, `session` and `json` extensions (all default in standard builds).
-  `gd` is **not** required at runtime; images are pre-generated.
-- A web server (Apache, nginx, LiteSpeed, Caddy, …) with PHP.
-- **A working mail transport on the server** for the contact form: PHP's `mail()`
-  hands the message to the local `sendmail` binary (Postfix, Exim, msmtp …) or to whatever
-  the hoster configured in `sendmail_path`. Without this no e-mail can be delivered –
-  the form then reports failure honestly and shows the direct e-mail and phone links.
-  The application does not include an SMTP client on purpose.
-- HTTPS. The canonical address is `https://www.reichi.com`; redirects from `http://`
-  and from the alias domains must be configured on the server (see below).
-- A writable `storage/` directory (or the fallback `sys_get_temp_dir()/reichi-storage`).
+- Any ordinary shared web host with **PHP 8.1 or newer** (developed and tested with
+  PHP 8.3). Needed extensions: `mbstring`, `filter`, `ctype`, `session`, `json` – all part
+  of standard hosting builds. `gd` is **not** required; images are pre-generated.
+  If the host lets you pick a PHP version in its control panel, pick 8.3 (or 8.2/8.1).
+- Apache with `.htaccess` support (the default on shared hosting). Nothing else has
+  to be configured on the server: no vhost, no nginx, no shell access.
+- **The host's PHP `mail()` function must be allowed** for the contact form. On shared
+  hosting this is normally the case. If not, the form says so honestly and shows the
+  direct e-mail and phone links – nothing breaks silently. The site deliberately has no
+  SMTP client.
+- HTTPS (Let's Encrypt via the hosting panel). The canonical address is
+  `https://www.reichi.com`.
+- PHP must be able to write into `storage/` (see step 5 below).
 
-## Installation
+## Installation via FTP (shared hosting)
 
-### A. Configurable document root (VPS, managed server, Plesk, Caddy …)
+1. Unzip `reichi-website-<date>.zip` on your computer.
+2. Open `htdocs/app/config.php` in a text editor and check the values – at minimum
+   `mail_to` (where inquiries go) and `mail_from` (an address **on your own domain**, e.g.
+   `website@reichi.com`; create it as a mailbox or alias in the hosting panel so the
+   host accepts it as sender). Save as UTF-8.
+3. Connect with your FTP program (FileZilla, Cyberduck, WinSCP …) and open the web
+   root of the domain – usually called `public_html`, `htdocs`, `httpdocs`, `www` or
+   `web`. Delete or move away the old WordPress files.
+4. Upload **everything inside** `htdocs/` – the files (`index.php`, `.htaccess`, …) and
+   the folders (`assets/`, `app/`, `storage/`, `impressum/`, `datenschutz/`). Not the
+   `htdocs` folder itself, and not `assets-src/`, `README.md` etc.
+   Make sure hidden files (`.htaccess`) are shown and transferred (FileZilla:
+   *Server → Force showing hidden files*).
+5. Permissions: PHP has to write into `storage/`, `storage/ratelimit/` and
+   `storage/logs/`. On most hosts (PHP runs as your FTP user) this already works with
+   the default `755`. If the form later reports a rate-limit/storage problem or
+   `storage/secret.php` is never created, set those three folders to `775` (or as a
+   last resort `777`) in the FTP client (right click → *File permissions*).
+6. Open `https://www.reichi.com/`. On the first visit the site creates
+   `storage/secret.php`. Then test:
+   - `https://www.reichi.com/app/content.php` and `/storage/secret.php` must show an
+     empty page or *404 / 403* – never text or code.
+   - Send yourself a test inquiry via the form and check that it arrives (also look
+     in spam; see *Mail* below).
+7. Set up a redirect from `http://` to `https://` and from the alias domains. Most
+   hosting panels have a switch for this ("force HTTPS" / domain forwarding). If yours
+   does not, remove the `#` in front of the `mod_rewrite` block in `.htaccess`.
 
-1. Upload the whole project, e.g. to `/var/www/reichi/`.
-2. Point the document root of the vhost to `/var/www/reichi/public`.
-3. `cp app/config.example.php app/config.php` and edit (see *Configuration*).
-4. Make `storage/` writable by the PHP user: `chmod 750 storage storage/ratelimit storage/logs`
-   and `chown` to the web user, or `chmod 770` if the web user is in your group.
-5. Open the site, submit a test inquiry, check that it arrives.
+The whole site lives in the web root, so **no access to Apache/nginx configuration is
+required**. `app/` and `storage/` are protected twice: by their own `.htaccess`
+(`Require all denied`, plus a `RedirectMatch 404` rule in the root `.htaccess`) and, in
+case `.htaccess` were ignored, by a PHP guard at the top of every file in `app/` that
+answers 404 to direct requests. `storage/secret.php` is a PHP file returning a string,
+so a direct request produces an empty page instead of the value.
 
-### B. Shared hosting with `public_html` (or `htdocs`, `httpdocs`, `www`)
+### Optional hardening: files above the web root
 
-Typical layout on the server:
+If your host lets you upload one level above the web root (many do), move `app/` and
+`storage/` there so they are outside the document root entirely:
 
 ```
-/home/USER/
-  app/                 <- upload the app/ folder here (outside the web root)
-  storage/             <- upload storage/ here, make it writable
-  public_html/         <- upload the CONTENTS of public/ here
+/                      (your FTP home)
+  app/
+  storage/
+  public_html/         (everything else from htdocs/)
 ```
 
-`public/index.php` etc. reference the application with `dirname(__DIR__) . '/app'`,
-i.e. one directory above the web root – so `app/` and `storage/` simply need to be
-siblings of `public_html/`. Nothing else has to be adjusted.
+The entry files look for `app/` inside the web root first and one level above second,
+and `storage_dir` in `config.php` defaults to the folder next to `app/`. Nothing has to
+be edited.
 
-If your hoster does not allow files above the web root, place `app/` and `storage/`
-inside `public_html/` **and** protect them (Apache: put a `.htaccess` with
-`Require all denied` into each; nginx: `location ~ ^/(app|storage)/ { deny all; }`).
-Then adjust the bootstrap path in the five entry files, because `app/` is now one level
-lower than expected:
+### Own server (VPS, Plesk, nginx …)
 
-| file | change `require` to |
-|---|---|
-| `index.php`, `contact.php`, `404.php` | `__DIR__ . '/app/bootstrap.php'` |
-| `impressum/index.php`, `datenschutz/index.php` | `dirname(__DIR__) . '/app/bootstrap.php'` |
+Point the document root at `htdocs/`. For nginx replicate the three things the
+`.htaccess` does: `location ~ ^/(app|storage)(/|$) { return 404; }`, `error_page 404
+/404.php;`, and the old-WordPress-path redirects listed in `MIGRATION.md`.
 
-and set `'storage_dir' => __DIR__ . '/../storage'` in `app/config.php` if needed.
-This is the fallback, not the recommended setup.
+### Redirects
 
-### nginx snippet
+- `http://` → `https://www.reichi.com` (301) and the alias domains `reichi.com`,
+  `reichi.at`, `christianreichinger.at`, `christianreichinger.com` → `https://www.reichi.com`.
+  Preferably via the hosting panel; otherwise the commented block in `.htaccess`.
+  Confirm the alias domains are all still owned before configuring.
+- Old WordPress paths (`/wp-content/…`, `/feed/`, `/xmlrpc.php`) → `/` (301): already in
+  `.htaccess`.
+- HSTS: enable `Strict-Transport-Security` (commented in `.htaccess`) only after HTTPS
+  works reliably.
 
-```nginx
-server {
-    server_name www.reichi.com;
-    root /var/www/reichi/public;
-    index index.php;
+### Mail
 
-    location / { try_files $uri $uri/ =404; }
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }
-    error_page 404 /404.php;
-    location ~ /\. { deny all; }           # dotfiles such as .htaccess
-    location ~* \.(jpg|webp|png|svg|ico|css|js)$ { expires 1y; add_header Cache-Control "public, immutable"; }
-    gzip on; gzip_types text/html text/css application/javascript image/svg+xml application/manifest+json;
-}
-```
+PHP's `mail()` hands the message to whatever the host configured (usually a local
+sendmail/Postfix). For reliable delivery to the inbox:
 
-### Redirects (server-level, documented separately from the app)
-
-- `http://` → `https://www.reichi.com` (301)
-- `reichi.com`, `reichi.at`, `christianreichinger.at`, `christianreichinger.com` →
-  `https://www.reichi.com` (301). The old imprint lists these alias domains; confirm they
-  are all still owned before configuring.
-- Old WordPress paths (`/wp-content/…`, `/feed/`, `/xmlrpc.php`) → `/` (301);
-  a ready-made rule set is in `public/.htaccess`. The canonical https/www redirect is
-  included there as a commented block – enable it once the certificate works.
-- HSTS: enable `Strict-Transport-Security` only after HTTPS works reliably.
+- `mail_from` must be an address on the site's domain; create it in the hosting panel.
+- Check the host's SPF record includes their mail servers (usually done for you).
+- If the host forbids the `-f` envelope parameter (the log then shows a sendmail
+  error), set `'mail_envelope_from' => null` in `config.php`.
+- If `mail()` is disabled altogether, set `'mail_enabled' => false`; the form then shows
+  the failure message with direct contacts instead of pretending.
 
 ## Configuration (`app/config.php`)
 
@@ -144,15 +157,15 @@ server {
 | `mail_to` | recipient of inquiries (default `reichi@reichi.com`) |
 | `mail_from`, `mail_from_name` | sender; **must be an address on the site's domain** so SPF/DMARC pass. The visitor's address is only used in `Reply-To`. |
 | `mail_envelope_from` | passed as `-f` to sendmail; set to `null` if the hoster forbids it |
-| `mail_enabled` | `false` in the example config → the form reports „could not send“ and shows direct contacts. **Set to `true` for production.** |
-| `secret` | random string (≥ 32 chars, e.g. `openssl rand -hex 32`) used to hash IP addresses for rate limiting |
+| `mail_enabled` | `true` by default. `false` → the form reports „could not send“ and shows direct contacts (use locally or while the host has no mail) |
+| `secret` | random string (≥ 32 chars) used to hash IP addresses for rate limiting. Leave empty to have it generated automatically into `storage/secret.php` on the first visit |
 | `rate_limit` | `max_per_window` (5) per `window_seconds` (3600), `min_interval` (20 s), `retention_seconds` (86400) |
-| `storage_dir` | writable directory outside the web root |
+| `storage_dir` | writable directory; default `storage/` next to `app/` (blocked by `.htaccess`) |
 | `log_mail_failures` | write `storage/logs/mail.log` (timestamp + error only, never form content) |
 | `force_secure_cookie` | set `true` when served exclusively over HTTPS behind a proxy that hides `HTTPS` |
 
-`app/config.php` is git-ignored. If it is missing the site falls back to the example
-config with mail disabled.
+`app/config.php` is git-ignored in this repository; the upload ZIP ships it as a copy
+of `config.example.php`. If it is missing the site falls back to the example values.
 
 ## Editing content
 
@@ -163,14 +176,14 @@ Everything editable lives in **`app/content.php`**, one PHP array with comments:
 - **References**: `portfolio.groups[*].items` – three separate lists (FOH mixed for /
   worked together with / festivals & venues). Add or remove names; counts update
   automatically.
-- **Client logos**: `clients.items` – name, URL (or `null`), file in `public/assets/images/logos/`,
+- **Client logos**: `clients.items` – name, URL (or `null`), file in `assets/images/logos/`,
   intrinsic width/height, alt text, `light_bg => true` for logos that ship with a white
   background (they are placed on a light plate).
 - **Contact details**: `contact` – address, e-mail, phone (`phone_display` for humans,
   `phone_href` for the `tel:` link), UID, alias domains.
 - **Navigation**: `nav` and `nav_cta`.
 - **Photos**: `photos` – see below.
-- **Legal texts**: directly in `public/impressum/index.php` and `public/datenschutz/index.php`
+- **Legal texts**: directly in `impressum/index.php` and `datenschutz/index.php`
   (they are prose, not data). Marked `[BESTÄTIGEN]` passages need owner/hoster input.
 
 ### Replacing or adding a photograph
@@ -179,7 +192,7 @@ Everything editable lives in **`app/content.php`**, one PHP array with comments:
 2. Add an entry to `PHOTOS` in `tools/build-images.py` (name, source file, widths; optional
    portrait crop) and run `python3 tools/build-images.py` (needs Python 3 + Pillow –
    development machine only, never on the server). It writes `name-<width>.jpg` and `.webp`
-   into `public/assets/images/photos/` without ever upscaling.
+   into `htdocs/assets/images/photos/` without ever upscaling.
 3. Add the photo to `photos` in `content.php` with `file`, `widths`, `width`/`height` of the
    largest variant, `alt`, `caption`, `credit`, and optionally `portrait` for the mobile crop.
 4. Reference it from `hero.photo`, `about.photo`, `hire.photo` or `gallery.items`.
@@ -190,7 +203,7 @@ names follow the `name-<width>.jpg` / `.webp` pattern listed in `widths`.
 ### Design tokens
 
 Colours, type scale, spacing and the header height are CSS custom properties at the
-top of `public/assets/css/style.css` (`:root`). Fonts are system stacks only.
+top of `assets/css/style.css` (`:root`). Fonts are system stacks only.
 
 ## Contact form behaviour
 
@@ -222,16 +235,18 @@ The JSON-LD block is a data block and not affected by `script-src`.
 ## Local development
 
 ```
-php -S 127.0.0.1:8080 -t public
+php -S 127.0.0.1:8080 -t htdocs
 # with a fake sendmail for testing the success path:
-php -S 127.0.0.1:8080 -t public -d sendmail_path=/path/to/fakesendmail.sh
+php -S 127.0.0.1:8080 -t htdocs -d sendmail_path=/path/to/fakesendmail.sh
 ```
 
 Note: PHP's built-in server serves unknown extension-less paths through `index.php`
-(and does not honour `.htaccess`); Apache/nginx will return 404 / use `404.php`.
+and does not honour `.htaccess`; Apache will return 404 / use `404.php`. The PHP guards
+in `app/` work everywhere, so `/app/…` answers 404 locally too.
 
 ## Building the upload ZIP
 
-`tools/build-zip.sh` creates `dist/reichi-website-<date>.zip` containing `app/`, `public/`,
-`storage/` (empty, with `.gitkeep`), the docs and `assets-src/originals/`. Excluded:
-`.git`, `app/config.php`, runtime data, `tools/`, `dist/`.
+`tools/build-zip.sh` creates `dist/reichi-website-<date>.zip` with one top-level folder
+`reichi-website/` containing `htdocs/` (upload its contents), the three docs and
+`assets-src/originals/`. It lints all PHP files first, ships `app/config.php` as a copy of
+the example (no secrets), and excludes `.git`, runtime data, `tools/` and `dist/`.

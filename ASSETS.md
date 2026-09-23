@@ -3,7 +3,7 @@
 All files were downloaded on 2026-09-23 from the original WordPress upload paths of
 `https://www.reichi.com/wp-content/uploads/…` (direct, not via the i0.wp.com proxy, except
 where noted). Untouched originals are kept in `assets-src/originals/`; delivery versions
-live in `public/assets/images/` and were generated with `tools/build-images.py`
+live in `htdocs/assets/images/` and were generated with `tools/build-images.py`
 (Pillow, JPEG q80 progressive, WebP q78, never upscaled).
 
 Credits come from three sources: the „Bildnachweise“ line on the old imprint, EXIF/IPTC
@@ -13,7 +13,7 @@ as a licence – see „Concerns“.
 
 ## Photographs
 
-| local name (`public/assets/images/photos/`) | source file | original size | intended use | widths generated | credit | concerns |
+| local name (`htdocs/assets/images/photos/`) | source file | original size | intended use | widths generated | credit | concerns |
 |---|---|---|---|---|---|---|
 | `portrait-hood` | `2019/12/DSC6295_square.jpg` | 1335×1335 | **Hero** portrait (LCP image, eager, `fetchpriority=high`) | 480, 600, 800, 1200 | EXIF: „media.dot _ martin mühlbacher“, Artist „martin mühlbacher“ → **Martin Mühlbacher – mdot.at** | Largest delivery 1200 px because the original is 1335 px; fine up to ~600 CSS px at 2×. |
 | `portrait-studio` | `2018/11/ChristianReichingerFrontpage.jpg` | 2406×1606 | Booking/contact section portrait; 4:5 crop for ≥48em (focus 67 % from left) | 800, 1200, 1600 + portrait crop 480, 800, 1000 | EXIF Copyright „media.dot“ → **Martin Mühlbacher – mdot.at** | Was the old hero background. Light grey background is intentional contrast on the dark page. |
@@ -27,7 +27,7 @@ as a licence – see „Concerns“.
 Not migrated: `wp-content/plugins/revslider/admin/assets/images/dummy.png` (slider
 placeholder, appeared 6× in the HTML – not a photograph).
 
-## Logos (`public/assets/images/logos/`)
+## Logos (`htdocs/assets/images/logos/`)
 
 Format kept (PNG with alpha / JPEG). Large logos were downscaled to 400 px (1×) and
 800 px (2×); small originals are served at their native size. `light_bg` = logo ships
@@ -53,7 +53,7 @@ with its own white background and is placed on a light plate in the design.
 All logos belong to their respective owners; they were already published on the old
 site in the same context („Clients“). Their reuse is assumed but not verified.
 
-## Icons (`public/assets/images/icons/`, `public/favicon.ico`)
+## Icons (`htdocs/assets/images/icons/`, `htdocs/favicon.ico`)
 
 | file | source | note |
 |---|---|---|
