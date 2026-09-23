@@ -15,7 +15,7 @@ CSS `background-image` declarations. Nothing from the old installation is used a
 | `/` | `/` | single page, same anchors |
 | `/impressum/` | `/impressum/` | kept |
 | `#skills` `#portfolio` `#contact` `#hire` `#bleedingstar` `#rstream` `#clients` | all kept | plus new `#about` `#fotos` `#projekte` |
-| `/wp-content/…`, `/feed/`, `/xmlrpc.php`, `/wp-json/…` | 301 → `/` | rule set in `public/.htaccess` (Apache) – must be replicated for nginx |
+| `/wp-content/…`, `/feed/`, `/xmlrpc.php`, `/wp-json/…` | 301 → `/` | rule set in `htdocs/.htaccess` (Apache) – must be replicated for nginx |
 | – | `/datenschutz/` | new, privacy statement split out of the imprint |
 | – | `/404.php` | new error page |
 
@@ -99,6 +99,7 @@ portrait crops exist for the two images that need a different mobile composition
 | analytics | Google Analytics | none |
 | cookies | GA + WP | one session cookie for the form |
 | headers | – | CSP and security headers from PHP |
+| hosting | WordPress install in the web root | plain files in the web root, uploadable via FTP; `app/` and `storage/` blocked by `.htaccess` + PHP guards |
 | language attr | `en-US` | `de` |
 | structured data | – | `Person` JSON-LD from visible facts only |
 
@@ -113,6 +114,7 @@ portrait crops exist for the two images that need a different mobile composition
 - All legacy anchors land below the sticky header (desktop and mobile).
 - Lightbox: opens via click, keyboard arrows, Escape closes, focus returns to the trigger; images remain plain links without JS.
 - Contact form: empty/invalid submission → field errors + preserved input; wrong CSRF token → explicit message; honeypot → silent fake success without mail; mail disabled → honest failure message; mail enabled with a fake `sendmail` → message accepted with correct `From`/`Reply-To`/UTF-8 subject; header-injection payloads in name/subject collapsed to spaces, injected e-mail rejected; rate limit → 4th submission within the window blocked, file contains only timestamps under an HMAC key; `GET /contact.php` → 303 to `/#hire`.
+- Shared-hosting layout: direct requests to `/app/*.php`, `/app/templates/*` and `/storage/secret.php` answer 404 or an empty page **without** `.htaccess` (PHP guards); the secret is created automatically in `storage/secret.php` on the first visit and stays stable.
 - Lighthouse 12 (local server, no network latency): home page mobile and desktop
   Performance 100 / Accessibility 100 / Best Practices 100 / SEO 100; imprint and privacy
   pages Accessibility/Best Practices/SEO 100. Production numbers will differ slightly
@@ -121,8 +123,10 @@ portrait crops exist for the two images that need a different mobile composition
 ### Not checked / not possible here
 
 - Real e-mail delivery (no MTA in the sandbox) – must be tested on the hosting.
-- Apache `.htaccess` behaviour (built-in PHP server ignores it) – rules follow standard
-  mod_rewrite/mod_expires/mod_headers syntax; verify once on the server.
+- Apache `.htaccess` behaviour (built-in PHP server ignores it) – every directive is wrapped
+  in `<IfModule>` and `Options` is avoided because shared hosts often forbid it; verify once
+  on the server that `/app/content.php` returns 403/404 and `/404.php` is used for unknown paths.
+- Whether the host's PHP user may write into `storage/` with the uploaded permissions.
 - Behaviour on the hoster's exact PHP version and `sendmail_path`.
 - Safari/Firefox rendering (only Chromium was available); the CSS uses widely supported
   features (`aspect-ratio`, `clamp()`, `svh`, `<dialog>`, `text-wrap` with graceful fallback).
@@ -130,10 +134,10 @@ portrait crops exist for the two images that need a different mobile composition
 ## 6. Open items requiring owner or hoster confirmation
 
 1. **Business data**: name, address (Maria Aich 3, 4971 Aurolzmünster), phone, e-mail, UID `ATU67362668`, and the four alias domains were taken from the old imprint – confirm they are current.
-2. **Hosting details** for the privacy statement (`[BESTÄTIGEN]` marks in `public/datenschutz/index.php`): provider name and seat, log retention, whether the mail server is the hoster's or an external mail provider, retention period for inquiries.
+2. **Hosting details** for the privacy statement (`[BESTÄTIGEN]` marks in `htdocs/datenschutz/index.php`): provider name and seat, log retention, whether the mail server is the hoster's or an external mail provider, retention period for inquiries.
 3. **Mail setup**: `mail_from` must exist / be allowed on the domain (SPF, DKIM, DMARC); set `mail_enabled => true` and test.
 4. **Photo credits**: the hooded and studio portraits and the club photo carry EXIF `media.dot`/Martin Mühlbacher; the Prague series carries an MW Design watermark; the blue open-air photo carries `StageShots.at | Christian Reichinger`. The large red-lit stage photo (`11059538_…_o-1.jpg`, a Facebook export) has **no embedded credit** – the photographer and usage rights should be confirmed. Publication on the old site is not proof of a licence for the new one.
 5. **Logo usage**: 12 client/festival logos and the two project logos are reused as on the old site. The R-Stream logo (black on transparent) is displayed inverted (white) via CSS – confirm this is acceptable.
 6. **Legal review**: the imprint and privacy texts describe the implementation accurately, but no legal compliance is guaranteed; have them checked if desired.
-7. **Redirects/HTTPS**: enable the canonical redirect block in `.htaccess` (or the nginx equivalent) once the certificate is active; configure alias domains.
+7. **Redirects/HTTPS**: activate HTTPS in the hosting panel, then either its „force HTTPS“/domain-forwarding option or the commented redirect block in `.htaccess`; configure alias domains.
 8. **Description texts of the five skills** are short interpretations of the old one-word items – adjust wording in `app/content.php` if anything reads too broad.
