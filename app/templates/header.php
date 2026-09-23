@@ -66,7 +66,7 @@ $jsonLd = [
 <link rel="mask-icon" href="/assets/images/icons/safari-pinned-tab.svg" color="#0d0d10">
 <link rel="manifest" href="/site.webmanifest">
 <?php if ($isHome): ?>
-<link rel="preload" as="image" imagesrcset="/assets/images/photos/portrait-hood-480.webp 480w, /assets/images/photos/portrait-hood-800.webp 800w, /assets/images/photos/portrait-hood-1200.webp 1200w" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
+<link rel="preload" as="image" fetchpriority="high" imagesrcset="/assets/images/photos/portrait-hood-480.webp 480w, /assets/images/photos/portrait-hood-600.webp 600w, /assets/images/photos/portrait-hood-800.webp 800w, /assets/images/photos/portrait-hood-1200.webp 1200w" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
 <?php endif; ?>
 <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
 <script src="<?= e(asset('js/main.js')) ?>" defer></script>

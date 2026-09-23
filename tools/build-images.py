@@ -22,7 +22,7 @@ WEBP_QUALITY = 78
 # name -> (source file, [widths], optional crop definition)
 # crop: dict(ratio=(w, h), cx=0..1 horizontal focus, cy=0..1 vertical focus, widths=[...])
 PHOTOS = {
-    "portrait-hood": dict(src="DSC6295_square.jpg", widths=[480, 800, 1200]),
+    "portrait-hood": dict(src="DSC6295_square.jpg", widths=[480, 600, 800, 1200]),
     "stage-red": dict(
         src="11059538_883376491737597_7864039594443423760_o-1.jpg",
         widths=[640, 1024, 1600, 2048],

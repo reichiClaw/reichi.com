@@ -211,7 +211,7 @@ return [
     // ------------------------------------------------------------------
     'photos' => [
         'portrait-hood' => [
-            'file' => 'portrait-hood', 'widths' => [480, 800, 1200], 'width' => 1200, 'height' => 1200,
+            'file' => 'portrait-hood', 'widths' => [480, 600, 800, 1200], 'width' => 1200, 'height' => 1200,
             'alt' => 'Porträt von Christian Reichinger in Schwarz-Weiß, mit Kapuze und Brille',
             'caption' => 'reichi | Christian Reichinger',
             'credit' => 'Martin Mühlbacher – mdot.at',
