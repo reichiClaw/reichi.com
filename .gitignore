@@ -1,0 +1,16 @@
+# Echte Konfiguration mit Secrets bleibt lokal
+app/config.php
+
+# Laufzeitdaten
+storage/ratelimit/*
+storage/logs/*
+!storage/ratelimit/.gitkeep
+!storage/logs/.gitkeep
+
+# Build-Artefakte
+dist/
+*.zip
+
+# System
+.DS_Store
+Thumbs.db
