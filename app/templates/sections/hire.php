@@ -111,7 +111,7 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
       <?php endif; ?>
 
       <?php if ($formStatus !== 'sent'): ?>
-      <form class="form" action="/contact.php" method="post" novalidate>
+      <form class="form" action="/contact.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
 
         <div class="form__trap" aria-hidden="true">

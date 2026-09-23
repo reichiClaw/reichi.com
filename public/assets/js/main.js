@@ -162,7 +162,13 @@
   /* 5. Formularstatus ---------------------------------------------------- */
   var status = doc.getElementById('form-status');
   if (status && window.location.hash === '#hire') {
-    status.focus({ preventScroll: true });
-    status.scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    // Erst nach dem Sprung des Browsers zum Fragment ausführen, sonst wird der Fokus wieder entfernt.
+    var focusStatus = function () {
+      setTimeout(function () {
+        status.focus({ preventScroll: true });
+        status.scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+      }, 50);
+    };
+    if (doc.readyState === 'complete') { focusStatus(); } else { window.addEventListener('load', focusStatus); }
   }
 })();
