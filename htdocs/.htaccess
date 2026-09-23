@@ -1,0 +1,74 @@
+# Apache-Konfiguration für den Webroot (public_html / htdocs). Bei normalem Shared Hosting
+# wird diese Datei automatisch beachtet. Die Seiten selbst funktionieren auch ohne sie;
+# der Schutz von app/ und storage/ ist zusätzlich in PHP eingebaut.
+
+# Verzeichnislisten leer ausgeben („Options -Indexes“ ist bei manchen Hostern in
+# .htaccess nicht erlaubt und würde die ganze Website mit Fehler 500 lahmlegen)
+<IfModule mod_autoindex.c>
+  IndexIgnore *
+</IfModule>
+
+# Standarddokument und Fehlerseite
+DirectoryIndex index.php index.html
+ErrorDocument 404 /404.php
+
+# Interne Verzeichnisse nie ausliefern (zusätzlich zu app/.htaccess und storage/.htaccess)
+<IfModule mod_alias.c>
+  RedirectMatch 404 "^/(app|storage)(/|$)"
+</IfModule>
+
+# Zeichensatz für Textdateien
+AddDefaultCharset UTF-8
+
+# Konsistente Weiterleitung auf die kanonische Domain (https://www.reichi.com).
+# Erst aktivieren, wenn HTTPS eingerichtet ist; Alias-Domains siehe README.md.
+#<IfModule mod_rewrite.c>
+#  RewriteEngine On
+#  RewriteCond %{HTTPS} off [OR]
+#  RewriteCond %{HTTP_HOST} !^www\.reichi\.com$ [NC]
+#  RewriteRule ^ https://www.reichi.com%{REQUEST_URI} [R=301,L]
+#</IfModule>
+
+# Alte WordPress-Pfade: Medien-URLs der alten Installation auf die Startseite leiten.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^wp-(content|includes|admin|json)(/|$) / [R=301,L]
+  RewriteRule ^(feed|comments/feed|xmlrpc\.php)(/|$) / [R=301,L]
+</IfModule>
+
+# Caching für statische Dateien (Bilder, CSS, JS erhalten Cache-Busting per ?v=)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # HSTS nur aktivieren, wenn HTTPS dauerhaft funktioniert:
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  <FilesMatch "\.(jpg|jpeg|webp|png|svg|ico|css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+# Kompression für Text
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml application/manifest+json
+</IfModule>
+
+# Dotfiles (z. B. .htaccess, .gitkeep) nicht ausliefern
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>

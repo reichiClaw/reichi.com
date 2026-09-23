@@ -1,11 +1,11 @@
 # Echte Konfiguration mit Secrets bleibt lokal
-app/config.php
+htdocs/app/config.php
 
 # Laufzeitdaten
-storage/ratelimit/*
-storage/logs/*
-!storage/ratelimit/.gitkeep
-!storage/logs/.gitkeep
+htdocs/storage/ratelimit/*
+htdocs/storage/logs/*
+!htdocs/storage/ratelimit/.gitkeep
+!htdocs/storage/logs/.gitkeep
 
 # Build-Artefakte
 dist/
@@ -14,3 +14,6 @@ dist/
 # System
 .DS_Store
 Thumbs.db
+
+# Automatisch erzeugtes Secret
+htdocs/storage/secret.php
