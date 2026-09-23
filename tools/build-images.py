@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Development-only helper: generates the delivery image variants in
-public/assets/images/ from the untouched originals in assets-src/originals/.
+htdocs/assets/images/ from the untouched originals in assets-src/originals/.
 
 Requires Python 3 + Pillow. It is NOT needed to deploy or run the website;
 the generated files are committed. Re-run it only when originals change or
@@ -14,7 +14,7 @@ from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "assets-src" / "originals"
-OUT = ROOT / "public" / "assets" / "images"
+OUT = ROOT / "htdocs" / "assets" / "images"
 
 JPEG_QUALITY = 80
 WEBP_QUALITY = 78
