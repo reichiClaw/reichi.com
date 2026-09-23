@@ -13,7 +13,7 @@
   --bg-4: #24242c;
   --ink: #f3efe7;
   --ink-2: #b9b3a8;
-  --ink-3: #7f7a71;
+  --ink-3: #938e84;
   --line: rgba(243, 239, 231, 0.12);
   --line-strong: rgba(243, 239, 231, 0.28);
   --accent: #ff4d3a;
@@ -93,7 +93,7 @@ mark { background: var(--accent-soft); color: var(--ink); padding: 0.05em 0.25em
   border-radius: 2px;
 }
 
-::selection { background: var(--accent); color: #fff; }
+::selection { background: var(--accent); color: var(--paper-ink); }
 
 .skip-link {
   position: absolute;
@@ -102,7 +102,7 @@ mark { background: var(--accent-soft); color: var(--ink); padding: 0.05em 0.25em
   z-index: 100;
   padding: 0.6rem 1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--paper-ink);
   font-weight: 650;
   border-radius: var(--radius);
   text-decoration: none;
@@ -179,7 +179,7 @@ main:focus { outline: none; }
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 .button:hover { border-color: var(--ink); transform: translateY(-1px); }
-.button--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.button--primary { background: var(--accent); border-color: var(--accent); color: var(--paper-ink); }
 .button--primary:hover { background: #ff604e; border-color: #ff604e; }
 .button--ghost:hover { background: rgba(243, 239, 231, 0.06); }
 .button--small { padding: 0.55rem 0.95rem; font-size: var(--step--1); }
