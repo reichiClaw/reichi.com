@@ -141,4 +141,5 @@ portrait crops exist for the two images that need a different mobile composition
 5. **Logo usage**: 12 client/festival logos and the two project logos are reused as on the old site. The R-Stream logo (black on transparent) is displayed inverted (white) via CSS – confirm this is acceptable.
 6. **Legal review**: the imprint and privacy texts describe the implementation accurately, but no legal compliance is guaranteed; have them checked if desired.
 7. **Redirects/HTTPS**: activate HTTPS in the hosting panel, then either its „force HTTPS“/domain-forwarding option or the commented redirect block in `.htaccess`; configure alias domains.
-8. **Description texts of the five skills** are short interpretations of the old one-word items – adjust wording in `app/content.php` if anything reads too broad.
+8. **Search Console** (SEO-08): verify the domain property, submit the sitemap, check indexing – steps in `README.md`, section *Search Console*.
+9. **Description texts of the five skills** are short interpretations of the old one-word items – adjust wording in `app/content.php` if anything reads too broad.
