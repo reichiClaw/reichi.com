@@ -60,6 +60,12 @@ return [
     // speichert es in storage/secret.php. Alternativ hier einen eigenen Wert eintragen.
     'secret' => '',
 
+    // URL-Präfix, falls die Website in einem Unterordner liegt (z. B. '/test' für
+    // https://www.reichi.com/test/). null = automatisch erkennen (Normalfall, auch für
+    // die Domain-Wurzel). Eine Installation im Unterordner gilt als Testumgebung und
+    // wird per <meta name="robots"> von der Indexierung ausgenommen.
+    'base_path' => null,
+
     // Fehler der Mailfunktion protokollieren (nur Zeitstempel + Fehlermeldung, keine Inhalte).
     'log_mail_failures' => true,
 

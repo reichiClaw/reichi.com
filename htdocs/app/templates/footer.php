@@ -16,7 +16,7 @@ $isHome = !empty($page['is_home']);
 <footer class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__brand">
-      <a class="brand brand--footer" href="/" aria-label="reichi – Startseite">
+      <a class="brand brand--footer" href="<?= e(url('/')) ?>" aria-label="reichi – Startseite">
         <?= logo_mark('brand__mark') ?>
         <span class="brand__word">reichi</span>
       </a>
@@ -39,9 +39,9 @@ $isHome = !empty($page['is_home']);
       <h2 class="site-footer__heading">Navigation</h2>
       <ul class="site-footer__links">
         <?php foreach ($content['nav'] as $item): ?>
-          <li><a href="<?= e($isHome ? substr($item['href'], 1) : $item['href']) ?>"><?= e($item['label']) ?></a></li>
+          <li><a href="<?= e($isHome ? substr($item['href'], 1) : url($item['href'])) ?>"><?= e($item['label']) ?></a></li>
         <?php endforeach; ?>
-        <li><a href="<?= e($isHome ? '#hire' : '/#hire') ?>">Anfrage</a></li>
+        <li><a href="<?= e($isHome ? '#hire' : url('/#hire')) ?>">Anfrage</a></li>
       </ul>
     </div>
 
@@ -54,8 +54,8 @@ $isHome = !empty($page['is_home']);
         <?php foreach ($content['projects']['items'] as $p): ?>
           <li><a href="<?= e($p['url']) ?>" rel="noopener noreferrer" target="_blank"><?= e($p['name']) ?></a></li>
         <?php endforeach; ?>
-        <li><a href="/impressum/">Impressum</a></li>
-        <li><a href="/datenschutz/">Datenschutz</a></li>
+        <li><a href="<?= e(url('/impressum/')) ?>">Impressum</a></li>
+        <li><a href="<?= e(url('/datenschutz/')) ?>">Datenschutz</a></li>
       </ul>
     </div>
   </div>

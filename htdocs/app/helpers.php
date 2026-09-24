@@ -44,11 +44,70 @@ function e(?string $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
 }
 
-/** Absolute URL auf Basis von base_url (für canonical, og:url, sitemap). */
+/**
+ * URL-Präfix, unter dem der Webroot erreichbar ist ('' in der Domain-Wurzel,
+ * '/test' bei Installation in einem Unterordner). Wird aus SCRIPT_NAME abgeleitet,
+ * indem der Pfad des aufgerufenen Skripts relativ zum Webroot abgeschnitten wird;
+ * in config.php kann 'base_path' den Wert fest vorgeben.
+ */
+function base_path(): string
+{
+    static $base = null;
+    if ($base !== null) {
+        return $base;
+    }
+    global $config;
+    if (isset($config['base_path']) && is_string($config['base_path'])) {
+        return $base = rtrim($config['base_path'], '/');
+    }
+    $normalize = static fn(string $p): string => preg_replace('#/+#', '/', str_replace('\\', '/', $p)) ?? $p;
+    $scriptName = $normalize((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $scriptFile = $normalize((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $root = rtrim($normalize(PUBLIC_DIR), '/');
+    $realRoot = realpath(PUBLIC_DIR);
+    $realScript = $scriptFile !== '' ? realpath($scriptFile) : false;
+    if ($realRoot !== false && $realScript !== false) {
+        $root = rtrim($normalize($realRoot), '/');
+        $scriptFile = $normalize($realScript);
+    }
+    $base = null;
+    if ($scriptFile !== '' && str_starts_with($scriptFile, $root . '/')) {
+        $relative = substr($scriptFile, strlen($root)); // z. B. /impressum/index.php
+        if (str_ends_with($scriptName, $relative)) {
+            $base = rtrim(substr($scriptName, 0, -strlen($relative)), '/');
+        }
+    }
+    if ($base === null) {
+        // Zweiter Versuch: Lage des Webroots relativ zum DOCUMENT_ROOT des Servers.
+        $docRoot = rtrim($normalize((string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
+        if ($docRoot !== '' && str_starts_with($root . '/', $docRoot . '/')) {
+            $base = rtrim(substr($root, strlen($docRoot)), '/');
+        }
+    }
+    if ($base === null) {
+        // Letzter Ausweg: Verzeichnis des aufgerufenen Skripts (korrekt für index.php im Webroot).
+        $dir = $normalize(dirname($scriptName));
+        $base = $dir === '/' || $dir === '.' ? '' : rtrim($dir, '/');
+    }
+    // Nur harmlose Zeichen zulassen; alles andere behandeln wie „in der Wurzel“.
+    if ($base !== '' && !preg_match('#\A(/[A-Za-z0-9._~-]+)+\z#', $base)) {
+        $base = '';
+    }
+    return $base;
+}
+
+/** Wurzelbezogener Pfad ('/impressum/', '/#hire', '/assets/…') → Pfad inkl. Basis-Präfix. */
+function url(string $path = '/'): string
+{
+    $path = '/' . ltrim($path, '/');
+    return base_path() . $path;
+}
+
+/** Absolute URL auf Basis von base_url (für canonical, og:url, Strukturdaten). */
 function absolute_url(string $path = '/'): string
 {
     global $config;
-    return rtrim($config['base_url'], '/') . '/' . ltrim($path, '/');
+    return rtrim($config['base_url'], '/') . url($path);
 }
 
 /** Pfad zu einer Datei unter assets/ im Webroot, mit Cache-Busting per Änderungszeit. */
@@ -56,7 +115,7 @@ function asset(string $path): string
 {
     $file = PUBLIC_DIR . '/assets/' . ltrim($path, '/');
     $version = is_file($file) ? '?v=' . dechex((int) filemtime($file)) : '';
-    return '/assets/' . ltrim($path, '/') . $version;
+    return url('/assets/' . ltrim($path, '/')) . $version;
 }
 
 /** Sicherheits-Header für alle Antworten. Funktioniert unabhängig vom Webserver. */
@@ -156,7 +215,7 @@ function flash_get(string $key, mixed $default = null): mixed
  */
 function picture(array $photo, array $options = []): string
 {
-    $base = '/assets/images/photos/' . $photo['file'];
+    $base = url('/assets/images/photos/' . $photo['file']);
     $sizes = $options['sizes'] ?? '100vw';
     $loading = $options['loading'] ?? 'lazy';
     $class = $options['class'] ?? '';
@@ -195,13 +254,13 @@ function picture(array $photo, array $options = []): string
 /** Größte JPEG-Variante eines Fotos (Ziel für Lightbox / „Bild öffnen“). */
 function photo_full_url(array $photo): string
 {
-    return '/assets/images/photos/' . $photo['file'] . '-' . max($photo['widths']) . '.jpg';
+    return url('/assets/images/photos/' . $photo['file'] . '-' . max($photo['widths']) . '.jpg');
 }
 
 /** <img> für ein Logo aus content.php (1x/2x, wenn vorhanden). */
 function logo_img(array $logo, string $class = ''): string
 {
-    $dir = '/assets/images/logos/';
+    $dir = url('/assets/images/logos/');
     $attrs = ' width="' . (int) $logo['width'] . '" height="' . (int) $logo['height'] . '"'
         . ' alt="' . e($logo['alt']) . '" loading="lazy" decoding="async"'
         . ($class !== '' ? ' class="' . e($class) . '"' : '');

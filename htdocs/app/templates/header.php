@@ -47,7 +47,8 @@ $jsonLd = [
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($pageTitle) ?></title>
 <meta name="description" content="<?= e($pageDescription) ?>">
-<?php if (!empty($page['noindex'])): ?>
+<?php // Eine Installation in einem Unterordner ist eine Testumgebung und soll nicht indexiert werden. ?>
+<?php if (!empty($page['noindex']) || base_path() !== ''): ?>
 <meta name="robots" content="noindex, follow">
 <?php endif; ?>
 <link rel="canonical" href="<?= e($canonical) ?>">
@@ -64,14 +65,15 @@ $jsonLd = [
 <meta property="og:image:height" content="<?= (int) $site['share_image_height'] ?>">
 <meta property="og:image:alt" content="<?= e($content['photos']['stage-red']['alt']) ?>">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="/favicon.ico" sizes="48x48">
-<link rel="icon" href="/assets/images/icons/favicon-32x32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="/assets/images/icons/favicon-16x16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="/assets/images/icons/apple-touch-icon.png">
-<link rel="mask-icon" href="/assets/images/icons/safari-pinned-tab.svg" color="#0d0d10">
-<link rel="manifest" href="/site.webmanifest">
+<link rel="icon" href="<?= e(url('/favicon.ico')) ?>" sizes="48x48">
+<link rel="icon" href="<?= e(url('/assets/images/icons/favicon-32x32.png')) ?>" sizes="32x32" type="image/png">
+<link rel="icon" href="<?= e(url('/assets/images/icons/favicon-16x16.png')) ?>" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="<?= e(url('/assets/images/icons/apple-touch-icon.png')) ?>">
+<link rel="mask-icon" href="<?= e(url('/assets/images/icons/safari-pinned-tab.svg')) ?>" color="#0d0d10">
+<link rel="manifest" href="<?= e(url('/site.webmanifest')) ?>">
 <?php if ($isHome): ?>
-<link rel="preload" as="image" fetchpriority="high" imagesrcset="/assets/images/photos/portrait-hood-480.webp 480w, /assets/images/photos/portrait-hood-600.webp 600w, /assets/images/photos/portrait-hood-800.webp 800w, /assets/images/photos/portrait-hood-1200.webp 1200w" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
+<?php $heroPhoto = $content['photos'][$content['hero']['photo']]; ?>
+<link rel="preload" as="image" fetchpriority="high" imagesrcset="<?= e(implode(', ', array_map(static fn(int $w): string => url('/assets/images/photos/' . $heroPhoto['file'] . '-' . $w . '.webp') . ' ' . $w . 'w', $heroPhoto['widths']))) ?>" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
 <?php endif; ?>
 <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
 <script src="<?= e(asset('js/main.js')) ?>" defer></script>
@@ -82,7 +84,7 @@ $jsonLd = [
 
 <header class="site-header" id="top">
   <div class="site-header__inner">
-    <a class="brand" href="<?= $isHome ? '#top' : '/' ?>" aria-label="reichi – Startseite">
+    <a class="brand" href="<?= e($isHome ? '#top' : url('/')) ?>" aria-label="reichi – Startseite">
       <?= logo_mark('brand__mark') ?>
       <span class="brand__word">reichi</span>
     </a>
@@ -95,11 +97,11 @@ $jsonLd = [
     <nav class="site-nav" id="site-nav" aria-label="Hauptnavigation">
       <ul class="site-nav__list">
         <?php foreach ($content['nav'] as $item): ?>
-          <?php $href = $isHome ? substr($item['href'], 1) : $item['href']; ?>
+          <?php $href = $isHome ? substr($item['href'], 1) : url($item['href']); ?>
           <li><a href="<?= e($href) ?>"><?= e($item['label']) ?></a></li>
         <?php endforeach; ?>
       </ul>
-      <a class="button button--small site-nav__cta" href="<?= e($isHome ? substr($content['nav_cta']['href'], 1) : $content['nav_cta']['href']) ?>"><?= e($content['nav_cta']['label']) ?></a>
+      <a class="button button--small site-nav__cta" href="<?= e($isHome ? substr($content['nav_cta']['href'], 1) : url($content['nav_cta']['href'])) ?>"><?= e($content['nav_cta']['label']) ?></a>
     </nav>
   </div>
 </header>

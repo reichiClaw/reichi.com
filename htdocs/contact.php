@@ -14,7 +14,7 @@ require APP_DIR . '/contact.php';
 
 start_session();
 
-$redirect = '/#hire';
+$redirect = url('/#hire');
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Location: ' . $redirect, true, 303);
