@@ -27,8 +27,8 @@ render('header', ['page' => $page]);
       <p class="section__note">Vielleicht ein alter Link von der früheren Website. Alles Wesentliche steht auf der Startseite.</p>
     </header>
     <div class="hero__actions">
-      <a class="button button--primary" href="/">Zur Startseite <?= icon('arrow-right', 'icon button__icon') ?></a>
-      <a class="button button--ghost" href="/#hire">Anfrage senden</a>
+      <a class="button button--primary" href="<?= e(url('/')) ?>">Zur Startseite <?= icon('arrow-right', 'icon button__icon') ?></a>
+      <a class="button button--ghost" href="<?= e(url('/#hire')) ?>">Anfrage senden</a>
     </div>
   </div>
 </section>

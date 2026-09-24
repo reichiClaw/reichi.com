@@ -66,7 +66,7 @@ render('header', ['page' => $page]);
 
       <section class="legal__block">
         <h2>Datenschutz</h2>
-        <p>Hinweise zur Verarbeitung personenbezogener Daten auf dieser Website (Kontaktformular, Server-Protokolle, technisch notwendiger Session-Cookie) finden sich in der <a href="/datenschutz/">Datenschutzerklärung</a>.</p>
+        <p>Hinweise zur Verarbeitung personenbezogener Daten auf dieser Website (Kontaktformular, Server-Protokolle, technisch notwendiger Session-Cookie) finden sich in der <a href="<?= e(url('/datenschutz/')) ?>">Datenschutzerklärung</a>.</p>
       </section>
 
       <section class="legal__block" id="bildnachweise">

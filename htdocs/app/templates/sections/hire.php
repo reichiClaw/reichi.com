@@ -116,7 +116,7 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
       <?php endif; ?>
 
       <?php if ($formStatus !== 'sent'): ?>
-      <form class="form" action="/contact.php" method="post">
+      <form class="form" action="<?= e(url('/contact.php')) ?>" method="post">
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
 
         <div class="form__trap" aria-hidden="true">
@@ -160,13 +160,13 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
         </div>
 
         <div class="form__footer">
-          <p class="form__privacy"><?= e($labels['privacy_note']) ?> <a href="/datenschutz/">Datenschutzerklärung</a></p>
+          <p class="form__privacy"><?= e($labels['privacy_note']) ?> <a href="<?= e(url('/datenschutz/')) ?>">Datenschutzerklärung</a></p>
           <button class="button button--primary" type="submit"><?= e($labels['submit']) ?> <?= icon('arrow-right', 'icon button__icon') ?></button>
         </div>
         <p class="form__required-note"><span aria-hidden="true">*</span> Pflichtfeld</p>
       </form>
       <?php else: ?>
-        <p class="hire__again"><a class="button button--ghost" href="/#hire">Weitere Anfrage senden</a></p>
+        <p class="hire__again"><a class="button button--ghost" href="<?= e(url('/#hire')) ?>">Weitere Anfrage senden</a></p>
       <?php endif; ?>
     </div>
   </div>
