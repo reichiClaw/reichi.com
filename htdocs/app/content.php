@@ -31,8 +31,8 @@ return [
     'site' => [
         'brand' => 'reichi',
         'name' => 'Christian Reichinger',
-        'title' => 'reichi | Christian Reichinger – Tontechniker / Sound Engineer',
-        'description' => 'Christian „reichi“ Reichinger ist Tontechniker aus dem Raum Ried im Innkreis / Oberösterreich. Live-Technik und internationales Touring gehören zu seinem Spezialgebiet.',
+        'title' => 'Christian Reichinger – Tontechniker & Tourmanager | reichi',
+        'description' => 'Christian „reichi“ Reichinger: Live-Tontechniker (FOH) und Tourmanager aus Ried im Innkreis, Oberösterreich. Seit 2007 mit Bands auf Tour – Festivals, Clubs, international. Anfragen für Tour, Konzert oder Recording.',
         'locale' => 'de_AT',
         'lang' => 'de',
         // Bild für Social-Sharing (relativer Pfad unter htdocs/)

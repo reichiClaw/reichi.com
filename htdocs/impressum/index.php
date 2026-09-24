@@ -12,7 +12,7 @@ require is_file(PUBLIC_DIR . '/app/bootstrap.php') ? PUBLIC_DIR . '/app/bootstra
 
 $contact = $content['contact'];
 $page = [
-    'title' => 'Impressum | Christian Reichinger',
+    'title' => 'Impressum | reichi – Christian Reichinger',
     'description' => 'Impressum von reichi.com – Christian Reichinger, Tontechniker / Sound Engineer, Aurolzmünster, Oberösterreich.',
     'path' => '/impressum/',
     'body_class' => 'page-legal',
