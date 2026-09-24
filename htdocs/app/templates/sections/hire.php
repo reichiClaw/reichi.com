@@ -62,7 +62,7 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
 ?>
 <section class="section hire" id="hire" aria-labelledby="hire-title">
   <div class="section__inner hire__grid">
-    <div class="hire__intro">
+    <div class="hire__intro" data-reveal>
       <p class="eyebrow"><?= e($hire['eyebrow']) ?></p>
       <h2 class="section__title" id="hire-title"><?= e($hire['title']) ?></h2>
       <p class="hire__question"><?= e($hire['question']) ?></p>

@@ -12,7 +12,7 @@ $gallery = $content['gallery'];
 ?>
 <section class="section gallery" id="fotos" aria-labelledby="gallery-title">
   <div class="section__inner">
-    <header class="section__head section__head--split">
+    <header class="section__head section__head--split" data-reveal>
       <div>
         <p class="eyebrow"><?= e($gallery['eyebrow']) ?></p>
         <h2 class="section__title" id="gallery-title"><?= e($gallery['title']) ?></h2>
