@@ -102,17 +102,17 @@ return [
     // Skills
     // ------------------------------------------------------------------
     'skills' => [
-        'title' => 'Skills',
-        'claim' => 'Knowledge and experience is the key!',
+        'title' => 'Knowledge and experience is the key!',
+        'claim' => 'Live-Mischung, Tourmanagement und alles dazwischen',
         'focus' => 'Focused on mixing and touring with Bands and Artists!',
         'items' => [
             [
                 'name' => 'Live Sound Mixing',
-                'text' => 'Front of House für Bands und Künstler – auf Festivals, in Clubs und überall dort, wo eine Show stattfindet.',
+                'text' => 'FOH-Mischung für Bands und Künstler – auf Festivals, in Clubs und überall dort, wo eine Show stattfindet. Auch mit knappem Equipment.',
             ],
             [
                 'name' => 'Live Sound Recording',
-                'text' => 'Mitschnitt von Live-Shows.',
+                'text' => 'Mitschnitt von Live-Shows direkt vom Pult.',
             ],
             [
                 'name' => 'Travel Organisation',
@@ -120,7 +120,7 @@ return [
             ],
             [
                 'name' => 'Managing',
-                'text' => 'Tour Management: Ablauf, Koordination und Ansprechperson vor Ort, damit sich die Band auf die Musik konzentrieren kann.',
+                'text' => 'Tourmanagement: Ablauf, Koordination und Ansprechperson vor Ort, damit sich die Band auf die Musik konzentrieren kann.',
             ],
             [
                 'name' => 'Publishing',
@@ -193,7 +193,7 @@ return [
 
     // Logos aus dem Abschnitt „Clients“ der alten Website (Reihenfolge wie dort)
     'clients' => [
-        'title' => 'Clients',
+        'title' => 'Kunden',
         'claim' => 'I rocked the crowd with these cool clients!',
         'items' => [
             ['name' => 'Supervision', 'url' => 'https://www.supervision-music.at/', 'file' => 'supervision-400.png', 'file2x' => 'supervision-800.png', 'width' => 400, 'height' => 70, 'alt' => 'Supervision', 'light_bg' => false],
@@ -313,8 +313,8 @@ return [
     // ------------------------------------------------------------------
     'hire' => [
         'eyebrow' => 'Anfrage',
-        'title' => 'Hire me for your next Tour or Concert!',
-        'question' => 'Du brauchst einen Tontechniker oder Tourmanager?',
+        'title' => 'Tontechniker oder Tourmanager für deine nächste Tour oder Show',
+        'question' => 'Hire me for your next Tour or Concert!',
         'paragraphs' => [
             'Egal ob Tour oder einzelnes Konzert – du bist hier richtig!',
             'Sei es auf einem Festival mit perfektem Setup, das gute Planung im Voraus benötigt, oder am Rande des Schwarzen Meers mit sehr limitiertem Equipment: Gerne hole ich für euch das Beste aus jeder Show heraus.',
@@ -334,7 +334,7 @@ return [
     ],
 
     'contact_section' => [
-        'title' => 'Contact me!',
+        'title' => 'Kontakt',
         'direct_title' => 'Direkt erreichen',
     ],
 
