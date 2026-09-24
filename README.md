@@ -104,6 +104,31 @@ case `.htaccess` were ignored, by a PHP guard at the top of every file in `app/`
 answers 404 to direct requests. `storage/secret.php` is a PHP file returning a string,
 so a direct request produces an empty page instead of the value.
 
+### Testing in a subfolder next to the old site
+
+You can upload the contents of `htdocs/` into a subfolder (e.g. `public_html/neu/`)
+while the old WordPress site keeps running in the root. The site detects the prefix
+automatically (`base_path()` in `app/helpers.php`, derived from the request path) and
+builds every internal link, asset URL, form action and redirect with it – so
+`https://www.reichi.com/neu/` works, including the contact form and legal pages.
+
+Two things are different in a subfolder, both on purpose:
+
+- every page carries `<meta name="robots" content="noindex">`, so the test copy never
+  competes with the live site in search engines;
+- `robots.txt` and `sitemap.xml` are static files meant for the domain root and are
+  simply not used there.
+
+Old WordPress installs catch unknown URLs with their own `index.php`; that is why an
+unpatched copy showed WordPress errors inside `style.css` – the browser asked for
+`/assets/css/style.css` in the root. With the automatic prefix this no longer happens.
+If detection should ever fail on an unusual server, set `'base_path' => '/neu'` in
+`app/config.php`.
+
+When going live, delete the WordPress files from the root and move the contents of
+the subfolder up (or upload again into the root). Remove `base_path` from `config.php`
+if you had set it.
+
 ### Optional hardening: files above the web root
 
 If your host lets you upload one level above the web root (many do), move `app/` and
@@ -161,6 +186,7 @@ sendmail/Postfix). For reliable delivery to the inbox:
 | `secret` | random string (≥ 32 chars) used to hash IP addresses for rate limiting. Leave empty to have it generated automatically into `storage/secret.php` on the first visit |
 | `rate_limit` | `max_per_window` (5) per `window_seconds` (3600), `min_interval` (20 s), `retention_seconds` (86400) |
 | `storage_dir` | writable directory; default `storage/` next to `app/` (blocked by `.htaccess`) |
+| `base_path` | `null` = detect automatically. Set e.g. `'/neu'` only if the site runs in a subfolder and detection fails |
 | `log_mail_failures` | write `storage/logs/mail.log` (timestamp + error only, never form content) |
 | `force_secure_cookie` | set `true` when served exclusively over HTTPS behind a proxy that hides `HTTPS` |
 
