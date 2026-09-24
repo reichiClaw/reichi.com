@@ -201,7 +201,7 @@ return [
             ['name' => 'SoulSanity', 'url' => 'https://www.soul-sanity.com/', 'file' => 'soulsanity.png', 'width' => 131, 'height' => 100, 'alt' => 'SoulSanity', 'light_bg' => false],
             ['name' => 'Summ A Rock', 'url' => null /* summa-rock.de existiert nicht mehr (Stand 24.09.2026) */, 'file' => 'summarock-400.jpg', 'file2x' => 'summarock-800.jpg', 'width' => 400, 'height' => 90, 'alt' => 'SummArock Festival', 'light_bg' => false],
             ['name' => 'Sonic VT', 'url' => 'https://sonic-vt.at/', 'file' => 'sonic-vt.png', 'width' => 287, 'height' => 88, 'alt' => 'Sonic Veranstaltungstechnik Pröll', 'light_bg' => false],
-            ['name' => 'Scorpios', 'url' => 'https://www.scorpios.com/', 'file' => 'scorpios.jpg', 'width' => 181, 'height' => 173, 'alt' => 'Scorpios Mykonos', 'light_bg' => false],
+            ['name' => 'Scorpios', 'url' => 'https://scorpios.com/', 'file' => 'scorpios.jpg', 'width' => 181, 'height' => 173, 'alt' => 'Scorpios Mykonos', 'light_bg' => false],
             ['name' => 'i Tüpfe Rider', 'url' => 'https://ituepferider.at/', 'file' => 'i-tuepfe-rider-400.png', 'file2x' => 'i-tuepfe-rider-800.png', 'width' => 400, 'height' => 78, 'alt' => 'i Tüpfe Rider', 'light_bg' => false],
             ['name' => 'Stadlmusi', 'url' => 'http://stadlmusi.at', 'file' => 'stadlmusi.jpg', 'width' => 300, 'height' => 200, 'alt' => 'Stadlmusi – Heavy Blasmusik', 'light_bg' => true],
             ['name' => 'Hoamspü', 'url' => 'https://www.hoamspue.at', 'file' => 'hoamspue-400.jpg', 'file2x' => 'hoamspue-800.jpg', 'width' => 400, 'height' => 142, 'alt' => 'Hoamspü – Austropop mit Gfühl', 'light_bg' => true],
