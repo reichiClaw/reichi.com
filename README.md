@@ -174,6 +174,25 @@ sendmail/Postfix). For reliable delivery to the inbox:
 - If `mail()` is disabled altogether, set `'mail_enabled' => false`; the form then shows
   the failure message with direct contacts instead of pretending.
 
+## Search Console (SEO-08 – owner action, no code change)
+
+The site itself is ready for indexing (canonicals, `robots.txt`, `sitemap.xml`, 404 pages,
+structured data). What only the owner can do:
+
+1. Open [Google Search Console](https://search.google.com/search-console) and add a
+   **Domain property** `reichi.com` (covers http/https, www/non-www and the alias domains
+   are separate). Verify via the DNS TXT record Google shows you – enter it at the domain
+   provider / hosting panel under DNS. No file or meta tag on the website is needed.
+2. *Sitemaps* → submit `https://www.reichi.com/sitemap.xml`.
+3. *URL inspection* → check `https://www.reichi.com/` and request indexing once.
+4. After a few weeks, look at: *Performance* (which queries bring impressions – brand
+   vs. service terms, click-through rate of the home page), *Pages* (old WordPress URLs
+   should show as redirected, nothing "Not found" that matters), *Core Web Vitals* (real
+   user data, which no lab test replaces), *Mobile usability*.
+5. Optional: Bing Webmaster Tools can import the verified Search Console property.
+
+Never paste verification codes or account credentials into chats or the repository.
+
 ## Configuration (`app/config.php`)
 
 | key | meaning |
