@@ -19,12 +19,13 @@ $canonical = absolute_url($page['path'] ?? '/');
 $isHome = !empty($page['is_home']);
 $bodyClass = $page['body_class'] ?? '';
 
-$jsonLd = [
-    '@context' => 'https://schema.org',
+$person = [
     '@type' => 'Person',
+    '@id' => absolute_url('/') . '#person',
     'name' => $contact['name'],
     'alternateName' => 'reichi',
-    'jobTitle' => 'Tontechniker / Sound Engineer, Tour Manager',
+    'jobTitle' => 'Tontechniker / Sound Engineer, Tourmanager',
+    'knowsAbout' => ['Live Sound Mixing', 'Front of House', 'Tourmanagement', 'Live Recording'],
     'url' => absolute_url('/'),
     'image' => absolute_url('/assets/images/photos/portrait-hood-800.jpg'),
     'email' => 'mailto:' . $contact['email'],
@@ -39,6 +40,24 @@ $jsonLd = [
     ],
     'sameAs' => array_column($content['social'], 'url'),
 ];
+// WebSite-Markup nur auf der Startseite (Site-Name-Präferenz laut Google Search Central).
+$jsonLd = $isHome
+    ? [
+        '@context' => 'https://schema.org',
+        '@graph' => [
+            [
+                '@type' => 'WebSite',
+                '@id' => absolute_url('/') . '#website',
+                'name' => $site['brand'],
+                'alternateName' => [$site['name'], 'reichi.com'],
+                'url' => absolute_url('/'),
+                'inLanguage' => $site['lang'],
+                'publisher' => ['@id' => $person['@id']],
+            ],
+            $person,
+        ],
+    ]
+    : ['@context' => 'https://schema.org'] + $person;
 ?>
 <!DOCTYPE html>
 <html lang="<?= e($site['lang']) ?>">
@@ -56,7 +75,7 @@ $jsonLd = [
 <meta name="color-scheme" content="dark">
 <meta property="og:locale" content="<?= e($site['locale']) ?>">
 <meta property="og:type" content="<?= $isHome ? 'profile' : 'website' ?>">
-<meta property="og:site_name" content="<?= e($site['name']) ?>">
+<meta property="og:site_name" content="<?= e($site['brand']) ?>">
 <meta property="og:title" content="<?= e($pageTitle) ?>">
 <meta property="og:description" content="<?= e($pageDescription) ?>">
 <meta property="og:url" content="<?= e($canonical) ?>">
