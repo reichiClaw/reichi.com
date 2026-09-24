@@ -12,7 +12,7 @@ $projects = $content['projects'];
 ?>
 <section class="section projects" id="projekte" aria-labelledby="projects-title">
   <div class="section__inner">
-    <header class="section__head">
+    <header class="section__head" data-reveal>
       <p class="eyebrow"><?= e($projects['eyebrow']) ?></p>
       <h2 class="section__title" id="projects-title"><?= e($projects['title']) ?></h2>
     </header>

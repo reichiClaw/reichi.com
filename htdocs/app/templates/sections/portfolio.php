@@ -13,7 +13,7 @@ $clients = $content['clients'];
 ?>
 <section class="section portfolio" id="portfolio" aria-labelledby="portfolio-title">
   <div class="section__inner">
-    <header class="section__head">
+    <header class="section__head" data-reveal>
       <p class="eyebrow">Portfolio</p>
       <h2 class="section__title" id="portfolio-title"><?= e($portfolio['title']) ?></h2>
       <p class="section__note"><?= e($portfolio['claim']) ?></p>

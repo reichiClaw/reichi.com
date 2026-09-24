@@ -12,7 +12,7 @@ $skills = $content['skills'];
 ?>
 <section class="section skills" id="skills" aria-labelledby="skills-title">
   <div class="section__inner">
-    <header class="section__head section__head--split">
+    <header class="section__head section__head--split" data-reveal>
       <div>
         <p class="eyebrow"><?= e($skills['title']) ?></p>
         <h2 class="section__title" id="skills-title"><?= e($skills['claim']) ?></h2>

@@ -24,7 +24,7 @@ $photo = $content['photos'][$about['photo']];
   </figure>
 
   <div class="section__inner about__body">
-    <header class="about__head">
+    <header class="about__head" data-reveal>
       <p class="eyebrow"><?= e($about['eyebrow']) ?></p>
       <h2 class="section__title" id="about-title"><?= e($about['title']) ?></h2>
     </header>
