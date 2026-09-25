@@ -20,6 +20,18 @@ portrait opens the page, the red-lit stage photo sits full-bleed behind the biog
 the Prague/Max the Sax series forms the gallery, the studio portrait anchors the
 booking section. References are set as typographic line-ups, not cards.
 
+Motion is limited to opacity/transform (plus one small canvas) and runs only under
+`prefers-reduced-motion: no-preference`: a staggered hero entrance and section reveals on
+scroll, and – on devices with a real mouse only – two pointer reactions in the hero
+(section 7 of `main.js`): the red stage glow (`.hero__spot`) pans slowly toward the pointer
+like a follow spot while portrait and text shift a few pixels against each other, and the
+thin stage-edge line beside the portrait becomes an oscilloscope trace (`.hero__scope`)
+that ripples when the pointer moves near it and settles back to a straight line. Touch
+devices, reduced motion and no-JS all get the unchanged static hero (CSS line, breathing
+glow). Both effects stop computing as soon as they have settled or the hero leaves the
+viewport. To drop them, delete section 7 of `main.js` (the `.hero__spot` element must stay –
+it is the stage glow itself; the `.hero__scope` canvas can go).
+
 ## Structure
 
 ```
