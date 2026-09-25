@@ -14,7 +14,7 @@ import random
 from PIL import Image
 
 SIZE = 160          # Kachelgröße in Pixeln (CSS: background-size 160px)
-STRENGTH = 0.062    # Standardabweichung der Deckkraft (0–1); höher = kräftigeres Korn
+STRENGTH = 0.045    # Standardabweichung der Deckkraft (0–1); höher = kräftigeres Korn
 LEVELS = 24         # Alpha-Stufen, hält die Datei klein
 SEED = 20260925
 
