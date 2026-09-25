@@ -1,5 +1,5 @@
 <?php
-/** Hero: Wortmarke, Rollen, Einleitung, zwei Aktionen, Porträt, Pegelanzeige (nur mit JS). */
+/** Hero: Wortmarke, Rollen, Einleitung, zwei Aktionen, Porträt. */
 
 declare(strict_types=1);
 
@@ -37,6 +37,4 @@ $photo = $content['photos'][$hero['photo']];
     </figure>
   </div>
   <p class="hero__credit">Foto: <?= e($photo['credit']) ?></p>
-  <?php // Dekorative Pegelanzeige (Canvas), von main.js gezeichnet; ohne JS unsichtbar. ?>
-  <canvas class="hero__meter" data-hero-meter aria-hidden="true"></canvas>
 </section>
