@@ -1,5 +1,5 @@
 <?php
-/** Hero: Wortmarke, Rollen, Einleitung, zwei Aktionen, Porträt. */
+/** Hero: Wortmarke, Rollen, Einleitung, zwei Aktionen, Porträt, Bühnenlicht (Verfolger per JS). */
 
 declare(strict_types=1);
 
@@ -12,6 +12,7 @@ $hero = $content['hero'];
 $photo = $content['photos'][$hero['photo']];
 ?>
 <section class="hero" aria-labelledby="hero-title">
+  <div class="hero__spot" aria-hidden="true"></div>
   <div class="hero__inner">
     <div class="hero__copy">
       <p class="eyebrow hero__eyebrow"><?= e($hero['eyebrow']) ?></p>
@@ -34,6 +35,8 @@ $photo = $content['photos'][$hero['photo']];
         <span class="hero__caption-label"><?= e($photo['caption']) ?></span>
         <span class="hero__caption-meta"><?= icon('pin', 'icon icon--small') ?> <?= e($hero['location']) ?></span>
       </figcaption>
+      <?php // Oszilloskop-Linie: ersetzt die CSS-Linie nur mit JS und Maus (main.js), sonst unsichtbar. ?>
+      <canvas class="hero__scope" aria-hidden="true"></canvas>
     </figure>
   </div>
   <p class="hero__credit">Foto: <?= e($photo['credit']) ?></p>
