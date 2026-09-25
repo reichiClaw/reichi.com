@@ -70,7 +70,7 @@ rendered icons). `mstile-150x150.png`/`browserconfig.xml` were fetched but dropp
 
 | file | source | note |
 |---|---|---|
-| `grain.png` | generated, `tools/build-grain.py` (seeded random noise, no photograph) | 160×160 greyscale+alpha film-grain tile, ~16 KB, laid over the whole page by `body::after` in `style.css`. Pixels are randomly light or dark at low opacity, so it adds texture without shifting the average brightness of the surfaces underneath (measured on `--bg`: σ ≈ 9 luminance steps, matching the owner's reference sample). Regenerate with a different `STRENGTH` for coarser/finer grain. |
+| `grain.png` | generated, `tools/build-grain.py` (seeded random noise, no photograph) | 160×160 greyscale+alpha film-grain tile, ~16 KB, laid over the whole page by `body::after` in `style.css`. Pixels are randomly light or dark at low opacity, so it adds texture without shifting the average brightness of the surfaces underneath (measured on `--bg`: σ ≈ 7 luminance steps; the owner's reference sample had ≈ 9 and was toned down on request). On displays ≥ 1.5 dppx the tile is shown at 80 CSS px so one speck equals one device pixel. Regenerate with a different `STRENGTH` for coarser/finer grain. |
 
 ## Responsive delivery summary
 
