@@ -130,9 +130,15 @@ function send_security_headers(): void
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()');
     header('Cross-Origin-Opener-Policy: same-origin');
+    // Nur mit konfiguriertem Cloudflare Turnstile werden dessen Script- und Frame-Quelle erlaubt
+    // (laut Cloudflare-Dokumentation genügen script-src und frame-src).
+    global $config;
+    $t = $config['turnstile'] ?? [];
+    $cf = is_array($t) && trim((string) ($t['site_key'] ?? '')) !== '' && trim((string) ($t['secret_key'] ?? '')) !== '';
     header(
-        "Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; "
+        "Content-Security-Policy: default-src 'none'; script-src 'self'" . ($cf ? ' https://challenges.cloudflare.com' : '') . "; style-src 'self'; "
         . "img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; "
+        . ($cf ? 'frame-src https://challenges.cloudflare.com; ' : '')
         . "form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'"
         . (is_https() ? '; upgrade-insecure-requests' : '')
     );

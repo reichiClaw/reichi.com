@@ -66,6 +66,38 @@ return [
     // wird per <meta name="robots"> von der Indexierung ausgenommen.
     'base_path' => null,
 
+    // Eingebauter Spamfilter für das Kontaktformular (ohne externe Dienste).
+    'spam' => [
+        // Mindestzeit in Sekunden zwischen Anzeigen und Absenden des Formulars.
+        'min_seconds' => 5,
+        // Maximal erlaubte Links (http://, https://, www.) in Betreff + Nachricht.
+        // Ohne aktiviertes JavaScript im Browser des Absenders gilt immer 0.
+        'max_links' => 1,
+        // Nachrichten, die überwiegend in diesen Schriftsystemen verfasst sind, werden
+        // abgewiesen (Unicode-Script-Namen). Leeres Array = Prüfung aus.
+        'reject_scripts' => ['Cyrillic', 'Han', 'Hangul', 'Hiragana', 'Katakana', 'Thai'],
+        // Begriffe (Groß-/Kleinschreibung egal), die eine Anfrage als Werbung markieren.
+        'blocked_terms' => [
+            'backlink', 'seo', 'ranking', 'casino', 'crypto', 'bitcoin', 'viagra', 'porn',
+            'escort', 'forex', 'loan', 'telegram', 'whatsapp me', 'guest post', 'gastbeitrag',
+        ],
+        // Abgewiesene Versuche protokollieren (nur Zeitstempel und Grund, keine Inhalte).
+        'log' => true,
+    ],
+
+    // Optional: Cloudflare Turnstile (unsichtbare bzw. automatische Prüfung „Bin ich ein Mensch?“).
+    // Kostenloses Cloudflare-Konto nötig, die Domain muss NICHT über Cloudflare laufen:
+    // dash.cloudflare.com → Turnstile → Widget hinzufügen → Domain reichi.com → Modus „Managed“.
+    // Beide Schlüssel eintragen = aktiv. Leer = aus (dann gilt nur der eingebaute Spamfilter).
+    // Hinweis: Mit Turnstile lädt der Browser des Besuchers Code von challenges.cloudflare.com –
+    // aber erst, wenn er das Formular benutzt. Die Datenschutzerklärung nennt Cloudflare dann automatisch.
+    'turnstile' => [
+        'site_key' => '',
+        'secret_key' => '',
+        // 'always' zeigt das kleine Widget immer, 'interaction-only' nur wenn eine Interaktion nötig ist.
+        'appearance' => 'always',
+    ],
+
     // Fehler der Mailfunktion protokollieren (nur Zeitstempel + Fehlermeldung, keine Inhalte).
     'log_mail_failures' => true,
 
