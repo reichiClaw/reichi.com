@@ -208,6 +208,8 @@ Never paste verification codes or account credentials into chats or the reposito
 | `base_path` | `null` = detect automatically. Set e.g. `'/neu'` only if the site runs in a subfolder and detection fails |
 | `log_mail_failures` | write `storage/logs/mail.log` (timestamp + error only, never form content) |
 | `force_secure_cookie` | set `true` when served exclusively over HTTPS behind a proxy that hides `HTTPS` |
+| `spam` | built-in content filter, see [Spam protection](#spam-protection): `min_seconds` (5), `max_links` (1, only with JavaScript; 0 without), `reject_scripts` (Unicode scripts that mark a message as spam when they make up more than 40 % of the letters), `blocked_terms` (case-insensitive substrings), `log` (write `storage/logs/spam.log`) |
+| `turnstile` | optional Cloudflare Turnstile: `site_key`, `secret_key` (both empty = off), `appearance` (`'always'` or `'interaction-only'`) |
 
 `app/config.php` is git-ignored in this repository; the upload ZIP ships it as a copy
 of `config.example.php`. If it is missing the site falls back to the example values.
@@ -257,9 +259,10 @@ top of `assets/css/style.css` (`:root`). Fonts are system stacks only.
   messages with `aria-describedby`/`aria-invalid`; inputs are preserved after errors.
 - Post/Redirect/Get: `contact.php` always answers with `303 → /#hire`; status, errors and
   values travel once through the session (flash). Reloading never re-submits.
-- Protection: CSRF token (session), invisible honeypot field, 3-second time trap,
-  per-sender rate limit stored as `storage/ratelimit/<hmac(ip)>.json` with `flock()`,
-  automatic pruning after `retention_seconds`. No IP addresses are stored in clear text.
+- Protection: CSRF token (session), two invisible honeypot fields, time trap, content
+  filter, per-sender rate limit stored as `storage/ratelimit/<hmac(ip)>.json` with
+  `flock()`, automatic pruning after `retention_seconds`, optional Cloudflare Turnstile.
+  Details in [Spam protection](#spam-protection). No IP addresses are stored in clear text.
 - Mail: `mail()` with fixed `From`, `Reply-To` only from the validated visitor address,
   UTF-8 subject encoding, all header values stripped of CR/LF. If `mail()` returns `false`
   the visitor sees an explicit failure message with e-mail/phone alternatives; a line is
@@ -268,6 +271,83 @@ top of `assets/css/style.css` (`:root`). Fonts are system stacks only.
 - Cookie: one session cookie `reichi_session` (HttpOnly, SameSite=Lax, Secure on HTTPS),
   set on the home page and the form handler only. No other cookies.
 
+## Spam protection
+
+The handler `contact.php` runs these checks in order. Everything up to and including the
+rate limit works without any external service or account.
+
+1. **Honeypots** – two hidden fields (`website`, `email_confirm`) that humans never see.
+   Filled → the bot gets a fake „sent“ page, nothing is mailed.
+2. **Time trap** – the session remembers when the form was rendered; submissions faster
+   than `spam.min_seconds` (default 5 s) are treated like honeypot hits.
+3. **Validation + CSRF** as before.
+4. **Content filter** (`contact_spam_check()` in `app/contact.php`) – rejects a message
+   with the visible status „Die Nachricht wurde als Werbung eingestuft“ and keeps the
+   entered values, so a wrongly caught human can rephrase. Reasons:
+   - `markup` – HTML anchors, `<script>`, BBCode `[url]`/`[link]`;
+   - `links` – more than `spam.max_links` URLs in subject + message. Browsers with
+     JavaScript send a `js_token` (derived from the CSRF token); without it the
+     allowance is **0** links, because almost all form bots do not run JavaScript;
+   - `name` – name contains a URL or no letter at all;
+   - `term` – one of `spam.blocked_terms` occurs (case-insensitive substring, so keep the
+     list short and specific; „seo“ also matches „Seoul“);
+   - `script` – at least 10 letters and more than 40 % of them in one of
+     `spam.reject_scripts` (default Cyrillic, Han, Hangul, Hiragana, Katakana, Thai).
+     Remove a script from the list if you expect real inquiries in that language.
+5. **Rate limit** as described above.
+6. **Cloudflare Turnstile** (only when configured, see below).
+
+Every rejection is appended to `storage/logs/spam.log` as
+`[date] reason <12-char hash of the hashed IP>` – no form content, no clear IP. The file
+rotates to `spam.log.1` at 512 KB. Set `spam.log` to `false` to disable. Reading the log
+after a few weeks tells you which rule catches what and whether a rule should be tuned.
+
+### Cloudflare Turnstile (optional)
+
+Turnstile is Cloudflare's CAPTCHA replacement: usually an invisible check, sometimes a
+one-click „Ich bin ein Mensch“ box, never picture puzzles. It is free and **does not require
+the domain to be hosted or proxied by Cloudflare** – only a free account.
+
+1. Sign up / log in at <https://dash.cloudflare.com/>, open **Turnstile**, „Add widget“.
+2. Widget name e.g. `reichi.com Kontaktformular`; hostnames `reichi.com` and `www.reichi.com`
+   (add the test subfolder host if you test elsewhere); widget mode **Managed**.
+3. Copy the **Site Key** and **Secret Key** into `app/config.php`:
+
+```php
+'turnstile' => [
+    'site_key'   => '0x4AAAAAAA…',
+    'secret_key' => '0x4AAAAAAA…',
+    'appearance' => 'always',        // or 'interaction-only'
+],
+```
+
+What changes as soon as both keys are set:
+
+- The form gets a placeholder for the widget. The Cloudflare script
+  `https://challenges.cloudflare.com/turnstile/v0/api.js` is loaded **only when the
+  visitor focuses or touches the form** – plain page views make no external request.
+- The submit button waits for the Turnstile token („Sicherheitsprüfung läuft …“) and then
+  submits automatically.
+- `contact.php` verifies the token server-side against
+  `https://challenges.cloudflare.com/turnstile/v0/siteverify` (cURL or stream wrapper,
+  8 s timeout). It **fails closed**: missing/invalid token, wrong hostname/action, or an
+  unreachable Cloudflare API → status „Die Sicherheitsprüfung wurde nicht bestätigt“, the
+  message is not sent, the reason is written to `spam.log` (`turnstile:<error-codes>`).
+- The CSP is widened for exactly two directives: `script-src` and `frame-src` gain
+  `https://challenges.cloudflare.com`. Everything else stays `'self'`.
+- The privacy page shows an additional „Cloudflare Turnstile“ paragraph and the form's
+  privacy note mentions Turnstile. Both disappear again when the keys are removed.
+- Without JavaScript the form can no longer be submitted (a `<noscript>` note says so and
+  points to e-mail/phone). Without Turnstile the no-JS path keeps working.
+
+`appearance => 'interaction-only'` hides the widget unless Cloudflare needs a click;
+`'always'` shows the small „Erfolg“ box, which makes the wait state easier to understand.
+
+Testing without a real account: Cloudflare's documented test keys
+`1x00000000000000000000AA` (site) / `1x0000000000000000000000000000000AA` (secret) always
+pass, `2x0000000000000000000000000000000AA` (secret) always fails. Never leave them in a
+live configuration – the always-pass secret accepts every token.
+
 ## Security headers / CSP
 
 Sent from PHP for every page (works on any web server): `Content-Security-Policy`
@@ -275,7 +355,8 @@ Sent from PHP for every page (works on any web server): `Content-Security-Policy
 `form-action 'self'`, `frame-ancestors 'none'`, …), `X-Content-Type-Options`,
 `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`.
 There are no inline scripts or style attributes anywhere, so no `unsafe-inline`.
-The JSON-LD block is a data block and not affected by `script-src`.
+The JSON-LD block is a data block and not affected by `script-src`. With Turnstile
+configured, `script-src` and `frame-src` additionally allow `https://challenges.cloudflare.com`.
 
 ## Local development
 

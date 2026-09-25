@@ -116,6 +116,8 @@ portrait crops exist for the two images that need a different mobile composition
 - Contact form: empty/invalid submission → field errors + preserved input; wrong CSRF token → explicit message; honeypot → silent fake success without mail; mail disabled → honest failure message; mail enabled with a fake `sendmail` → message accepted with correct `From`/`Reply-To`/UTF-8 subject; header-injection payloads in name/subject collapsed to spaces, injected e-mail rejected; rate limit → 4th submission within the window blocked, file contains only timestamps under an HMAC key; `GET /contact.php` → 303 to `/#hire`.
 - Subfolder installation (`/new/` next to a simulated WordPress root that answers every unknown URL): all links, assets, `<picture>` sources, preload, form action and the 303 redirect carry the prefix; CSS/JS load, lightbox and legal pages work, `noindex` is set; no request reaches the WordPress root. Root installation unchanged (no prefix, no `noindex`).
 - Shared-hosting layout: direct requests to `/app/*.php`, `/app/templates/*` and `/storage/secret.php` answer 404 or an empty page **without** `.htaccess` (PHP guards); the secret is created automatically in `storage/secret.php` on the first visit and stays stable.
+- Spam protection (after the first real spam mail arrived through the form): the content filter was exercised with `curl` and the fake `sendmail` – ordinary inquiries with and without JavaScript and with one link (JS) are sent; one link without JavaScript or with a wrong `js_token`, two links, a blocked term, an HTML link, a mostly-Cyrillic message, a URL as name and a digits-only name are rejected with the visible „Werbung“ status and logged as `filter:links|term|markup|script|name`; the second honeypot and the time trap answer with the fake success and log `honeypot`/`too-fast`. With Turnstile **off**, the pages make zero external requests and the CSP is unchanged.
+- Cloudflare Turnstile with Cloudflare's documented **test keys** (headless Chrome): no request to Cloudflare before the form is touched; the script loads on first focus; a token is obtained and the message is accepted (one mail written); a POST without token and a POST verified against the always-fail test secret are rejected with the „Sicherheitsprüfung“ status, no mail, log entry `turnstile:…`; the CSP contains `https://challenges.cloudflare.com` only in `script-src` and `frame-src`, and only while keys are configured; the privacy page shows the Cloudflare paragraph only then. Turnstile rendered without any CSP violation.
 - Lighthouse 12 (local server, no network latency): home page mobile and desktop
   Performance 100 / Accessibility 100 / Best Practices 100 / SEO 100; imprint and privacy
   pages Accessibility/Best Practices/SEO 100. Production numbers will differ slightly
@@ -131,6 +133,9 @@ portrait crops exist for the two images that need a different mobile composition
 - Behaviour on the hoster's exact PHP version and `sendmail_path`.
 - Safari/Firefox rendering (only Chromium was available); the CSS uses widely supported
   features (`aspect-ratio`, `clamp()`, `svh`, `<dialog>`, `text-wrap` with graceful fallback).
+- Turnstile with **real** keys on the live host (only Cloudflare's test keys were available
+  here), and how much of the actual bot traffic the built-in filter stops – read
+  `storage/logs/spam.log` after a few weeks.
 
 ## 6. Open items requiring owner or hoster confirmation
 
@@ -143,3 +148,4 @@ portrait crops exist for the two images that need a different mobile composition
 7. **Redirects/HTTPS**: activate HTTPS in the hosting panel, then either its „force HTTPS“/domain-forwarding option or the commented redirect block in `.htaccess`; configure alias domains.
 8. **Search Console** (SEO-08): verify the domain property, submit the sitemap, check indexing – steps in `README.md`, section *Search Console*.
 9. **Description texts of the five skills** are short interpretations of the old one-word items – adjust wording in `app/content.php` if anything reads too broad.
+10. **Spam protection**: the built-in filter is active as shipped. Decide whether to enable Cloudflare Turnstile (free account, two keys in `app/config.php`, steps in `README.md`, section *Spam protection*); if enabled, review the generated „Cloudflare Turnstile“ paragraph on the privacy page. Check `storage/logs/spam.log` occasionally and adjust `spam.blocked_terms` / `spam.reject_scripts` if legitimate inquiries are caught.
