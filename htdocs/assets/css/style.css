@@ -66,6 +66,17 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+body::after {
+  /* Feines Filmkorn über der ganzen Seite: eine kleine, nahtlos kachelnde Rauschgrafik
+     (tools/build-grain.py) mit sehr geringer Deckkraft, fest im Viewport, nicht klickbar.
+     Liegt über allen Flächen, damit die Helligkeitsstufen (--bg … --bg-4) erhalten bleiben. */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background: url("../images/grain.png") 0 0 / 160px 160px repeat;
+}
 
 h1, h2, h3, h4 {
   margin: 0;
@@ -1044,7 +1055,7 @@ main:focus { outline: none; }
 }
 
 @media print {
-  .site-header, .nav-toggle, .hero__spot, .gallery__zoom, .lightbox, .form { display: none !important; }
+  .site-header, .nav-toggle, .hero__spot, .gallery__zoom, .lightbox, .form, body::after { display: none !important; }
   html, body { background: #fff; color: #000; }
   a { color: #000; }
 }
