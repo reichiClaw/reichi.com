@@ -20,6 +20,17 @@ portrait opens the page, the red-lit stage photo sits full-bleed behind the biog
 the Prague/Max the Sax series forms the gallery, the studio portrait anchors the
 booking section. References are set as typographic line-ups, not cards.
 
+Motion is limited to opacity/transform and runs only under
+`prefers-reduced-motion: no-preference`: a staggered hero entrance, section reveals on
+scroll, and a decorative **level meter** along the bottom of the hero (`<canvas>`,
+section 7 of `main.js`) – thin bars at a quiet noise floor that rise under the mouse
+pointer with meter ballistics (fast attack, slow release, peak hold) and clip in the accent
+colour on fast moves; the dot in `reichi.` pulses like a signal LED and flashes on clip.
+Mouse reaction only on devices with a fine pointer; touch devices get the idle shimmer;
+reduced motion draws the meter once, statically; without JavaScript it does not exist.
+It animates only while the hero is on screen and the tab is visible. Remove the
+`<canvas>` in `app/templates/sections/hero.php` to drop it entirely.
+
 ## Structure
 
 ```
