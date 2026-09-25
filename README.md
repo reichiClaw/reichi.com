@@ -12,8 +12,10 @@ analytics or CAPTCHA service. Everything the site needs is in this repository.
 
 ## Design direction (short)
 
-Dark, atmospheric base with a warm off-white type colour and one restrained accent
-inspired by stage lighting (`#ff4d3a`). Large system-font typography (`system-ui` stack for
+Dark, atmospheric base with a fine film grain over the whole page (`body::after`, tile
+`assets/images/grain.png` from `tools/build-grain.py`; delete that rule to go back to flat
+colour), a warm off-white type colour and one restrained accent inspired by stage
+lighting (`#ff4d3a`). Large system-font typography (`system-ui` stack for
 copy, a monospace stack for labels, numbers and captions – a nod to patch lists and
 stage plots). The existing photographs carry the composition: the hooded black-and-white
 portrait opens the page, the red-lit stage photo sits full-bleed behind the biography,
