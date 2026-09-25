@@ -37,6 +37,16 @@ $statusText = [
         'title' => 'Kurz warten, bitte.',
         'text' => $formMessage ?? 'Bitte versuch es in ein paar Minuten noch einmal.',
     ],
+    'spam' => [
+        'type' => 'error',
+        'title' => 'Die Nachricht wurde als Werbung eingestuft.',
+        'text' => 'Der Spamfilter hat angeschlagen – meist wegen Links oder bestimmter Begriffe. Bitte formuliere die Anfrage ohne Links neu oder schreib direkt an ' . $contact['email'] . '. Deine Eingaben stehen unten weiterhin im Formular.',
+    ],
+    'turnstile' => [
+        'type' => 'error',
+        'title' => 'Die Sicherheitsprüfung wurde nicht bestätigt.',
+        'text' => 'Bitte sende das Formular noch einmal ab; dafür muss JavaScript aktiviert sein. Klappt es weiterhin nicht, schreib direkt an ' . $contact['email'] . ' oder ruf an unter ' . $contact['phone_display'] . '.',
+    ],
     'failed' => [
         'type' => 'error',
         'title' => 'Die Nachricht konnte nicht versendet werden.',
@@ -49,6 +59,7 @@ $field = static function (string $name) use ($formValues): string {
     return e($formValues[$name] ?? '');
 };
 $err = static fn(string $name): ?string => $formErrors[$name] ?? null;
+$turnstile = turnstile_enabled($config) ? $config['turnstile'] : null;
 $describedBy = static function (string $name, bool $hasHint) use ($err): string {
     $ids = [];
     if ($hasHint) {
@@ -116,12 +127,15 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
       <?php endif; ?>
 
       <?php if ($formStatus !== 'sent'): ?>
-      <form class="form" action="<?= e(url('/contact.php')) ?>" method="post">
+      <form class="form" action="<?= e(url('/contact.php')) ?>" method="post"<?= $turnstile ? ' data-turnstile-sitekey="' . e($turnstile['site_key']) . '" data-turnstile-appearance="' . e($turnstile['appearance'] ?? 'always') . '"' : '' ?>>
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+        <input type="hidden" name="js_token" value="" data-js-token>
 
         <div class="form__trap" aria-hidden="true">
           <label for="f-website">Website</label>
           <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off" value="">
+          <label for="f-email-confirm">E-Mail wiederholen</label>
+          <input type="text" id="f-email-confirm" name="email_confirm" tabindex="-1" autocomplete="off" value="">
         </div>
 
         <div class="form__row form__row--2">
@@ -159,8 +173,14 @@ $describedBy = static function (string $name, bool $hasHint) use ($err): string 
           <?php if ($err('message')): ?><p class="form__error" id="f-message-error"><?= e($err('message')) ?></p><?php endif; ?>
         </div>
 
+        <?php if ($turnstile): ?>
+          <div class="form__turnstile" data-turnstile-widget>
+            <noscript><p class="form__hint">Für die Sicherheitsprüfung (Cloudflare Turnstile) ist JavaScript nötig. Alternativ erreichst du mich direkt per E-Mail oder Telefon.</p></noscript>
+          </div>
+        <?php endif; ?>
+
         <div class="form__footer">
-          <p class="form__privacy"><?= e($labels['privacy_note']) ?> <a href="<?= e(url('/datenschutz/')) ?>">Datenschutzerklärung</a></p>
+          <p class="form__privacy"><?= e($labels['privacy_note']) ?><?= $turnstile ? ' Zum Schutz vor Spam wird Cloudflare Turnstile eingesetzt.' : '' ?> <a href="<?= e(url('/datenschutz/')) ?>">Datenschutzerklärung</a></p>
           <button class="button button--primary" type="submit"><?= e($labels['submit']) ?> <?= icon('arrow-right', 'icon button__icon') ?></button>
         </div>
         <p class="form__required-note"><span aria-hidden="true">*</span> Pflichtfeld</p>

@@ -21,20 +21,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     exit;
 }
 
-// Honeypot: Das Feld ist für Menschen unsichtbar; ist es gefüllt, wird still „Erfolg“ vorgetäuscht.
-if (!empty($_POST['website'])) {
+// Honeypots: Beide Felder sind für Menschen unsichtbar; sind sie gefüllt, wird still „Erfolg“ vorgetäuscht.
+if (!empty($_POST['website']) || !empty($_POST['email_confirm'])) {
+    contact_spam_log($config, 'honeypot');
     flash_set('contact_status', 'sent');
     header('Location: ' . $redirect, true, 303);
     exit;
 }
 
-// Zeitfalle: Formulare, die in unter drei Sekunden nach dem Rendern abgeschickt werden, sind fast immer Bots.
+// Zeitfalle: Formulare, die zu schnell nach dem Rendern abgeschickt werden, sind fast immer Bots.
 $renderedAt = (int) ($_SESSION['contact_form_rendered'] ?? 0);
-if ($renderedAt > 0 && time() - $renderedAt < 3) {
+$minSeconds = max(1, (int) ($config['spam']['min_seconds'] ?? 5));
+if ($renderedAt > 0 && time() - $renderedAt < $minSeconds) {
+    contact_spam_log($config, 'too-fast');
     flash_set('contact_status', 'sent');
     header('Location: ' . $redirect, true, 303);
     exit;
 }
+
+// Interaktions-Token: main.js schreibt das umgekehrte CSRF-Token in ein verstecktes Feld.
+// Fehlt es, hat der Absender kein JavaScript ausgeführt – erlaubt, aber mit strengeren Regeln.
+$jsSeen = isset($_POST['js_token'], $_SESSION['csrf_token'])
+    && is_string($_POST['js_token'])
+    && hash_equals(strrev($_SESSION['csrf_token']), $_POST['js_token']);
 
 $result = contact_validate($_POST);
 $values = $result['values'];
@@ -55,10 +64,26 @@ if ($errors !== []) {
     exit;
 }
 
+$spam = contact_spam_check($values, $config, $jsSeen);
+if ($spam !== null) {
+    contact_spam_log($config, 'filter:' . $spam);
+    flash_set('contact_status', 'spam');
+    flash_set('contact_values', $values);
+    header('Location: ' . $redirect, true, 303);
+    exit;
+}
+
 $limited = contact_rate_limit($config);
 if ($limited !== null) {
     flash_set('contact_status', 'limited');
     flash_set('contact_message', $limited);
+    flash_set('contact_values', $values);
+    header('Location: ' . $redirect, true, 303);
+    exit;
+}
+
+if (turnstile_enabled($config) && !turnstile_verify($_POST['cf-turnstile-response'] ?? null, $config)) {
+    flash_set('contact_status', 'turnstile');
     flash_set('contact_values', $values);
     header('Location: ' . $redirect, true, 303);
     exit;

@@ -82,6 +82,154 @@ function contact_validate(array $post): array
     return ['values' => $values, 'errors' => $errors];
 }
 
+/**
+ * Eingebauter Spamfilter. Liefert null, wenn die Anfrage unauffällig ist, sonst den
+ * Grund (Kurzcode) für das Protokoll. Die Regeln stehen in config.php unter 'spam'.
+ * $jsSeen: der Browser hat JavaScript ausgeführt (Interaktions-Token stimmt).
+ */
+function contact_spam_check(array $values, array $config, bool $jsSeen): ?string
+{
+    $rules = $config['spam'] ?? [];
+    $text = $values['subject'] . "\n" . $values['message'];
+    $lower = mb_strtolower($text);
+
+    // HTML- oder BBCode-Links haben in einer Anfrage nichts verloren.
+    if (preg_match('/<\s*a\s|\[url[=\]]|\[link[=\]]|<\s*script/i', $text)) {
+        return 'markup';
+    }
+
+    // Links zählen; ohne JavaScript ist gar keiner erlaubt.
+    $links = preg_match_all('#https?://|\bwww\.#i', $text);
+    $maxLinks = $jsSeen ? max(0, (int) ($rules['max_links'] ?? 1)) : 0;
+    if ($links > $maxLinks) {
+        return 'links';
+    }
+
+    // Ein Name mit Link oder ohne einen einzigen Buchstaben ist kein Name.
+    if (preg_match('#https?://|www\.#i', $values['name']) || !preg_match('/\p{L}/u', $values['name'])) {
+        return 'name';
+    }
+
+    foreach ((array) ($rules['blocked_terms'] ?? []) as $term) {
+        $term = mb_strtolower(trim((string) $term));
+        if ($term !== '' && str_contains($lower, $term)) {
+            return 'term';
+        }
+    }
+
+    // Überwiegend fremdes Schriftsystem (z. B. rein kyrillische Werbung).
+    $scripts = (array) ($rules['reject_scripts'] ?? []);
+    if ($scripts !== [] && preg_match_all('/\p{L}/u', $text) >= 10) {
+        $letters = preg_match_all('/\p{L}/u', $text);
+        $classes = implode('', array_map(
+            static fn(string $s): string => '\p{' . preg_replace('/[^A-Za-z_]/', '', $s) . '}',
+            $scripts
+        ));
+        $foreign = @preg_match_all('/[' . $classes . ']/u', $text);
+        if ($foreign !== false && $letters > 0 && $foreign / $letters > 0.4) {
+            return 'script';
+        }
+    }
+
+    return null;
+}
+
+/** Protokolliert abgewiesene Versuche – nur Zeitpunkt, Grund und Absender-Hash (gekürzt). */
+function contact_spam_log(array $config, string $reason): void
+{
+    if (empty($config['spam']['log'])) {
+        return;
+    }
+    $dir = rtrim($config['storage_dir'], '/') . '/logs';
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true)) {
+        return;
+    }
+    $file = $dir . '/spam.log';
+    if (is_file($file) && filesize($file) > 512 * 1024) {
+        @rename($file, $file . '.1');
+    }
+    @file_put_contents(
+        $file,
+        '[' . date('c') . '] ' . $reason . ' ' . substr(contact_client_key($config), 0, 12) . PHP_EOL,
+        FILE_APPEND | LOCK_EX
+    );
+}
+
+/** Turnstile ist aktiv, wenn beide Schlüssel konfiguriert sind. */
+function turnstile_enabled(array $config): bool
+{
+    $t = $config['turnstile'] ?? [];
+    return is_array($t) && trim((string) ($t['site_key'] ?? '')) !== '' && trim((string) ($t['secret_key'] ?? '')) !== '';
+}
+
+/**
+ * Prüft das Turnstile-Token serverseitig bei Cloudflare (Siteverify). Gibt true nur bei
+ * bestätigtem Erfolg zurück; ist der Dienst nicht erreichbar, gilt die Prüfung als
+ * nicht bestanden (fail closed) – die Statusmeldung nennt dann die direkten Kontaktwege.
+ */
+function turnstile_verify(?string $token, array $config): bool
+{
+    if (!is_string($token) || $token === '' || strlen($token) > 2048) {
+        return false;
+    }
+    $secret = (string) $config['turnstile']['secret_key'];
+    $body = http_build_query([
+        'secret' => $secret,
+        'response' => $token,
+        'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+    ]);
+    $url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+    $raw = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        ]);
+        $raw = curl_exec($ch);
+        if ($raw === false) {
+            contact_log($config, 'Turnstile: Siteverify nicht erreichbar (' . curl_error($ch) . ').');
+        }
+        curl_close($ch);
+    } else {
+        $ctx = stream_context_create(['http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => $body,
+            'timeout' => 8,
+        ]]);
+        $raw = @file_get_contents($url, false, $ctx);
+        if ($raw === false) {
+            contact_log($config, 'Turnstile: Siteverify nicht erreichbar (allow_url_fopen/curl prüfen).');
+        }
+    }
+
+    if (!is_string($raw)) {
+        return false;
+    }
+    $data = json_decode($raw, true);
+    if (!is_array($data) || empty($data['success'])) {
+        contact_spam_log($config, 'turnstile:' . implode(',', (array) ($data['error-codes'] ?? ['unbekannt'])));
+        return false;
+    }
+    // Das Token muss für dieses Formular auf diesem Host ausgestellt worden sein
+    // (Cloudflares Testschlüssel liefern immer example.com und werden hier ausgenommen).
+    $testing = !empty($data['metadata']['result_with_testing_key']);
+    $host = strtolower(preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+    $actionOk = !isset($data['action']) || $data['action'] === 'contact';
+    $hostOk = !isset($data['hostname']) || strtolower((string) $data['hostname']) === $host;
+    if (!$testing && (!$actionOk || !$hostOk)) {
+        contact_spam_log($config, 'turnstile:host-or-action');
+        return false;
+    }
+    return true;
+}
+
 /** Anonymisierter Schlüssel für das Rate-Limit: HMAC der IP mit dem konfigurierten Secret. */
 function contact_client_key(array $config): string
 {

@@ -9,6 +9,7 @@ declare(strict_types=1);
 define('PUBLIC_DIR', dirname(__DIR__));
 // app/ liegt normalerweise im Webroot; alternativ eine Ebene darüber (siehe README).
 require is_file(PUBLIC_DIR . '/app/bootstrap.php') ? PUBLIC_DIR . '/app/bootstrap.php' : dirname(PUBLIC_DIR) . '/app/bootstrap.php';
+require APP_DIR . '/contact.php';
 
 $contact = $content['contact'];
 $rl = $config['rate_limit'];
@@ -55,13 +56,18 @@ render('header', ['page' => $page]);
         <p>Die Übermittlung an das Postfach erfolgt über den Mailserver des Hosting-Anbieters <mark class="legal__todo">[BESTÄTIGEN: eigener Mailserver oder externer E-Mail-Anbieter]</mark>.</p>
 
         <h3>Schutz vor Missbrauch</h3>
-        <p>Um das Formular vor automatisiertem Spam zu schützen, werden drei Maßnahmen eingesetzt, die keine externen Dienste (kein CAPTCHA-Anbieter) benötigen:</p>
+        <p>Um das Formular vor automatisiertem Spam zu schützen, werden folgende Maßnahmen eingesetzt, die keine externen Dienste benötigen:</p>
         <ul class="legal__list">
-          <li>Ein für Menschen unsichtbares Formularfeld, das nur von automatisierten Programmen ausgefüllt wird.</li>
+          <li>Für Menschen unsichtbare Formularfelder, die nur von automatisierten Programmen ausgefüllt werden, sowie eine Mindestzeit zwischen Anzeigen und Absenden des Formulars.</li>
+          <li>Eine inhaltliche Prüfung der Nachricht auf typische Werbemerkmale (z. B. Anzahl der Links, bestimmte Begriffe). Abgewiesene Versuche werden nur mit Zeitpunkt, Grund und einem gekürzten Hashwert protokolliert – ohne Inhalte oder IP-Adresse.</li>
           <li>Eine serverseitige Begrenzung der Anzahl von Absendevorgängen: Dafür wird aus der IP-Adresse mit einem geheimen Schlüssel ein nicht rückrechenbarer Hashwert gebildet und zusammen mit den Zeitpunkten der letzten Absendevorgänge außerhalb des öffentlichen Webverzeichnisses gespeichert. Die IP-Adresse selbst wird dabei nicht gespeichert. Die Einträge werden nach spätestens <?= $retentionHours ?> Stunden automatisch gelöscht. Erlaubt sind höchstens <?= (int) $rl['max_per_window'] ?> Anfragen innerhalb von <?= (int) round((int) $rl['window_seconds'] / 60) ?> Minuten je Verbindung.</li>
           <li>Ein Sitzungs-Token (CSRF-Schutz), das sicherstellt, dass das Formular tatsächlich von dieser Website abgesendet wurde.</li>
         </ul>
         <p>Schlägt der Versand fehl, wird ausschließlich Zeitpunkt und technische Fehlermeldung protokolliert – ohne Formularinhalte oder IP-Adresse.</p>
+        <?php if (turnstile_enabled($config)): ?>
+        <h3>Cloudflare Turnstile</h3>
+        <p>Zusätzlich wird für das Kontaktformular der Dienst <strong>Turnstile</strong> der Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA, eingesetzt, um automatisierte Absendevorgänge zu erkennen. Der dafür nötige Code wird erst geladen, wenn Sie das Formular tatsächlich benutzen (Klick oder Fokus in ein Formularfeld). Dabei werden Ihre IP-Adresse sowie technische Merkmale des Browsers und der Interaktion an Cloudflare übermittelt; Cloudflare erzeugt daraus ein Prüf-Token, das dieser Webserver beim Absenden bei Cloudflare bestätigen lässt. Cloudflare setzt für die Prüfung selbst keine Tracking-Cookies auf dieser Domain. Eine Übermittlung in die USA kann stattfinden; Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert. Rechtsgrundlage ist mein berechtigtes Interesse am Schutz des Formulars vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Näheres in der <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener noreferrer" target="_blank">Datenschutzerklärung von Cloudflare</a>. Ohne JavaScript kann das Formular dann nicht abgesendet werden; die direkten Kontaktwege stehen jederzeit zur Verfügung.</p>
+        <?php endif; ?>
       </section>
 
       <section class="legal__block">

@@ -6,6 +6,7 @@
  *  3. Sanftes Einblenden von Abschnitten (respektiert prefers-reduced-motion)
  *  4. Lightbox für die Galerie auf Basis von <dialog>
  *  5. Fokus auf Formular-Statusmeldung nach dem Absenden
+ *  6. Formular: Interaktions-Token und optional Cloudflare Turnstile (erst bei Nutzung geladen)
  */
 (function () {
   'use strict';
@@ -170,5 +171,69 @@
       }, 50);
     };
     if (doc.readyState === 'complete') { focusStatus(); } else { window.addEventListener('load', focusStatus); }
+  }
+
+  /* 6. Formular: Interaktions-Token, optional Turnstile ------------------- */
+  var form = doc.querySelector('form.form');
+  if (form) {
+    // Beleg, dass ein Browser mit JavaScript das Formular gesendet hat (Server prüft strrev(csrf)).
+    var csrf = form.querySelector('[name="csrf_token"]');
+    var jsToken = form.querySelector('[data-js-token]');
+    if (csrf && jsToken) { jsToken.value = csrf.value.split('').reverse().join(''); }
+
+    var siteKey = form.getAttribute('data-turnstile-sitekey');
+    var widgetHost = form.querySelector('[data-turnstile-widget]');
+    if (siteKey && widgetHost) {
+      var submit = form.querySelector('button[type="submit"]');
+      var submitLabel = submit ? submit.innerHTML : '';
+      var tokenReady = false;
+      var pendingSubmit = false;
+      var loading = false;
+
+      function setWaiting(waiting) {
+        if (!submit) { return; }
+        submit.disabled = waiting;
+        submit.innerHTML = waiting ? 'Sicherheitsprüfung läuft …' : submitLabel;
+      }
+
+      window.reichiTurnstileReady = function () {
+        window.turnstile.render(widgetHost, {
+          sitekey: siteKey,
+          theme: 'dark',
+          language: 'de',
+          action: 'contact',
+          appearance: form.getAttribute('data-turnstile-appearance') || 'always',
+          callback: function () {
+            tokenReady = true;
+            setWaiting(false);
+            if (pendingSubmit) { pendingSubmit = false; form.submit(); }
+          },
+          'expired-callback': function () { tokenReady = false; },
+          'error-callback': function () { tokenReady = false; setWaiting(false); }
+        });
+      };
+
+      // Das Cloudflare-Script wird erst geladen, wenn der Besucher das Formular tatsächlich benutzt.
+      function loadTurnstile() {
+        if (loading) { return; }
+        loading = true;
+        var script = doc.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=reichiTurnstileReady&render=explicit';
+        script.async = true;
+        script.defer = true;
+        doc.head.appendChild(script);
+      }
+      form.addEventListener('focusin', loadTurnstile, { once: true });
+      form.addEventListener('pointerdown', loadTurnstile, { once: true });
+
+      form.addEventListener('submit', function (event) {
+        if (tokenReady) { return; }
+        // Token noch nicht da: Absenden zurückhalten, bis die Prüfung fertig ist.
+        event.preventDefault();
+        pendingSubmit = true;
+        setWaiting(true);
+        loadTurnstile();
+      });
+    }
   }
 })();

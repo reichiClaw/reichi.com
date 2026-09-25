@@ -828,6 +828,9 @@ main:focus { outline: none; }
 
 /* Honeypot: für Menschen unsichtbar, für Screenreader ausgeblendet */
 .form__trap { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.form__turnstile { min-height: 65px; margin-top: 0.25rem; }
+.form__turnstile:empty { display: none; }
+.js .form__turnstile:empty { display: block; }
 
 .form-status {
   margin-bottom: 1.25rem;
