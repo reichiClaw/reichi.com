@@ -425,6 +425,12 @@ main:focus { outline: none; }
   display: block;
 }
 .hero__character[hidden] { display: none; }
+/* Bildnachweis je nach angezeigtem Bild: Foto auf Touch-Geräten, Animation mit Maus */
+.hero__credit--animation { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .hero__credit--photo { display: none; }
+  .hero__credit--animation { display: inline; }
+}
 .hero__scope {
   /* Oszilloskop-Variante der Linie (Canvas, nur mit JS und Maus); deckt dieselbe Stelle ab,
      ist aber breit genug für die Wellenform */
