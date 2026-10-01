@@ -72,6 +72,12 @@ rendered icons). `mstile-150x150.png`/`browserconfig.xml` were fetched but dropp
 |---|---|---|
 | `grain.png` | generated, `tools/build-grain.py` (seeded random noise, no photograph) | 160×160 greyscale+alpha film-grain tile, ~16 KB, laid over the whole page by `body::after` in `style.css`. Pixels are randomly light or dark at low opacity, so it adds texture without shifting the average brightness of the surfaces underneath (measured on `--bg`: σ ≈ 7 luminance steps; the owner's reference sample had ≈ 9 and was toned down on request). On displays ≥ 1.5 dppx the tile is shown at 80 CSS px so one speck equals one device pixel. Regenerate with a different `STRENGTH` for coarser/finer grain. |
 
+## Head animation frames (`htdocs/assets/images/character/`)
+
+| file(s) | source | note |
+|---|---|---|
+| `frame-00.webp` … `frame-63.webp`, `center.webp`, `manifest.json` | `assets-src/originals/character-head-turn.mp4` (1280×720, 24 fps, 240 frames; provided by the owner on 2026-10-01, original filename `Character_moving_head_and_eyes_20261001191043_0284.mp4`) via `tools/build-character-frames.py` | 65 WebP crops 720×720 (q82, ~1.6 MB total), one per 5.625° of head rotation starting at „up“, clockwise; `center.webp` = video frame 0. Used only when `hero_visual => 'animation'`. Background measured `#010101`, face at (0.50, 0.43) of the crop. **Credit/licence unknown** – the video shows the same person as the hooded portrait, but the file carries no author metadata and the generating tool/photographer is not documented; `hero.animation.credit` is therefore `null` and the credit line is hidden until the owner confirms. |
+
 ## Responsive delivery summary
 
 - Photos: `<picture>` with WebP `<source>` + JPEG fallback, `srcset`/`sizes`, explicit

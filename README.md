@@ -219,6 +219,7 @@ Never paste verification codes or account credentials into chats or the reposito
 | `secret` | random string (≥ 32 chars) used to hash IP addresses for rate limiting. Leave empty to have it generated automatically into `storage/secret.php` on the first visit |
 | `rate_limit` | `max_per_window` (5) per `window_seconds` (3600), `min_interval` (20 s), `retention_seconds` (86400) |
 | `storage_dir` | writable directory; default `storage/` next to `app/` (blocked by `.htaccess`) |
+| `hero_visual` | `'photo'` (default) shows the portrait photograph; `'animation'` shows the cursor-following head in the same box – see [Hero head animation](#hero-head-animation) |
 | `base_path` | `null` = detect automatically. Set e.g. `'/neu'` only if the site runs in a subfolder and detection fails |
 | `log_mail_failures` | write `storage/logs/mail.log` (timestamp + error only, never form content) |
 | `force_secure_cookie` | set `true` when served exclusively over HTTPS behind a proxy that hides `HTTPS` |
@@ -260,6 +261,43 @@ Everything editable lives in **`app/content.php`**, one PHP array with comments:
 
 Without Python you can also export the sizes from any image editor as long as the file
 names follow the `name-<width>.jpg` / `.webp` pattern listed in `widths`.
+
+### Hero head animation
+
+`'hero_visual' => 'animation'` in `app/config.php` replaces the hero photograph with a
+portrait whose head turns to follow the mouse pointer. It occupies exactly the box the
+photo uses (same classes, same aspect ratios, same entrance animation); nothing else on the
+page moves.
+
+How it works (`tools/build-character-frames.py`, section 8 of `main.js`):
+
+- Source is a 10 s video (`assets-src/originals/character-head-turn.mp4`, 1280×720, 24 fps)
+  in which the head turns once clockwise through the eight compass directions. The script
+  reads it with OpenCV, measures the background colour, locates the face, tracks facial
+  features through all 240 frames and derives a gaze angle per frame. It then picks **64
+  frames** at 5.625° steps (index 0 = up, clockwise) – choosing frames so that the
+  excursion changes smoothly around the circle – and writes them as 720×720 WebP crops to
+  `assets/images/character/frame-00…63.webp`, plus `center.webp` (video frame 0, looking into
+  the camera) and `manifest.json` (frame count, background `#010101`, face position).
+  The video is **never** played or seeked in the browser.
+- The template renders `center.webp` as a normal `<img>` (preloaded, LCP) and an empty
+  `<canvas>` on top. After the `load` event, and only on devices with a real mouse
+  (`hover: hover` + `pointer: fine`) without `prefers-reduced-motion`, the 64 frames
+  (~1.6 MB) are fetched and decoded; then the canvas takes over.
+- Each animation frame computes the pointer angle to the face (`atan2`), smooths it with a
+  shortest-path angular lerp (factor 0.26 → ~35 ms per step), maps it to the nearest of the
+  64 frames and draws **exactly one** frame at full opacity with cover fitting – no
+  blending, so no ghosting. Within 12 % of the shorter viewport side around the face the
+  centre frame is shown (eye contact). The loop stops as soon as the pose has settled and
+  while the hero is off screen or the tab hidden.
+- Touch devices, reduced motion and no-JS users get the static `center.webp`; if any frame
+  fails to load the static image simply stays.
+- Texts (alt, caption, credit) live in `content.php` under `hero.animation`. `credit` is
+  `null` until the owner confirms the source of the video; the „Foto:“ line is hidden then.
+
+Regenerate frames (development machine only): `pip install opencv-python-headless numpy`,
+then `python3 tools/build-character-frames.py`. The script prints the frame numbers it
+identified for the eight directions and the chosen 64.
 
 ### Design tokens
 
