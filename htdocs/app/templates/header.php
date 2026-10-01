@@ -90,7 +90,9 @@ $jsonLd = $isHome
 <link rel="apple-touch-icon" href="<?= e(url('/assets/images/icons/apple-touch-icon.png')) ?>">
 <link rel="mask-icon" href="<?= e(url('/assets/images/icons/safari-pinned-tab.svg')) ?>" color="#0d0d10">
 <link rel="manifest" href="<?= e(url('/site.webmanifest')) ?>">
-<?php if ($isHome): ?>
+<?php if ($isHome && ($heroAnim = hero_animation($config))): ?>
+<link rel="preload" as="image" fetchpriority="high" href="<?= e($heroAnim['dir'] . '/center.webp') ?>" type="image/webp">
+<?php elseif ($isHome): ?>
 <?php $heroPhoto = $content['photos'][$content['hero']['photo']]; ?>
 <link rel="preload" as="image" fetchpriority="high" imagesrcset="<?= e(implode(', ', array_map(static fn(int $w): string => url('/assets/images/photos/' . $heroPhoto['file'] . '-' . $w . '.webp') . ' ' . $w . 'w', $heroPhoto['widths']))) ?>" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
 <?php endif; ?>

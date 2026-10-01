@@ -38,6 +38,41 @@ function ensure_secret(string $storageDir): string
     return is_string($written) && strlen($written) >= 32 ? $written : $secret;
 }
 
+/**
+ * Daten der Hero-Kopfanimation (manifest.json aus tools/build-character-frames.py),
+ * oder null, wenn in config.php 'hero_visual' nicht 'animation' ist oder die Bilder fehlen –
+ * dann zeigt der Hero wie bisher das Foto.
+ */
+function hero_animation(array $config): ?array
+{
+    static $cache = false;
+    if ($cache !== false) {
+        return $cache;
+    }
+    $cache = null;
+    if (($config['hero_visual'] ?? 'photo') !== 'animation') {
+        return null;
+    }
+    $file = PUBLIC_DIR . '/assets/images/character/manifest.json';
+    if (!is_file($file)) {
+        return null;
+    }
+    $data = json_decode((string) file_get_contents($file), true);
+    if (!is_array($data) || empty($data['frames']) || empty($data['face']) || !is_file(PUBLIC_DIR . '/assets/images/character/center.webp')) {
+        return null;
+    }
+    $cache = [
+        'frames' => (int) $data['frames'],
+        'width' => (int) ($data['width'] ?? 720),
+        'height' => (int) ($data['height'] ?? 720),
+        'background' => preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['background'] ?? '')) ? strtolower((string) $data['background']) : '#000000',
+        'face_x' => (float) $data['face'][0],
+        'face_y' => (float) $data['face'][1],
+        'dir' => url('/assets/images/character'),
+    ];
+    return $cache;
+}
+
 /** HTML-Escaping für Textknoten und Attributwerte. */
 function e(?string $value): string
 {

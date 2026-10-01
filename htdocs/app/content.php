@@ -96,6 +96,13 @@ return [
         'secondary' => ['label' => 'Anfrage senden', 'href' => '#hire'],
         'photo' => 'portrait-hood',
         'location' => 'Ried im Innkreis · Oberösterreich',
+        // Texte für die Kopfanimation (config.php: 'hero_visual' => 'animation').
+        // credit: Urheber/Quelle des Videos, aus dem die Bilder stammen – null blendet die Zeile aus.
+        'animation' => [
+            'alt' => 'Porträt von Christian Reichinger mit Kapuze vor schwarzem Hintergrund, der Kopf folgt dem Mauszeiger',
+            'caption' => 'reichi | Christian Reichinger',
+            'credit' => null,
+        ],
     ],
 
     // ------------------------------------------------------------------

@@ -66,6 +66,13 @@ return [
     // wird per <meta name="robots"> von der Indexierung ausgenommen.
     'base_path' => null,
 
+    // Bild im Hero: 'photo' = das Porträtfoto wie bisher,
+    // 'animation' = Kopf folgt dem Mauszeiger (Einzelbilder aus assets/images/character/,
+    // erzeugt mit tools/build-character-frames.py). Gleiche Fläche, gleiche Größe.
+    // Die Animation läuft nur mit Maus und JavaScript; Touch-Geräte, prefers-reduced-motion
+    // und Browser ohne JS sehen das ruhige Standbild (center.webp).
+    'hero_visual' => 'photo',
+
     // Eingebauter Spamfilter für das Kontaktformular (ohne externe Dienste).
     'spam' => [
         // Mindestzeit in Sekunden zwischen Anzeigen und Absenden des Formulars.

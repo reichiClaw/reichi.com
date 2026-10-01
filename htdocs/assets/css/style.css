@@ -410,6 +410,21 @@ main:focus { outline: none; }
   width: 1px;
   background: linear-gradient(to bottom, transparent, var(--accent), transparent);
 }
+.hero__stage {
+  /* Kopfanimation: Standbild bestimmt die Fläche (identisch mit dem Foto), die Canvas liegt
+     deckungsgleich darüber und zeichnet genau ein Einzelbild – kein Überblenden. */
+  position: relative;
+  background: #010101;
+}
+.hero__stage .hero__img { display: block; }
+.hero__character {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.hero__character[hidden] { display: none; }
 .hero__scope {
   /* Oszilloskop-Variante der Linie (Canvas, nur mit JS und Maus); deckt dieselbe Stelle ab,
      ist aber breit genug für die Wellenform */
@@ -1031,8 +1046,9 @@ main:focus { outline: none; }
   .hero__intro { animation-delay: 260ms; }
   .hero__actions { animation-delay: 340ms; }
   .hero__caption, .hero__credit { animation: rise 800ms var(--ease) 500ms both; }
-  .hero__figure picture { display: block; overflow: clip; }
-  .hero__img { animation: settle 1400ms var(--ease) both; transform-origin: 50% 40%; }
+  .hero__figure picture, .hero__stage { display: block; overflow: clip; }
+  .hero__img, .hero__stage { animation: settle 1400ms var(--ease) both; transform-origin: 50% 40%; }
+  .hero__stage .hero__img { animation: none; }
   .hero__figure::after { animation: draw-line 1200ms var(--ease) 300ms both; transform-origin: top; }
   .hero__spot::before { animation: breathe 9s ease-in-out infinite alternate; }
   .js .hero__spot { will-change: transform; }

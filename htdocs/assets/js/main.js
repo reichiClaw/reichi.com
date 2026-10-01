@@ -8,6 +8,7 @@
  *  5. Fokus auf Formular-Statusmeldung nach dem Absenden
  *  6. Formular: Interaktions-Token und optional Cloudflare Turnstile (erst bei Nutzung geladen)
  *  7. Hero: Bühnenlicht folgt der Maus (Verfolger), Bühnenkante als Oszilloskop-Linie
+ *  8. Hero: Kopf folgt dem Mauszeiger (optional, config 'hero_visual' => 'animation')
  */
 (function () {
   'use strict';
@@ -395,5 +396,175 @@
         drawScope();
       }
     });
+  }
+
+  /* 8. Hero: Kopf folgt dem Mauszeiger ----------------------------------- */
+  // 64 vorberechnete Einzelbilder (5,625° Schritte, 0 = oben, im Uhrzeigersinn) plus
+  // center.webp. Pro Frame wird genau EIN Bild deckend gezeichnet – kein Überblenden, kein
+  // Video-Seeking. Der Winkel Zeiger→Gesicht wird mit kürzestem Weg um den Kreis geglättet
+  // (Faktor 0.26 ≈ 35 ms Reaktion); in der Nähe des Gesichts schaut sie direkt in die Kamera.
+  var stage = doc.querySelector('[data-hero-character]');
+  if (stage && finePointer.matches && !reduceMotion.matches) {
+    var characterCanvas = stage.querySelector('.hero__character');
+    var characterCtx = characterCanvas && characterCanvas.getContext ? characterCanvas.getContext('2d', { alpha: false }) : null;
+    if (characterCtx) {
+      var frameCount = parseInt(stage.getAttribute('data-frames'), 10) || 64;
+      var frameDir = stage.getAttribute('data-dir');
+      var faceFx = parseFloat(stage.getAttribute('data-face-x')) || 0.5;
+      var faceFy = parseFloat(stage.getAttribute('data-face-y')) || 0.45;
+      var background = stage.getAttribute('data-background') || '#000000';
+      var LERP = 0.26;
+      var DEADZONE = 0.12;              // Anteil der kürzeren Viewport-Seite
+      var STEP = (Math.PI * 2) / frameCount;
+
+      var images = [];
+      var centerImage = null;
+      var ready = false;
+      var cssW = 0, cssH = 0, dpr = 1;
+      var drawRect = null;              // Lage des Bildes auf der Canvas (cover)
+      var smoothed = -Math.PI / 2;      // Startwinkel: oben
+      var targetAngle = -Math.PI / 2;
+      var wantCenter = true;            // ohne Zeiger: Blick in die Kamera
+      var shownIndex = -2;              // -1 = center, 0..n-1 = Frame
+      var pointerX = -1, pointerY = -1;
+      var charRaf = 0, charOnScreen = true;
+
+      function lerpAngle(a, b, t) {
+        var d = b - a;
+        while (d > Math.PI) { d -= Math.PI * 2; }
+        while (d < -Math.PI) { d += Math.PI * 2; }
+        return a + d * t;
+      }
+
+      function angleToIndex(angle) {
+        // 0 = oben (-90°), dann im Uhrzeigersinn (Bildschirmkoordinaten, y nach unten)
+        var turns = (angle + Math.PI / 2) / (Math.PI * 2);
+        turns -= Math.floor(turns);
+        return Math.round(turns * frameCount) % frameCount;
+      }
+
+      function sizeCanvas() {
+        var rect = stage.getBoundingClientRect();
+        cssW = Math.max(1, Math.round(rect.width));
+        cssH = Math.max(1, Math.round(rect.height));
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        characterCanvas.width = Math.round(cssW * dpr);
+        characterCanvas.height = Math.round(cssH * dpr);
+        characterCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        characterCtx.imageSmoothingEnabled = true;
+        characterCtx.imageSmoothingQuality = 'high';
+        var img = centerImage;
+        var scale = Math.max(cssW / img.naturalWidth, cssH / img.naturalHeight);   // wie object-fit: cover
+        var w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+        drawRect = { x: (cssW - w) / 2, y: (cssH - h) / 2, w: w, h: h };
+        shownIndex = -2;
+      }
+
+      function paint(index) {
+        if (index === shownIndex || !drawRect) { return; }
+        shownIndex = index;
+        var img = index < 0 ? centerImage : images[index];
+        characterCtx.fillStyle = background;
+        characterCtx.fillRect(0, 0, cssW, cssH);
+        characterCtx.globalAlpha = 1;
+        characterCtx.drawImage(img, drawRect.x, drawRect.y, drawRect.w, drawRect.h);
+      }
+
+      function facePoint() {
+        var rect = stage.getBoundingClientRect();
+        return {
+          x: rect.left + drawRect.x + drawRect.w * faceFx,
+          y: rect.top + drawRect.y + drawRect.h * faceFy
+        };
+      }
+
+      function updateTarget() {
+        if (pointerX < 0) { wantCenter = true; return; }
+        var face = facePoint();
+        var dx = pointerX - face.x, dy = pointerY - face.y;
+        var deadzone = DEADZONE * Math.min(window.innerWidth, window.innerHeight);
+        wantCenter = Math.hypot(dx, dy) < deadzone;
+        if (!wantCenter) { targetAngle = Math.atan2(dy, dx); }
+      }
+
+      function characterFrame() {
+        charRaf = 0;
+        if (!ready) { return; }
+        if (reduceMotion.matches) { paint(-1); return; }
+        updateTarget();
+        if (wantCenter) {
+          paint(-1);
+          smoothed = targetAngle;   // beim Verlassen der Zone ohne Umweg weiterdrehen
+          return;
+        }
+        smoothed = lerpAngle(smoothed, targetAngle, LERP);
+        paint(angleToIndex(smoothed));
+        var remaining = Math.abs(lerpAngle(smoothed, targetAngle, 1) - smoothed);
+        if (remaining > STEP / 8 && charOnScreen && !doc.hidden) {
+          charRaf = window.requestAnimationFrame(characterFrame);
+        }
+      }
+
+      function characterKick() {
+        if (ready && !charRaf && charOnScreen && !doc.hidden) {
+          charRaf = window.requestAnimationFrame(characterFrame);
+        }
+      }
+
+      function load(src) {
+        return new Promise(function (resolve, reject) {
+          var img = new Image();
+          img.decoding = 'async';
+          img.onload = function () {
+            // Vollständig dekodieren, damit das erste Zeichnen jedes Bildes nicht ruckelt
+            if (img.decode) { img.decode().then(function () { resolve(img); }, function () { resolve(img); }); } else { resolve(img); }
+          };
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      function startCharacter() {
+        var jobs = [load(frameDir + '/center.webp')];
+        for (var i = 0; i < frameCount; i++) {
+          jobs.push(load(frameDir + '/frame-' + (i < 10 ? '0' + i : i) + '.webp'));
+        }
+        Promise.all(jobs).then(function (loaded) {
+          centerImage = loaded[0];
+          images = loaded.slice(1);
+          sizeCanvas();
+          paint(-1);
+          characterCanvas.hidden = false;
+          ready = true;
+          characterKick();
+        }, function () {
+          // Ein Bild fehlt: Standbild bleibt, keine Animation
+        });
+      }
+
+      // Erst nach dem Laden der Seite starten, damit die Einzelbilder nicht mit dem
+      // Hero-Bild und dem CSS konkurrieren.
+      if (doc.readyState === 'complete') { startCharacter(); } else { window.addEventListener('load', startCharacter); }
+
+      doc.addEventListener('mousemove', function (event) {
+        pointerX = event.clientX; pointerY = event.clientY;
+        characterKick();
+      }, { passive: true });
+      doc.addEventListener('mouseleave', function () { pointerX = -1; pointerY = -1; characterKick(); });
+      window.addEventListener('scroll', characterKick, { passive: true });
+      window.addEventListener('resize', function () {
+        if (ready) { sizeCanvas(); paint(wantCenter ? -1 : angleToIndex(smoothed)); characterKick(); }
+      });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          charOnScreen = entries[0].isIntersecting;
+          characterKick();
+        }).observe(stage);
+      }
+      doc.addEventListener('visibilitychange', characterKick);
+      reduceMotion.addEventListener && reduceMotion.addEventListener('change', function () {
+        if (reduceMotion.matches && ready) { pointerX = -1; paint(-1); }
+      });
+    }
   }
 })();
