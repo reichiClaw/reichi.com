@@ -38,6 +38,9 @@ function ensure_secret(string $storageDir): string
     return is_string($written) && strlen($written) >= 32 ? $written : $secret;
 }
 
+/** Geräte, auf denen die Kopfanimation läuft – muss zur Abfrage in main.js und style.css passen. */
+const HERO_MOUSE_MEDIA = '(hover: hover) and (pointer: fine)';
+
 /**
  * Daten der Hero-Kopfanimation (manifest.json aus tools/build-character-frames.py),
  * oder null, wenn in config.php 'hero_visual' nicht 'animation' ist oder die Bilder fehlen –
@@ -252,7 +255,9 @@ function flash_get(string $key, mixed $default = null): mixed
  *
  * $photo = ['file' => 'stage-red', 'widths' => [640, 1024, ...], 'width' => 2048, 'height' => 1365,
  *           'alt' => '…', 'portrait' => ['widths' => [540, 900], 'width' => 1092, 'height' => 1365]]
- * $options: sizes (string), loading ('lazy'|'eager'), fetchpriority, class, portrait_media
+ * $options: sizes (string), loading ('lazy'|'eager'), fetchpriority, class, portrait_media,
+ *           alt (überschreibt $photo['alt']), lead_sources (fertige <source>-Elemente, die vor
+ *           den Foto-Quellen stehen – z. B. ein anderes Bild für Geräte mit Maus)
  */
 function picture(array $photo, array $options = []): string
 {
@@ -269,7 +274,7 @@ function picture(array $photo, array $options = []): string
         ));
     };
 
-    $html = '<picture>';
+    $html = '<picture>' . ($options['lead_sources'] ?? '');
     if (!empty($photo['portrait']) && !empty($options['portrait_media'])) {
         $media = e($options['portrait_media']);
         $pw = $photo['portrait']['widths'];
@@ -284,7 +289,7 @@ function picture(array $photo, array $options = []): string
     $html .= '<img src="' . e("{$base}-{$largest}.jpg") . '" srcset="'
         . e($srcset($base, $photo['widths'], 'jpg')) . '" sizes="' . e($sizes) . '"'
         . ' width="' . (int) $photo['width'] . '" height="' . (int) $photo['height'] . '"'
-        . ' alt="' . e($photo['alt']) . '" loading="' . e($loading) . '" decoding="' . $decoding . '"'
+        . ' alt="' . e($options['alt'] ?? $photo['alt']) . '" loading="' . e($loading) . '" decoding="' . $decoding . '"'
         . (!empty($options['fetchpriority']) ? ' fetchpriority="' . e($options['fetchpriority']) . '"' : '')
         . ($class !== '' ? ' class="' . e($class) . '"' : '')
         . '>';

@@ -13,7 +13,6 @@ $photo = $content['photos'][$hero['photo']];
 // config.php 'hero_visual': 'photo' (Standard) oder 'animation' (Kopf folgt dem Mauszeiger).
 $anim = hero_animation($config);
 $caption = $anim ? $hero['animation']['caption'] : $photo['caption'];
-$credit = $anim ? $hero['animation']['credit'] : $photo['credit'];
 ?>
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero__spot" aria-hidden="true"></div>
@@ -35,13 +34,17 @@ $credit = $anim ? $hero['animation']['credit'] : $photo['credit'];
 
     <figure class="hero__figure">
       <?php if ($anim): ?>
-        <?php // Standbild (Blick in die Kamera) in exakt der Bildfläche des Fotos; main.js legt die Canvas darüber, sobald alle Einzelbilder geladen sind. ?>
+        <?php // Geräte mit Maus bekommen center.webp (Blick in die Kamera) und darüber die Canvas;
+              // Handys/Tablets laden stattdessen das Originalfoto – ein <picture>, ein Download. ?>
         <div class="hero__stage" data-hero-character
              data-frames="<?= (int) $anim['frames'] ?>" data-dir="<?= e($anim['dir']) ?>"
              data-face-x="<?= e((string) $anim['face_x']) ?>" data-face-y="<?= e((string) $anim['face_y']) ?>"
              data-background="<?= e($anim['background']) ?>">
-          <img class="hero__img" src="<?= e($anim['dir'] . '/center.webp') ?>" width="<?= (int) $anim['width'] ?>" height="<?= (int) $anim['height'] ?>"
-               alt="<?= e($hero['animation']['alt']) ?>" loading="eager" decoding="sync" fetchpriority="high">
+          <?= picture($photo, [
+              'sizes' => '(max-width: 47.99em) 100vw, 42vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'hero__img',
+              'alt' => $hero['animation']['alt'],
+              'lead_sources' => '<source media="' . e(HERO_MOUSE_MEDIA) . '" type="image/webp" srcset="' . e($anim['dir'] . '/center.webp') . '" width="' . (int) $anim['width'] . '" height="' . (int) $anim['height'] . '">',
+          ]) ?>
           <canvas class="hero__character" aria-hidden="true" hidden></canvas>
         </div>
       <?php else: ?>
@@ -55,5 +58,9 @@ $credit = $anim ? $hero['animation']['credit'] : $photo['credit'];
       <canvas class="hero__scope" aria-hidden="true"></canvas>
     </figure>
   </div>
-  <?php if ($credit): ?><p class="hero__credit">Foto: <?= e($credit) ?></p><?php endif; ?>
+  <?php if ($anim): ?>
+    <p class="hero__credit"><span class="hero__credit--photo">Foto: <?= e($photo['credit']) ?></span><?php if ($hero['animation']['credit']): ?><span class="hero__credit--animation">Foto: <?= e($hero['animation']['credit']) ?></span><?php endif; ?></p>
+  <?php else: ?>
+    <p class="hero__credit">Foto: <?= e($photo['credit']) ?></p>
+  <?php endif; ?>
 </section>

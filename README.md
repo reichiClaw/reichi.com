@@ -280,20 +280,23 @@ How it works (`tools/build-character-frames.py`, section 8 of `main.js`):
   `assets/images/character/frame-00…63.webp`, plus `center.webp` (video frame 0, looking into
   the camera) and `manifest.json` (frame count, background `#010101`, face position).
   The video is **never** played or seeked in the browser.
-- The template renders `center.webp` as a normal `<img>` (preloaded, LCP) and an empty
-  `<canvas>` on top. After the `load` event, and only on devices with a real mouse
-  (`hover: hover` + `pointer: fine`) without `prefers-reduced-motion`, the 64 frames
-  (~1.6 MB) are fetched and decoded; then the canvas takes over.
+- The template renders one `<picture>`: its first `<source>` serves `center.webp` only on
+  devices with a real mouse (`(hover: hover) and (pointer: fine)`); phones and tablets fall
+  through to the original photograph exactly as in photo mode (one download either way,
+  preload carries the same media condition). An empty `<canvas>` sits on top. After the
+  `load` event, on mouse devices without `prefers-reduced-motion`, the 64 frames (~1.6 MB)
+  are fetched and decoded; then the canvas takes over.
 - Each animation frame computes the pointer angle to the face (`atan2`), smooths it with a
   shortest-path angular lerp (factor 0.26 → ~35 ms per step), maps it to the nearest of the
   64 frames and draws **exactly one** frame at full opacity with cover fitting – no
   blending, so no ghosting. Within 12 % of the shorter viewport side around the face the
   centre frame is shown (eye contact). The loop stops as soon as the pose has settled and
   while the hero is off screen or the tab hidden.
-- Touch devices, reduced motion and no-JS users get the static `center.webp`; if any frame
-  fails to load the static image simply stays.
-- Texts (alt, caption, credit) live in `content.php` under `hero.animation`. `credit` is
-  `null` until the owner confirms the source of the video; the „Foto:“ line is hidden then.
+- Touch devices see the photograph (with its credit); mouse users with reduced motion or
+  without JS see the static `center.webp`; if any frame fails to load the still stays.
+- Texts live in `content.php` under `hero.animation`. The `alt` must be true for both the
+  photo and the still. `credit` is `null` until the owner confirms the source of the video;
+  on mouse devices the „Foto:“ line is then empty, on touch devices it shows the photo credit.
 
 Regenerate frames (development machine only): `pip install opencv-python-headless numpy`,
 then `python3 tools/build-character-frames.py`. The script prints the frame numbers it
