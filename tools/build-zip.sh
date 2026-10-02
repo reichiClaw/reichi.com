@@ -5,6 +5,7 @@
 # ZIP layout:
 #   reichi-website/
 #     htdocs/        -> upload the CONTENTS of this folder into public_html (FTP)
+#     htdocs/it/     -> web root of reichi.it (domain mapped to this folder in the panel)
 #     README.md, MIGRATION.md, ASSETS.md
 #     assets-src/    -> untouched original photos/logos (do not upload)
 set -eu
@@ -19,8 +20,10 @@ PKG="$STAGE/reichi-website"
 mkdir -p dist "$PKG"
 rm -f "$OUT"
 
-# Sanity check before packaging
+# Sanity checks before packaging: PHP syntax, and the copies of the shared
+# front-end files inside htdocs/it/ (web root of reichi.it) must be current.
 find htdocs -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
+sh tools/sync-it-assets.sh --check
 
 cp -R htdocs "$PKG/htdocs"
 cp README.md MIGRATION.md ASSETS.md "$PKG/"

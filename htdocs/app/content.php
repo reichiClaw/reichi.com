@@ -313,6 +313,15 @@ return [
                 // Das Original-Logo ist schwarz auf transparent; 'invert' stellt es per CSS weiß dar.
                 'logo' => ['file' => 'rstream.png', 'width' => 744, 'height' => 182, 'alt' => 'R-Stream', 'invert' => true],
             ],
+            [
+                'id' => 'reichi-it',
+                'name' => 'reichi.it',
+                'text' => 'Event-IT: Netzwerk, WLAN und Support für Festivals und Events.',
+                'url' => 'https://reichi.it/',
+                'link_label' => 'reichi.it',
+                // Erzeugt aus assets-src/brand/reichi-it-logo-dark.svg (tools/build-it-brand.py)
+                'logo' => ['file' => 'reichi-it.png', 'width' => 760, 'height' => 188, 'alt' => 'reichi.it'],
+            ],
         ],
     ],
 

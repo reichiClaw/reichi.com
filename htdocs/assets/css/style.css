@@ -794,6 +794,11 @@ main:focus { outline: none; }
 @media (min-width: 48em) {
   .projects__list { grid-template-columns: 1fr 1fr; }
 }
+@media (min-width: 64em) {
+  /* Drei Projekte nebeneinander statt einer halbleeren zweiten Zeile */
+  .projects__list:has(> li:nth-child(3)) { grid-template-columns: repeat(3, 1fr); }
+  .projects__list:has(> li:nth-child(3)) .projects__link { grid-template-columns: 1fr; align-content: start; }
+}
 @media (max-width: 30em) {
   .projects__link { grid-template-columns: 1fr; }
   .projects__logo img { max-width: 9rem; }
