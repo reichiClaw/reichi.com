@@ -22,7 +22,8 @@
 
   var VIEW = 600; // viewBox-Kantenlänge des SVG
   var style = getComputedStyle(document.documentElement);
-  var accent = (style.getPropertyValue('--accent') || '#0b6fb3').trim();
+  var accent = (style.getPropertyValue('--accent') || '#00e6c3').trim();
+  var accentInk = (style.getPropertyValue('--accent-ink') || '#00705f').trim();
   var ink = (style.getPropertyValue('--ink') || '#15151a').trim();
 
   var nodes = Array.prototype.map.call(svg.querySelectorAll('.it-net__node'), function (el) {
@@ -106,7 +107,7 @@
       pointer.alpha += ((pointer.active ? 1 : 0) - pointer.alpha) * 0.1;
       var r = Math.max(width, height) * 0.28;
       var g = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, r);
-      g.addColorStop(0, hexAlpha(accent, 0.13 * pointer.alpha));
+      g.addColorStop(0, hexAlpha(accent, 0.2 * pointer.alpha));
       g.addColorStop(1, hexAlpha(accent, 0));
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, width, height);
@@ -132,7 +133,7 @@
       var n = nodes[ring.node];
       ctx.beginPath();
       ctx.arc(px(n.x), py(n.y), (18 + ring.t * 26) * scale, 0, Math.PI * 2);
-      ctx.strokeStyle = hexAlpha(accent, 0.55 * (1 - ring.t));
+      ctx.strokeStyle = hexAlpha(accentInk, 0.6 * (1 - ring.t));
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -159,20 +160,28 @@
       var tailT = Math.max(0, p.t - 0.14);
       var tx = px(from.x + (to.x - from.x) * tailT);
       var ty = py(from.y + (to.y - from.y) * tailT);
+      // abwärts: elektrischer Schweif mit dunklem Kern (das helle Blaugrün allein wäre auf Papier zu blass),
+      // aufwärts (Echo): Tinte
       var color = p.down ? accent : ink;
       var grad = ctx.createLinearGradient(tx, ty, x, y);
       grad.addColorStop(0, hexAlpha(color, 0));
-      grad.addColorStop(1, hexAlpha(color, 0.7));
+      grad.addColorStop(1, hexAlpha(color, p.down ? 0.95 : 0.7));
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = p.down ? 3 : 2.5;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(tx, ty);
       ctx.lineTo(x, y);
       ctx.stroke();
+      if (p.down) {
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = hexAlpha(accent, 0.45);
+        ctx.fill();
+      }
       ctx.beginPath();
-      ctx.arc(x, y, 3.2, 0, Math.PI * 2);
-      ctx.fillStyle = color;
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = p.down ? accentInk : ink;
       ctx.fill();
     }
 
@@ -192,7 +201,7 @@
     var h = hex.replace('#', '');
     if (h.length === 3) { h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; }
     var n = parseInt(h, 16);
-    if (isNaN(n)) { return 'rgba(11,111,179,' + alpha + ')'; }
+    if (isNaN(n)) { return 'rgba(0,112,95,' + alpha + ')'; }
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha.toFixed(3) + ')';
   }
 
