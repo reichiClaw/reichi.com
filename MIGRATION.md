@@ -119,6 +119,23 @@ portrait crops exist for the two images that need a different mobile composition
 - Spam protection (after the first real spam mail arrived through the form): the content filter was exercised with `curl` and the fake `sendmail` – ordinary inquiries with and without JavaScript and with one link (JS) are sent; one link without JavaScript or with a wrong `js_token`, two links, a blocked term, an HTML link, a mostly-Cyrillic message, a URL as name and a digits-only name are rejected with the visible „Werbung“ status and logged as `filter:links|term|markup|script|name`; the second honeypot and the time trap answer with the fake success and log `honeypot`/`too-fast`. With Turnstile **off**, the pages make zero external requests and the CSP is unchanged.
 - Cloudflare Turnstile with Cloudflare's documented **test keys** (headless Chrome): no request to Cloudflare before the form is touched; the script loads on first focus; a token is obtained and the message is accepted (one mail written); a POST without token and a POST verified against the always-fail test secret are rejected with the „Sicherheitsprüfung“ status, no mail, log entry `turnstile:…`; the CSP contains `https://challenges.cloudflare.com` only in `script-src` and `frame-src`, and only while keys are configured; the privacy page shows the Cloudflare paragraph only then. Turnstile rendered without any CSP violation.
 - Hero head animation (`hero_visual => 'animation'`, Chrome headless with an emulated mouse): canvas appears at exactly the photo's box at 390/768/1440 px (1:1, 4:5, 1:1), all 64 frames + `center.webp` load only after `load`, every canvas pixel is fully opaque and the corner matches `#010101`, six probe directions render six distinct poses, the pointer over the face shows the centre frame, a 180° cursor jump sweeps through the half circle in ~11 frame changes (~230 ms); touch emulation (phone and tablet) downloads the original photograph instead of `center.webp`, shows its credit and loads **no** frames; reduced motion and no-JS on a mouse device load no frames and show the still; photo mode renders HTML identical to the previous version (only the CSRF token differs).
+- reichi.it (`htdocs/it/`, PHP 8.3.6, Chrome headless): served both as its own document root
+  (`-t htdocs/it`, simulating the mapped domain) and as subfolder `/it/` of reichi.com. In
+  both cases page, Impressum, Datenschutz and 404 render without PHP warnings, zero external
+  requests, no console errors, no horizontal overflow at 390/820/1440 px; canonical and
+  `og:url` are always `https://reichi.it/…`; the subfolder variant carries `noindex`, the
+  document-root variant does not. Form: invalid submission → field errors, the selected
+  subject stays selected; valid submission → 303 to `/#anfrage`, one mail written by the
+  fake `sendmail` with `To: reichi@reichi.it`, `From: reichi.it Website <website@reichi.it>`,
+  subject prefix `[reichi.it]` and body „Neue Anfrage über reichi.it“. With
+  `sites.it.enforce_host = 'reichi.it'` requests with another `Host` header answer 301 to
+  `https://reichi.it/<path>` (query string kept, local `/it` prefix stripped); with the
+  matching host nothing redirects. Network hero: packets are drawn without any pointer,
+  the pointer glow appears on mouse move, reduced motion leaves the canvas empty. Colour
+  contrast of the light theme computed: accent blue 4.77:1, accent text 6.5:1, body
+  grey 7.9:1, caption grey 5.3:1 on the paper background, white on the red button 4.68:1.
+  reichi.com's HTML stays identical to the previous version (normalised for CSRF token,
+  asset versions, whitespace) apart from the new third project card.
 - Lighthouse 12 (local server, no network latency): home page mobile and desktop
   Performance 100 / Accessibility 100 / Best Practices 100 / SEO 100; imprint and privacy
   pages Accessibility/Best Practices/SEO 100. Production numbers will differ slightly
@@ -137,6 +154,9 @@ portrait crops exist for the two images that need a different mobile composition
 - Turnstile with **real** keys on the live host (only Cloudflare's test keys were available
   here), and how much of the actual bot traffic the built-in filter stops – read
   `storage/logs/spam.log` after a few weeks.
+- reichi.it on the real hosting: whether the panel lets the domain point at the `it/`
+  subfolder (step list in `README.md`), whether `it/.htaccess` is evaluated (the 404 rewrite
+  is the only thing that depends on it), and the mail accounts on the reichi.it domain.
 
 ## 6. Open items requiring owner or hoster confirmation
 
@@ -151,3 +171,18 @@ portrait crops exist for the two images that need a different mobile composition
 9. **Description texts of the five skills** are short interpretations of the old one-word items – adjust wording in `app/content.php` if anything reads too broad.
 10. **Head animation**: `hero_visual` ships as `'photo'`. If you switch to `'animation'`, confirm who made the source video / whether the frames may be published and set `hero.animation.credit` in `app/content.php` (currently `null`, credit line hidden). Not measured here: the extra ~1.6 MB on desktop over a real connection, and the feel with a physical mouse.
 11. **Spam protection**: the built-in filter is active as shipped. Decide whether to enable Cloudflare Turnstile (free account, two keys in `app/config.php`, steps in `README.md`, section *Spam protection*); if enabled, review the generated „Cloudflare Turnstile“ paragraph on the privacy page. Check `storage/logs/spam.log` occasionally and adjust `spam.blocked_terms` / `spam.reject_scripts` if legitimate inquiries are caught.
+12. **reichi.it – facts to confirm before go-live**: the texts in `app/content-it.php` use only
+    what was confirmed (same media owner, `reichi@reichi.it`, since 2007 in live production,
+    UniFi as main brand with Cisco and other common vendors, customers festivals /
+    production companies / corporate, reference Woodstock der Blasmusik). Please check the
+    **scope wording of the reference** („Event-IT für das Woodstock der Blasmusik im
+    Innviertel“ – years, what exactly, whether the festival agrees to be named and linked to
+    `woodstock.at`) and the service bullets (e.g. „zweite Leitung als Reserve“,
+    „Streaming-Anbindung“) against what you actually offer. No prices, no numbers, no
+    further clients were added. The Impressum states the same business data; the privacy
+    statement's `[BESTÄTIGEN]` marks apply to reichi.it as well (same hosting).
+13. **reichi.it – domain, mail, redirect**: map the domain to the `it/` folder, create
+    `reichi@reichi.it` and `website@reichi.it`, test an inquiry, then set
+    `sites.it.enforce_host` (`README.md`, section *reichi.it*). The link „reichi.it“ in the
+    projects row of reichi.com points at `https://reichi.it/` – it is live only after the
+    domain is mapped.

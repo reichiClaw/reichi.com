@@ -7,6 +7,9 @@ semantic HTML, plain CSS, a few lines of vanilla JavaScript and PHP 8.1+ (tested
 No CMS, database, framework, package manager, build step, external fonts, scripts,
 analytics or CAPTCHA service. Everything the site needs is in this repository.
 
+The same code also serves **reichi.it**, the event-IT department (folder `htdocs/it/`,
+own domain mapped to that folder) – see [reichi.it (IT department)](#reichiit-it-department).
+
 - `MIGRATION.md` – what was migrated from the old site, what changed, what is still open
 - `ASSETS.md` – image manifest (source URL, local file, use, credit, concerns)
 
@@ -48,20 +51,34 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
   assets/js/main.js      nav toggle, header state, reveal, lightbox
   assets/images/         photos (jpg + webp, several widths), logos, icons
   robots.txt, sitemap.xml, site.webmanifest, favicon.ico
+  it/                    web root of reichi.it – see "reichi.it (IT department)" below
+    index.php, contact.php, 404.php, impressum/, datenschutz/   same pattern, SITE = 'it'
+    .htaccess            404 rewrite that works as own domain and as /it/ subfolder
+    assets/css/it.css    light theme + reichi.it components (loaded after style.css)
+    assets/js/it.js      the animated network diagram in the hero
+    assets/css/style.css, assets/js/main.js, assets/images/grain.png
+                         COPIES of the shared files (tools/sync-it-assets.sh)
+    assets/images/icons/, favicon.ico, share-reichi-it.png, robots.txt, sitemap.xml
   app/                   PHP code – not reachable from the browser (.htaccess + PHP guard)
     bootstrap.php        shared entry (config, helpers, content, security headers)
     config.example.php   template for config.php
     config.php           your configuration (in the ZIP; not versioned in git)
     content.php          ALL editable copy, references, links, photo + logo metadata
+    content-it.php       the same for reichi.it
     contact.php          form validation, rate limiting, mail()
+    contact-handler.php  the POST flow shared by htdocs/contact.php and it/contact.php
     helpers.php          escaping, <picture> rendering, CSRF, session, icons
-    templates/           header.php, footer.php, sections/ (hero, skills, about, …)
+    templates/           header.php, footer.php, sections/ (reichi.com), it/ (reichi.it),
+                         partials/contact-form.php, legal/ (Impressum, Datenschutz)
   storage/               writable runtime data – not reachable from the browser
     ratelimit/           one small JSON file per sender hash (auto-pruned)
     logs/mail.log        mail failures (timestamp + error only)
     secret.php           auto-generated secret for hashing IPs (created on first visit)
 assets-src/originals/    untouched originals downloaded from the old site (do not upload)
+assets-src/brand/        reichi.it logo files (SVG + PNG, light and dark) – do not upload
 tools/build-images.py    optional dev helper to regenerate image derivatives
+tools/build-it-brand.py  optional dev helper: reichi.it logo, favicons, share image
+tools/sync-it-assets.sh  copies style.css / main.js / grain.png into htdocs/it/assets/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 ```
 
@@ -225,9 +242,60 @@ Never paste verification codes or account credentials into chats or the reposito
 | `force_secure_cookie` | set `true` when served exclusively over HTTPS behind a proxy that hides `HTTPS` |
 | `spam` | built-in content filter, see [Spam protection](#spam-protection): `min_seconds` (5), `max_links` (1, only with JavaScript; 0 without), `reject_scripts` (Unicode scripts that mark a message as spam when they make up more than 40 % of the letters), `blocked_terms` (case-insensitive substrings), `log` (write `storage/logs/spam.log`) |
 | `turnstile` | optional Cloudflare Turnstile: `site_key`, `secret_key` (both empty = off), `appearance` (`'always'` or `'interaction-only'`) |
+| `site_name` | short name used in the inquiry mail text („Neue Anfrage über reichi.com“) |
+| `sites` | per-site overrides, currently `sites.it` for reichi.it – see [reichi.it](#reichiit-it-department). Any key above can be overridden there; in addition `own_domain` (public URLs without the local subfolder) and `enforce_host` (301 to the own domain) |
 
 `app/config.php` is git-ignored in this repository; the upload ZIP ships it as a copy
 of `config.example.php`. If it is missing the site falls back to the example values.
+
+## reichi.it (IT department)
+
+`htdocs/it/` is a second, independent website – **reichi.it**, event IT (network, Wi-Fi,
+internet uplink, on-site operation, consulting) – that shares the PHP code in `app/` with
+reichi.com but has its own copy (`app/content-it.php`), its own light theme (`it/assets/css/it.css`),
+its own logo, favicons, robots/sitemap and mail settings. The public PHP files in `it/`
+define `SITE = 'it'`; `bootstrap.php` then loads `content-it.php` and applies the
+overrides from `config.php` → `'sites' => ['it' => […]]`.
+
+### Hosting panel: map the domain to the folder
+
+1. Upload everything as usual (step 4 above) – `it/` comes along inside `htdocs/`.
+2. In the hosting panel add the domain **reichi.it** (and `www.reichi.it` as alias) to the
+   same account and set its **document root / base folder to the `it/` subfolder** of the
+   reichi.com web root (e.g. `public_html/it`). Enable HTTPS (Let's Encrypt) for it.
+3. Create the mailboxes or aliases **`reichi@reichi.it`** (recipient) and
+   **`website@reichi.it`** (sender) so the host accepts the sender address (SPF/DMARC).
+   Both names are preset in `config.php` under `sites.it`.
+4. Open `https://reichi.it/` and check: page, Impressum, Datenschutz, a test inquiry.
+5. When that works, set `sites.it.enforce_host` to `'reichi.it'` in `config.php`. From then
+   on `https://www.reichi.com/it/…` answers with a permanent redirect to `https://reichi.it/…`.
+   Until then the folder stays reachable as `www.reichi.com/it/` – automatically with
+   `noindex`, because the code detects that it is running in a subfolder.
+6. Optional: a second Turnstile widget for the domain reichi.it (or add reichi.it to the
+   existing widget) and enter its keys under `sites.it.turnstile`.
+7. Optional: Search Console property for `https://reichi.it/`, sitemap `https://reichi.it/sitemap.xml`.
+
+Why copies of `style.css`, `main.js` and `grain.png` inside `it/assets/`: once the domain
+points at `it/`, the browser cannot load anything from the parent folder. PHP can (`../app/`),
+static files cannot. After changing one of the shared files run `sh tools/sync-it-assets.sh`;
+`tools/build-zip.sh` refuses to package when the copies are stale.
+
+### What differs by design
+
+- Light „paper“ background with the same film grain, blue accent (`--accent` in `it.css`;
+  the alternative green is noted in the same comment), reichi.com's red only on the primary
+  button. Du-form, lighter tone, a few English lines (`lang="en"`).
+- Hero: no photo but an inline-SVG network diagram (Uplink → Produktion → FOH/Stage/…).
+  `it.js` draws travelling packets along the lines and a soft pointer glow on a canvas
+  above it – mouse only, nothing with `prefers-reduced-motion` or without JavaScript.
+- Form: same partial and same protection; the subject is a select (Aufbau, Betrieb vor
+  Ort, Beratung, Sonstiges). Inquiries go to `reichi@reichi.it`, redirect anchor `#anfrage`.
+- Impressum and Datenschutz use the shared templates in `app/templates/legal/` with the
+  same owner data; reichi.it adds one sentence (same media owner as reichi.com) and has
+  no image credits.
+- Logo: `assets-src/brand/reichi-it-logo.svg|png` (for light surfaces),
+  `reichi-it-logo-dark.svg|png` (for dark surfaces), `reichi-it-mark.svg`. Regenerate with
+  `python3 tools/build-it-brand.py` (needs `fonttools`, `cairosvg`, `pillow` and Inter Bold).
 
 ## Editing content
 
@@ -419,6 +487,9 @@ configured, `script-src` and `frame-src` additionally allow `https://challenges.
 php -S 127.0.0.1:8080 -t htdocs
 # with a fake sendmail for testing the success path:
 php -S 127.0.0.1:8080 -t htdocs -d sendmail_path=/path/to/fakesendmail.sh
+# reichi.it as it will run on its own domain (document root = htdocs/it):
+php -S 127.0.0.1:8082 -t htdocs/it
+# … and as subfolder: http://127.0.0.1:8080/it/ (gets noindex automatically)
 ```
 
 Note: PHP's built-in server serves unknown extension-less paths through `index.php`
