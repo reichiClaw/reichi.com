@@ -38,24 +38,20 @@
 @media (max-width: 63.99em) {
   .js .site-nav { box-shadow: 0 30px 60px rgba(21, 21, 26, 0.12); }
 }
-.brand__suffix { color: var(--accent-ink); font-weight: 650; }
+.brand__suffix { font-weight: inherit; }
 .brand:hover .brand__mark { color: var(--accent-ink); }
-/* der Blitz anstelle des Punkts vor „it“ (Inline-SVG aus content-it.php) */
+/* der Blitz anstelle des Punkts vor „it“ (Inline-SVG aus content-it.php): steht auf der Grundlinie,
+   so hoch wie der i-Punkt, das einzige farbige Element der Marke */
 .brand__bolt {
   display: inline-block;
   width: auto;
-  height: 1em;
-  margin: 0 -0.04em 0 -0.07em;
-  vertical-align: -0.17em;
+  height: 0.8em;
+  margin: 0 0.06em 0 0.07em;
+  vertical-align: -0.02em;
   overflow: visible;
-  fill: var(--accent);
-  stroke: var(--accent-ink);
-  stroke-width: 2.4;
-  stroke-linejoin: round;
-  paint-order: stroke;
+  fill: var(--accent-ink);
   filter: drop-shadow(0 0 3px var(--accent-glow));
 }
-.brand__bolt-sparks { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; }
 .brand:hover .brand__bolt { filter: drop-shadow(0 0 6px var(--accent)); }
 
 .button--primary { background: var(--red); border-color: var(--red); color: #fff; }
