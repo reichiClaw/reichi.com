@@ -12,7 +12,10 @@ $contact = $content['contact'];
 $isHome = !empty($page['is_home']);
 $site = $content['site'];
 $brandSuffix = (string) ($site['brand_suffix'] ?? '');
-$brandSuffixHtml = isset($site['brand_suffix_html']) ? (string) $site['brand_suffix_html'] : e($brandSuffix);
+$brandWordmark = (string) ($site['brand_wordmark'] ?? '');
+$brandWordHtml = $brandWordmark !== ''
+    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="360" height="78" decoding="async">'
+    : e($site['brand']) . ($brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '');
 $hireHref = $content['nav_cta']['href'];
 // „Mehr“-Spalte: eigene Linkliste der Website oder (reichi.com) die verbundenen Projekte.
 $moreLinks = $content['footer']['links'] ?? array_map(
@@ -27,7 +30,7 @@ $moreLinks = $content['footer']['links'] ?? array_map(
     <div class="site-footer__brand">
       <a class="brand brand--footer" href="<?= e(url('/')) ?>" aria-label="<?= e($site['brand'] . $brandSuffix) ?> – Startseite">
         <?= logo_mark('brand__mark') ?>
-        <span class="brand__word"><?= e($site['brand']) ?><?= $brandSuffix !== '' ? '<span class="brand__suffix">' . $brandSuffixHtml . '</span>' : '' ?></span>
+        <span class="brand__word"><?= $brandWordHtml ?></span>
       </a>
       <p class="site-footer__meta"><?= e($contact['roles']) ?></p>
       <p class="site-footer__meta"><?= e($contact['availability']) ?></p>
