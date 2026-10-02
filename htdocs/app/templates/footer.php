@@ -10,15 +10,23 @@ if (!defined('PUBLIC_DIR')) {
 
 $contact = $content['contact'];
 $isHome = !empty($page['is_home']);
+$site = $content['site'];
+$brandSuffix = (string) ($site['brand_suffix'] ?? '');
+$hireHref = $content['nav_cta']['href'];
+// „Mehr“-Spalte: eigene Linkliste der Website oder (reichi.com) die verbundenen Projekte.
+$moreLinks = $content['footer']['links'] ?? array_map(
+    static fn(array $p): array => ['label' => $p['name'], 'url' => $p['url']],
+    $content['projects']['items'] ?? []
+);
 ?>
 </main>
 
 <footer class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__brand">
-      <a class="brand brand--footer" href="<?= e(url('/')) ?>" aria-label="reichi – Startseite">
+      <a class="brand brand--footer" href="<?= e(url('/')) ?>" aria-label="<?= e($site['brand'] . $brandSuffix) ?> – Startseite">
         <?= logo_mark('brand__mark') ?>
-        <span class="brand__word">reichi</span>
+        <span class="brand__word"><?= e($site['brand']) ?><?= $brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '' ?></span>
       </a>
       <p class="site-footer__meta"><?= e($contact['roles']) ?></p>
       <p class="site-footer__meta"><?= e($contact['availability']) ?></p>
@@ -41,7 +49,7 @@ $isHome = !empty($page['is_home']);
         <?php foreach ($content['nav'] as $item): ?>
           <li><a href="<?= e($isHome ? substr($item['href'], 1) : url($item['href'])) ?>"><?= e($item['label']) ?></a></li>
         <?php endforeach; ?>
-        <li><a href="<?= e($isHome ? '#hire' : url('/#hire')) ?>">Anfrage</a></li>
+        <li><a href="<?= e($isHome ? substr($hireHref, 1) : url($hireHref)) ?>"><?= e($content['nav_cta']['label']) ?></a></li>
       </ul>
     </div>
 
@@ -51,8 +59,8 @@ $isHome = !empty($page['is_home']);
         <?php foreach ($content['social'] as $s): ?>
           <li><a href="<?= e($s['url']) ?>" rel="noopener noreferrer me" target="_blank"><?= e($s['label']) ?> <span class="muted"><?= e($s['handle']) ?></span></a></li>
         <?php endforeach; ?>
-        <?php foreach ($content['projects']['items'] as $p): ?>
-          <li><a href="<?= e($p['url']) ?>" rel="noopener noreferrer" target="_blank"><?= e($p['name']) ?></a></li>
+        <?php foreach ($moreLinks as $p): ?>
+          <li><a href="<?= e($p['url']) ?>" rel="noopener noreferrer<?= !empty($p['me']) ? ' me' : '' ?>" target="_blank"><?= e($p['label']) ?><?= !empty($p['note']) ? ' <span class="muted">' . e($p['note']) . '</span>' : '' ?></a></li>
         <?php endforeach; ?>
         <li><a href="<?= e(url('/impressum/')) ?>">Impressum</a></li>
         <li><a href="<?= e(url('/datenschutz/')) ?>">Datenschutz</a></li>
@@ -61,12 +69,14 @@ $isHome = !empty($page['is_home']);
   </div>
 
   <div class="site-footer__bottom">
+    <?php if (!empty($content['footer']['credits'])): ?>
     <p class="site-footer__credits"><?= e($content['footer']['credits']) ?></p>
+    <?php endif; ?>
     <p class="site-footer__copy">&copy; <?= date('Y') ?> <?= e($contact['name']) ?></p>
   </div>
 </footer>
 
-<?php if ($isHome): ?>
+<?php if ($isHome && !empty($content['gallery'])): ?>
 <dialog class="lightbox" id="lightbox" aria-label="Bild in Großansicht">
   <figure class="lightbox__figure">
     <img class="lightbox__img" src="" alt="" width="1200" height="800">

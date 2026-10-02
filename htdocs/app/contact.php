@@ -342,12 +342,13 @@ function contact_send(array $values, array $config): bool
     // Reply-To ausschließlich aus der bereits validierten Besucheradresse (nur Adresse, kein Anzeigename).
     $replyTo = filter_var(contact_header_safe($values['email']), FILTER_VALIDATE_EMAIL);
 
+    $siteName = contact_header_safe((string) ($config['site_name'] ?? 'reichi.com'));
     $headers = [
         'From: ' . $fromName . ' <' . $from . '>',
         'MIME-Version: 1.0',
         'Content-Type: text/plain; charset=UTF-8',
         'Content-Transfer-Encoding: 8bit',
-        'X-Mailer: reichi.com contact form',
+        'X-Mailer: ' . $siteName . ' contact form',
         'Auto-Submitted: auto-generated',
     ];
     if ($replyTo !== false) {
@@ -355,7 +356,7 @@ function contact_send(array $values, array $config): bool
     }
 
     $lines = [
-        'Neue Anfrage über reichi.com',
+        'Neue Anfrage über ' . $siteName,
         '',
         'Name:     ' . $values['name'],
         'E-Mail:   ' . $values['email'],

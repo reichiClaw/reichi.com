@@ -145,7 +145,13 @@ function url(string $path = '/'): string
 function absolute_url(string $path = '/'): string
 {
     global $config;
-    return rtrim($config['base_url'], '/') . url($path);
+    $root = rtrim($config['base_url'], '/');
+    // Zeigt eine eigene Domain direkt auf diesen Ordner (reichi.it → htdocs/it/), kennt sie den
+    // lokalen Unterordner nicht – er gehört dann nicht in canonical, og:url & Co.
+    if (!empty($config['own_domain'])) {
+        return $root . '/' . ltrim($path, '/');
+    }
+    return $root . url($path);
 }
 
 /** Pfad zu einer Datei unter assets/ im Webroot, mit Cache-Busting per Änderungszeit. */

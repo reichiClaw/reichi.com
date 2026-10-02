@@ -18,16 +18,21 @@ $pageDescription = $page['description'] ?? $site['description'];
 $canonical = absolute_url($page['path'] ?? '/');
 $isHome = !empty($page['is_home']);
 $bodyClass = $page['body_class'] ?? '';
+// Optionale Abweichungen je Website (reichi.it): Zusatz zur Wortmarke, Farben, weitere Dateien.
+$brandSuffix = (string) ($site['brand_suffix'] ?? '');
+$brandLabel = $site['brand'] . $brandSuffix . ' – Startseite';
+$themeColor = (string) ($site['theme_color'] ?? '#0d0d10');
+$personImage = (string) ($site['person_image'] ?? '/assets/images/photos/portrait-hood-800.jpg');
 
 $person = [
     '@type' => 'Person',
     '@id' => absolute_url('/') . '#person',
     'name' => $contact['name'],
     'alternateName' => 'reichi',
-    'jobTitle' => 'Tontechniker / Sound Engineer, Tourmanager',
-    'knowsAbout' => ['Live Sound Mixing', 'Front of House', 'Tourmanagement', 'Live Recording'],
+    'jobTitle' => $site['job_title'] ?? 'Tontechniker / Sound Engineer, Tourmanager',
+    'knowsAbout' => $site['knows_about'] ?? ['Live Sound Mixing', 'Front of House', 'Tourmanagement', 'Live Recording'],
     'url' => absolute_url('/'),
-    'image' => absolute_url('/assets/images/photos/portrait-hood-800.jpg'),
+    'image' => str_starts_with($personImage, 'http') ? $personImage : absolute_url($personImage),
     'email' => 'mailto:' . $contact['email'],
     'telephone' => $contact['phone_display'],
     'address' => [
@@ -38,7 +43,7 @@ $person = [
         'addressRegion' => 'Oberösterreich',
         'addressCountry' => 'AT',
     ],
-    'sameAs' => array_column($content['social'], 'url'),
+    'sameAs' => array_merge(array_column($content['social'], 'url'), $site['same_as'] ?? []),
 ];
 // WebSite-Markup nur auf der Startseite (Site-Name-Präferenz laut Google Search Central).
 $jsonLd = $isHome
@@ -48,8 +53,8 @@ $jsonLd = $isHome
             [
                 '@type' => 'WebSite',
                 '@id' => absolute_url('/') . '#website',
-                'name' => $site['brand'],
-                'alternateName' => [$site['name'], 'reichi.com'],
+                'name' => $site['brand'] . $brandSuffix,
+                'alternateName' => $site['website_alternate_names'] ?? [$site['name'], 'reichi.com'],
                 'url' => absolute_url('/'),
                 'inLanguage' => $site['lang'],
                 'publisher' => ['@id' => $person['@id']],
@@ -71,34 +76,38 @@ $jsonLd = $isHome
 <meta name="robots" content="noindex, follow">
 <?php endif; ?>
 <link rel="canonical" href="<?= e($canonical) ?>">
-<meta name="theme-color" content="#0d0d10">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="<?= e($themeColor) ?>">
+<meta name="color-scheme" content="<?= e($site['color_scheme'] ?? 'dark') ?>">
 <meta property="og:locale" content="<?= e($site['locale']) ?>">
-<meta property="og:type" content="<?= $isHome ? 'profile' : 'website' ?>">
-<meta property="og:site_name" content="<?= e($site['brand']) ?>">
+<meta property="og:type" content="<?= $isHome ? e($site['og_type_home'] ?? 'profile') : 'website' ?>">
+<meta property="og:site_name" content="<?= e($site['brand'] . $brandSuffix) ?>">
 <meta property="og:title" content="<?= e($pageTitle) ?>">
 <meta property="og:description" content="<?= e($pageDescription) ?>">
 <meta property="og:url" content="<?= e($canonical) ?>">
 <meta property="og:image" content="<?= e(absolute_url($site['share_image'])) ?>">
 <meta property="og:image:width" content="<?= (int) $site['share_image_width'] ?>">
 <meta property="og:image:height" content="<?= (int) $site['share_image_height'] ?>">
-<meta property="og:image:alt" content="<?= e($content['photos']['stage-red']['alt']) ?>">
+<meta property="og:image:alt" content="<?= e($site['share_image_alt'] ?? $content['photos']['stage-red']['alt']) ?>">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="<?= e(url('/favicon.ico')) ?>" sizes="48x48">
 <link rel="icon" href="<?= e(url('/assets/images/icons/favicon-32x32.png')) ?>" sizes="32x32" type="image/png">
 <link rel="icon" href="<?= e(url('/assets/images/icons/favicon-16x16.png')) ?>" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="<?= e(url('/assets/images/icons/apple-touch-icon.png')) ?>">
-<link rel="mask-icon" href="<?= e(url('/assets/images/icons/safari-pinned-tab.svg')) ?>" color="#0d0d10">
+<link rel="mask-icon" href="<?= e(url('/assets/images/icons/safari-pinned-tab.svg')) ?>" color="<?= e($themeColor) ?>">
 <link rel="manifest" href="<?= e(url('/site.webmanifest')) ?>">
-<?php if ($isHome): ?>
+<?php if ($isHome && !empty($content['hero']['photo'])): ?>
 <?php $heroPhoto = $content['photos'][$content['hero']['photo']]; $heroAnim = hero_animation($config); ?>
 <?php if ($heroAnim): ?>
 <link rel="preload" as="image" fetchpriority="high" media="<?= e(HERO_MOUSE_MEDIA) ?>" href="<?= e($heroAnim['dir'] . '/center.webp') ?>" type="image/webp">
 <?php endif; ?>
 <link rel="preload" as="image" fetchpriority="high"<?= $heroAnim ? ' media="not all and ' . e(HERO_MOUSE_MEDIA) . '"' : '' ?> imagesrcset="<?= e(implode(', ', array_map(static fn(int $w): string => url('/assets/images/photos/' . $heroPhoto['file'] . '-' . $w . '.webp') . ' ' . $w . 'w', $heroPhoto['widths']))) ?>" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
 <?php endif; ?>
-<link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
-<script src="<?= e(asset('js/main.js')) ?>" defer></script>
+<?php foreach ($site['stylesheets'] ?? ['css/style.css'] as $sheet): ?>
+<link rel="stylesheet" href="<?= e(asset($sheet)) ?>">
+<?php endforeach; ?>
+<?php foreach ($site['scripts'] ?? ['js/main.js'] as $script): ?>
+<script src="<?= e(asset($script)) ?>" defer></script>
+<?php endforeach; ?>
 <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
 </head>
 <body<?= $bodyClass !== '' ? ' class="' . e($bodyClass) . '"' : '' ?>>
@@ -106,9 +115,9 @@ $jsonLd = $isHome
 
 <header class="site-header" id="top">
   <div class="site-header__inner">
-    <a class="brand" href="<?= e($isHome ? '#top' : url('/')) ?>" aria-label="reichi – Startseite">
+    <a class="brand" href="<?= e($isHome ? '#top' : url('/')) ?>" aria-label="<?= e($brandLabel) ?>">
       <?= logo_mark('brand__mark') ?>
-      <span class="brand__word">reichi</span>
+      <span class="brand__word"><?= e($site['brand']) ?><?= $brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '' ?></span>
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
