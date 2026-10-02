@@ -28,6 +28,12 @@ return [
     'site' => [
         'brand' => 'reichi',
         'brand_suffix' => '.it',
+        // Sichtbare Form in Kopf- und Fußzeile: Blitz statt Punkt (dieselbe Form wie im Logo,
+        // tools/build-it-brand.py). Einzige Stelle mit HTML in dieser Datei.
+        'brand_suffix_html' => '<svg class="brand__bolt" viewBox="0 0 32 48" width="32" height="48" aria-hidden="true" focusable="false">'
+            . '<path d="M19 8 L5 31 H14.5 L12 48 L27 23 H17.5 Z"/>'
+            . '<path class="brand__bolt-sparks" d="M20 4 L21 0 M24 5 L27 1.5 M26.5 9 L31 8"/>'
+            . '</svg>it',
         'name' => 'Christian Reichinger',
         'title' => 'reichi.it – Event-IT: Netzwerk, WLAN & Support für Festivals und Events',
         'description' => 'Event-IT von Christian „reichi“ Reichinger: Netzwerk, WLAN und Internet am Gelände aufbauen, während der Show betreuen, vorher richtig planen. Für Festivals, Produktionsfirmen und Firmen-Events. Die IT-Abteilung von reichi.com.',
@@ -104,7 +110,7 @@ return [
         'diagram_label' => 'Schematischer Netzplan eines Festivalgeländes: Internet-Uplink, Produktionsbüro, FOH, Bühne, Backstage, Kassa und Gäste-WLAN',
         'diagram_nodes' => ['Uplink', 'Produktion', 'FOH', 'Stage', 'Backstage', 'Kassa', 'Guest Wi-Fi'],
         'diagram_caption' => 'Netzplan, schematisch',
-        'diagram_meta' => 'All nodes green',
+        'diagram_meta' => 'All nodes up',
     ],
 
     // ------------------------------------------------------------------

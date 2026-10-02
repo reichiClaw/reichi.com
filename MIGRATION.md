@@ -132,8 +132,10 @@ portrait crops exist for the two images that need a different mobile composition
   `https://reichi.it/<path>` (query string kept, local `/it` prefix stripped); with the
   matching host nothing redirects. Network hero: packets are drawn without any pointer,
   the pointer glow appears on mouse move, reduced motion leaves the canvas empty. Colour
-  contrast of the light theme computed: accent blue 4.77:1, accent text 6.5:1, body
-  grey 7.9:1, caption grey 5.3:1 on the paper background, white on the red button 4.68:1.
+  contrast of the light theme computed: accent text `#00705f` 5.4:1 (the electric
+  `#00e6c3` itself is 1.4:1 and is only used for fills, lines and glows, never for text),
+  body grey 7.9:1, caption grey 5.3:1 on the paper background, ink on the electric accent
+  (selection, skip link) 11:1, white on the red button 4.68:1.
   reichi.com's HTML stays identical to the previous version (normalised for CSRF token,
   asset versions, whitespace) apart from the new third project card.
 - Lighthouse 12 (local server, no network latency): home page mobile and desktop

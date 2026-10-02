@@ -282,9 +282,13 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 
 ### What differs by design
 
-- Light „paper“ background with the same film grain, blue accent (`--accent` in `it.css`;
-  the alternative green is noted in the same comment), reichi.com's red only on the primary
-  button. Du-form, lighter tone, a few English lines (`lang="en"`).
+- Light „paper“ background with the same film grain, an electric blue-green accent
+  (`--accent` in `it.css`, used for fills, lines and glows only; text uses the darker
+  `--accent-ink`), reichi.com's red only on the primary button. The brand shows a lightning
+  bolt instead of the dot before „it“ (`brand_suffix_html` in `content-it.php`); the second
+  headline line and the bolt carry a soft glow that flickers briefly every few seconds
+  (motion only without `prefers-reduced-motion`). Du-form, lighter tone, a few English lines
+  (`lang="en"`).
 - Hero: no photo but an inline-SVG network diagram (Uplink → Produktion → FOH/Stage/…).
   `it.js` draws travelling packets along the lines and a soft pointer glow on a canvas
   above it – mouse only, nothing with `prefers-reduced-motion` or without JavaScript.
@@ -294,7 +298,8 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
   same owner data; reichi.it adds one sentence (same media owner as reichi.com) and has
   no image credits.
 - Logo: `assets-src/brand/reichi-it-logo.svg|png` (for light surfaces),
-  `reichi-it-logo-dark.svg|png` (for dark surfaces), `reichi-it-mark.svg`. Regenerate with
+  `reichi-it-logo-dark.svg|png` (for dark surfaces), `reichi-it-mark.svg` (badge). The script
+  also writes the favicons, the share image and the card logo for reichi.com. Regenerate with
   `python3 tools/build-it-brand.py` (needs `fonttools`, `cairosvg`, `pillow` and Inter Bold).
 
 ## Editing content

@@ -1,8 +1,9 @@
 /* ==========================================================================
    reichi.it – Ergänzungen zu style.css (wird danach geladen)
-   Helles Papier statt Bühnenschwarz, Blau als Akzent, das Rot von reichi.com bleibt dem
-   Hauptknopf vorbehalten. Aufbau: 1. Tokens  2. Überschreibungen  3. Hero + Netzplan
-   4. Leistungen  5. Ablauf  6. Warum ich  7. Referenz  8. Formular  9. Motion
+   Helles Papier statt Bühnenschwarz, ein elektrisches Blaugrün als Akzent (Flächen, Linien,
+   Leuchten) mit einer dunklen Variante für Text, das Rot von reichi.com bleibt dem Hauptknopf
+   vorbehalten. Aufbau: 1. Tokens  2. Überschreibungen  3. Hero + Netzplan  4. Leistungen
+   5. Ablauf  6. Warum ich  7. Referenz  8. Formular  9. Motion
    ========================================================================== */
 
 /* 1. Tokens -------------------------------------------------------------- */
@@ -16,10 +17,12 @@
   --ink-3: #63636b;
   --line: rgba(21, 21, 26, 0.12);
   --line-strong: rgba(21, 21, 26, 0.3);
-  /* Akzent: Blau. Alternative Grün: --accent #117a4d, --accent-ink #0f6a43, --accent-soft rgba(17,122,77,0.12) */
-  --accent: #0b6fb3;
-  --accent-ink: #085a92;
-  --accent-soft: rgba(11, 111, 179, 0.12);
+  /* Akzent: elektrisches Blaugrün. --accent nur für Flächen, Linien und Leuchten (1.4:1 auf Papier),
+     Text immer in --accent-ink (5.4:1). Tinte auf --accent: 11:1. */
+  --accent: #00e6c3;
+  --accent-ink: #00705f;
+  --accent-soft: rgba(0, 230, 195, 0.16);
+  --accent-glow: rgba(0, 230, 195, 0.55);
   --red: #d8371f;
   --red-hover: #c43018;
   --paper: #15151a;
@@ -35,14 +38,31 @@
 @media (max-width: 63.99em) {
   .js .site-nav { box-shadow: 0 30px 60px rgba(21, 21, 26, 0.12); }
 }
-.brand__suffix { color: var(--accent); font-weight: 650; }
-.brand:hover .brand__mark { color: var(--accent); }
+.brand__suffix { color: var(--accent-ink); font-weight: 650; }
+.brand:hover .brand__mark { color: var(--accent-ink); }
+/* der Blitz anstelle des Punkts vor „it“ (Inline-SVG aus content-it.php) */
+.brand__bolt {
+  display: inline-block;
+  width: auto;
+  height: 1em;
+  margin: 0 -0.04em 0 -0.07em;
+  vertical-align: -0.17em;
+  overflow: visible;
+  fill: var(--accent);
+  stroke: var(--accent-ink);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 3px var(--accent-glow));
+}
+.brand__bolt-sparks { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; }
+.brand:hover .brand__bolt { filter: drop-shadow(0 0 6px var(--accent)); }
 
 .button--primary { background: var(--red); border-color: var(--red); color: #fff; }
 .button--primary:hover { background: var(--red-hover); border-color: var(--red-hover); }
 .button--ghost:hover { background: rgba(21, 21, 26, 0.05); }
-.skip-link { background: var(--accent); color: #fff; }
-::selection { background: var(--accent); color: #fff; }
+.skip-link { background: var(--accent); color: var(--ink); }
+::selection { background: var(--accent); color: var(--ink); }
 code { background: var(--bg-3); }
 .eyebrow { color: var(--accent-ink); }
 
@@ -61,7 +81,7 @@ code { background: var(--bg-3); }
 .form__error { color: var(--red); }
 .form__field--error .form__input { border-color: var(--red); }
 .form__req, .form__required-note span { color: var(--red); }
-.form-status { border-left-color: var(--accent); background: var(--accent-soft); }
+.form-status { border-left-color: var(--accent-ink); background: var(--accent-soft); }
 .form-status--success { border-left-color: var(--ok); background: var(--ok-soft); }
 
 .hire { background: linear-gradient(to bottom, var(--bg), var(--bg-2)); }
@@ -76,7 +96,9 @@ code { background: var(--bg-3); }
   font-size: 0.5em;
   line-height: 1.05;
   letter-spacing: -0.03em;
-  color: var(--accent);
+  color: var(--accent-ink);
+  /* leichtes Überlast-Leuchten hinter der zweiten Zeile */
+  text-shadow: 0 0 0.45em var(--accent-glow);
   text-wrap: balance;
 }
 .it-hero__tagline {
@@ -86,9 +108,9 @@ code { background: var(--bg-3); }
   letter-spacing: 0.02em;
   color: var(--ink-3);
 }
-.it-hero__tagline::before { content: "// "; color: var(--accent); }
+.it-hero__tagline::before { content: "// "; color: var(--accent-ink); }
 .it-hero .hero__roles { margin-top: 1.5rem; }
-.it-hero .hero__roles li + li::before { color: var(--accent); }
+.it-hero .hero__roles li + li::before { color: var(--accent-ink); }
 
 .it-net__panel {
   position: relative;
@@ -109,8 +131,13 @@ code { background: var(--bg-3); }
 .it-net__tag { fill: var(--bg); stroke: var(--ink); stroke-width: 1.25; }
 .it-net__node--core .it-net__tag { fill: var(--ink); }
 .it-net__node--core .it-net__label { fill: var(--bg); }
-.it-net__node--uplink .it-net__tag { stroke: var(--accent); stroke-width: 1.5; }
-.it-net__led { fill: var(--ok); }
+.it-net__node--uplink .it-net__tag { stroke: var(--accent-ink); stroke-width: 1.5; }
+.it-net__led {
+  fill: var(--accent);
+  stroke: var(--accent-ink);
+  stroke-width: 0.75;
+  filter: drop-shadow(0 0 2.5px var(--accent-glow));
+}
 .it-net__label {
   font-family: var(--font-mono);
   font-size: 14px;
@@ -125,8 +152,8 @@ code { background: var(--bg-3); }
   height: 0.5rem;
   margin-right: 0.15rem;
   border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 3px var(--ok-soft);
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-ink), 0 0 6px var(--accent-glow);
 }
 .hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
 @media (min-width: 48em) {
@@ -182,8 +209,9 @@ code { background: var(--bg-3); }
   top: 0.55em;
   width: 0.55rem;
   height: 0.55rem;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--accent-ink);
   border-radius: 2px;
+  background: var(--accent-soft);
 }
 @media (min-width: 48em) {
   .services__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -205,9 +233,10 @@ code { background: var(--bg-3); }
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--accent-ink);
   border-radius: 50%;
   background: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-soft);
   color: var(--accent-ink);
   font-family: var(--font-mono);
   font-weight: 600;
@@ -221,7 +250,7 @@ code { background: var(--bg-3); }
   top: 2.25rem;
   bottom: -2rem;
   width: 1.5px;
-  background: linear-gradient(to bottom, var(--accent), var(--line-strong));
+  background: linear-gradient(to bottom, var(--accent-ink), var(--accent) 30%, var(--line-strong));
 }
 .process__name { font-size: var(--step-1); }
 .process__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; max-width: 32rem; text-wrap: pretty; }
@@ -235,7 +264,7 @@ code { background: var(--bg-3); }
     bottom: auto;
     width: auto;
     height: 1.5px;
-    background: linear-gradient(to right, var(--accent), var(--line-strong));
+    background: linear-gradient(to right, var(--accent-ink), var(--accent) 30%, var(--line-strong));
   }
 }
 
@@ -246,7 +275,7 @@ code { background: var(--bg-3); }
 .why__points { list-style: none; display: grid; gap: 1.25rem 2rem; }
 .why__point { border-top: 1px solid var(--line-strong); padding-top: 1rem; }
 .why__name { font-size: var(--step-1); margin-bottom: 0.35rem; }
-.why__name::before { content: "> "; color: var(--accent); font-family: var(--font-mono); font-weight: 500; }
+.why__name::before { content: "> "; color: var(--accent-ink); font-family: var(--font-mono); font-weight: 500; }
 .why__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; }
 .why__facts { margin: 0; }
 .why__quote { font-size: var(--step-2); }
@@ -309,7 +338,7 @@ code { background: var(--bg-3); }
 
 /* 8. Formular / Kontakt -------------------------------------------------- */
 .hire__question { color: var(--ink) !important; }
-.contact__link .icon, .contact__address .icon { color: var(--accent); }
+.contact__link .icon, .contact__address .icon { color: var(--accent-ink); }
 
 /* 9. Motion -------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
@@ -329,6 +358,22 @@ code { background: var(--bg-3); }
   .it-net__node:nth-child(5) .it-net__led { animation-delay: -3.2s; }
   .it-net__node:nth-child(6) .it-net__led { animation-delay: -1.9s; }
   .it-net__node:nth-child(7) .it-net__led { animation-delay: -2.7s; }
+  /* Überlast: alle paar Sekunden zuckt das Leuchten kurz – Text und Farbe bleiben stabil */
+  @keyframes overload-glow {
+    0%, 86%, 100% { text-shadow: 0 0 0.45em var(--accent-glow); }
+    88% { text-shadow: 0 0 0.9em var(--accent), 0 0 0.2em var(--accent-glow); }
+    90% { text-shadow: 0 0 0.3em var(--accent-glow); }
+    92% { text-shadow: 0 0 0.8em var(--accent), 0 0 0.25em var(--accent-glow); }
+    95% { text-shadow: 0 0 0.45em var(--accent-glow); }
+  }
+  .it-hero__title-b { animation: overload-glow 7s linear infinite; }
+  @keyframes overload-bolt {
+    0%, 90%, 100% { filter: drop-shadow(0 0 3px var(--accent-glow)); opacity: 1; }
+    92% { filter: drop-shadow(0 0 7px var(--accent)); opacity: 0.55; }
+    94% { filter: drop-shadow(0 0 3px var(--accent-glow)); opacity: 1; }
+    96% { filter: drop-shadow(0 0 7px var(--accent)); opacity: 0.7; }
+  }
+  .brand__bolt { animation: overload-bolt 5s linear infinite; }
 }
 
 @media print {

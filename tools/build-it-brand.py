@@ -2,17 +2,20 @@
 """
 Erzeugt die Markenzeichen von reichi.it (Entwicklungsrechner, nicht auf dem Server nötig):
 
-  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi.it“ + Sechseck-R, für helle Flächen
+  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi⚡it“ + Sechseck-R, für helle Flächen
   assets-src/brand/reichi-it-logo-dark.svg   dieselbe Marke für dunkle Flächen
   assets-src/brand/reichi-it-logo*.png       Pixelversionen (2400 px breit, transparent)
-  assets-src/brand/reichi-it-mark.svg        nur das Sechseck-R in Akzentfarbe
-  htdocs/it/favicon.ico, htdocs/it/assets/images/icons/*    Favicons (Marke auf Papier)
+  assets-src/brand/reichi-it-mark.svg        Sechseck-R mit dem Blitz als Abzeichen
+  htdocs/it/favicon.ico, htdocs/it/assets/images/icons/*    Favicons (Blitz auf Tinte)
   htdocs/it/assets/images/share-reichi-it.png              Social-Sharing-Bild 1200×630
+  htdocs/assets/images/logos/reichi-it.png                 Karte in der Projektzeile von reichi.com
 
 Die Wortmarke verwendet dieselbe Schriftidee wie die Website (serifenlose Systemschrift,
 fett, eng gesetzt); als Datei wird sie mit Inter Bold (SIL Open Font License) in Pfade
-umgewandelt, damit sie überall gleich aussieht. Das Sechseck-R stammt aus dem vorhandenen
-safari-pinned-tab.svg der alten reichi.com.
+umgewandelt, damit sie überall gleich aussieht. Der Punkt vor „it“ ist ein Blitz in der
+elektrischen Akzentfarbe mit kleinen Funken – die IT-Abteilung ist „leicht überlastet“.
+Das Sechseck-R stammt aus dem vorhandenen safari-pinned-tab.svg der alten reichi.com.
+Dieselbe Blitzform steht als Inline-SVG in content-it.php (brand_suffix_html) und it.css.
 
     pip install fonttools cairosvg pillow
     python3 tools/build-it-brand.py
@@ -37,8 +40,27 @@ ICON_DIR = IT_DIR / "assets" / "images" / "icons"
 
 PAPER = "#f5f2eb"
 INK = "#15151a"
-ACCENT = "#0b6fb3"
+ACCENT = "#00e6c3"        # elektrisches Blaugrün – nur für Flächen und Grafik
+ACCENT_INK = "#00705f"    # dunkle Variante für Text auf Papier (5.4:1)
 LIGHT_INK = "#f3efe7"
+
+# Blitz mit Funken in einem 32×48-Kasten (Blitz y 8…48, Funken oben rechts).
+# Dieselben Pfade stehen in content-it.php (Kopfzeile) – bei Änderungen beides anpassen.
+BOLT_D = "M19 8 L5 31 H14.5 L12 48 L27 23 H17.5 Z"
+SPARKS_D = "M20 4 L21 0 M24 5 L27 1.5 M26.5 9 L31 8"
+BOLT_W, BOLT_H = 32.0, 48.0
+
+
+def bolt_svg(x: float, y: float, height: float, fill: str, stroke: str | None, spark: str) -> str:
+    """Blitz + Funken mit linker oberer Ecke (x, y) und Gesamthöhe height (Kasten 32×48)."""
+    s = height / BOLT_H
+    outline = f' stroke="{stroke}" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke"' if stroke else ""
+    return (
+        f'<g transform="translate({x:.2f} {y:.2f}) scale({s:.5f})">'
+        f'<path d="{BOLT_D}" fill="{fill}"{outline}/>'
+        f'<path d="{SPARKS_D}" fill="none" stroke="{spark}" stroke-width="2.2" stroke-linecap="round"/>'
+        "</g>"
+    )
 
 # Sechseck-R aus safari-pinned-tab.svg (100×100, y nach oben → Transform im <g>)
 MARK_PATHS = (
@@ -84,8 +106,8 @@ def text_paths(font: TTFont, text: str, size: float, x: float, baseline: float, 
     return pen.getCommands(), pos
 
 
-def build_logo(font: TTFont, ink: str, accent: str, out: Path) -> tuple[str, int, int]:
-    """Wortmarke: Mark + „reichi“ + „.it“. Gibt (svg, width, height) zurück."""
+def build_logo(font: TTFont, ink: str, it_color: str, bolt_stroke: str | None, out: Path) -> tuple[str, int, int]:
+    """Wortmarke: Mark + „reichi“ + Blitz + „it“. Gibt (svg, width, height) zurück."""
     size = 100.0            # Schriftgröße
     mark = 92.0             # Kantenlänge des Zeichens
     gap = 24.0
@@ -93,16 +115,22 @@ def build_logo(font: TTFont, ink: str, accent: str, out: Path) -> tuple[str, int
     baseline = pad + 84.0   # Grundlinie so, dass das x-Höhen-Zentrum auf der Mitte des Zeichens liegt
     x = pad + mark + gap
     d_word, w_word = text_paths(font, "reichi", size, x, baseline, -0.03)
-    d_it, w_it = text_paths(font, ".it", size, x + w_word - 0.01 * size, baseline, -0.03)
-    width = round(x + w_word + w_it + pad)
+    # Blitz: Oberkante der Funken knapp über der Versalhöhe, Spitze ein Stück unter die Grundlinie
+    bolt_h = 0.92 * size
+    bolt_s = bolt_h / BOLT_H
+    bolt_x = x + w_word - 0.05 * size
+    bolt_y = baseline - 0.84 * size
+    it_x = bolt_x + BOLT_W * bolt_s - 0.03 * size
+    d_it, w_it = text_paths(font, "it", size, it_x, baseline, -0.03)
+    width = round(it_x + w_it + pad)
     height = round(pad * 2 + mark)
-    mark_y = pad
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
         f'role="img" aria-label="reichi.it">'
-        f'{mark_svg(pad, mark_y, mark, ink)}'
+        f'{mark_svg(pad, pad, mark, ink)}'
         f'<path fill="{ink}" d="{d_word}"/>'
-        f'<path fill="{accent}" d="{d_it}"/>'
+        f'{bolt_svg(bolt_x, bolt_y, bolt_h, ACCENT, bolt_stroke, ACCENT)}'
+        f'<path fill="{it_color}" d="{d_it}"/>'
         "</svg>"
     )
     out.write_text(svg, encoding="utf-8")
@@ -120,11 +148,18 @@ def render_png(svg: str, out: Path, width: int | None = None, background: str | 
 
 def build_icons() -> None:
     ICON_DIR.mkdir(parents=True, exist_ok=True)
-    # Marke in Akzentfarbe auf Papier – unterscheidet den Tab klar von reichi.com (weiß auf schwarz)
+    # Elektrischer Blitz auf Tinte – unterscheidet den Tab klar von reichi.com (weißes R auf Schwarz)
     icon_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'<rect width="100" height="100" fill="{PAPER}"/>'
-        f'{mark_svg(13, 13, 74, ACCENT)}'
+        f'<rect width="100" height="100" fill="{INK}"/>'
+        f'{bolt_svg(22, 6, 88, ACCENT, None, ACCENT)}'
+        "</svg>"
+    )
+    # unter 48 px: ohne Funken und größer, sonst bleibt nur Pixelbrei
+    icon_small = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
+        f'<rect width="100" height="100" fill="{INK}"/>'
+        f'{bolt_svg(18, -12, 118, ACCENT, None, "none")}'
         "</svg>"
     )
     sizes = {
@@ -132,18 +167,18 @@ def build_icons() -> None:
         "apple-touch-icon.png": 180, "icon-192.png": 192, "icon-512.png": 512,
     }
     for name, px in sizes.items():
-        render_png(icon_svg, ICON_DIR / name, width=px)
+        render_png(icon_small if px < 48 else icon_svg, ICON_DIR / name, width=px)
     # favicon.ico mit 16/32/48 px
     frames = []
     for px in (48, 32, 16):
         buf = io.BytesIO()
-        cairosvg.svg2png(bytestring=icon_svg.encode("utf-8"), write_to=buf, output_width=px)
+        cairosvg.svg2png(bytestring=(icon_small if px < 48 else icon_svg).encode("utf-8"), write_to=buf, output_width=px)
         frames.append(Image.open(io.BytesIO(buf.getvalue())).convert("RGBA"))
     frames[0].save(IT_DIR / "favicon.ico", format="ICO", sizes=[(48, 48), (32, 32), (16, 16)], append_images=frames[1:])
     # Safari-Pinned-Tab: einfarbige Silhouette (Farbe setzt der Browser über das color-Attribut)
     pinned = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'{mark_svg(0, 0, 100, "#000000")}'
+        f'{bolt_svg(17, 0, 100, "#000000", None, "#000000")}'
         "</svg>"
     )
     (ICON_DIR / "safari-pinned-tab.svg").write_text(pinned, encoding="utf-8")
@@ -152,7 +187,7 @@ def build_icons() -> None:
 def build_share_image(font: TTFont) -> None:
     """1200×630: Wortmarke groß, darunter eine Zeile, auf Papier mit Rasterpunkten."""
     w, h = 1200, 630
-    logo_svg, lw, lh = build_logo(font, INK, ACCENT, BRAND_DIR / "reichi-it-logo.svg")
+    logo_svg, lw, lh = build_logo(font, INK, ACCENT_INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
     scale = 760 / lw
     inner = logo_svg[logo_svg.index(">") + 1 : logo_svg.rindex("</svg>")]
     sub_d, sub_w = text_paths(font, "Event-IT: Netzwerk, WLAN & Support", 40, 0, 0, -0.01)
@@ -180,19 +215,28 @@ def main() -> None:
     font = TTFont(str(FONT))
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
 
-    light, _, _ = build_logo(font, INK, ACCENT, BRAND_DIR / "reichi-it-logo.svg")
-    dark, _, _ = build_logo(font, LIGHT_INK, "#3fa0e0", BRAND_DIR / "reichi-it-logo-dark.svg")
+    # hell: „it“ und Blitzkontur in dunklem Blaugrün (lesbar auf Papier), Blitzfläche elektrisch
+    light, _, _ = build_logo(font, INK, ACCENT_INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
+    # dunkel: „it“ und Blitz leuchten ohne Kontur
+    dark, _, _ = build_logo(font, LIGHT_INK, ACCENT, None, BRAND_DIR / "reichi-it-logo-dark.svg")
     render_png(light, BRAND_DIR / "reichi-it-logo.png", width=2400)
     render_png(dark, BRAND_DIR / "reichi-it-logo-dark.png", width=2400)
+    # Karte in der Projektzeile von reichi.com (dunkler Hintergrund)
+    logos_dir = ROOT / "htdocs" / "assets" / "images" / "logos"
+    logos_dir.mkdir(parents=True, exist_ok=True)
+    render_png(dark, logos_dir / "reichi-it.png", width=760)
+    # Abzeichen: Sechseck-R mit dem Blitz unten rechts
     mark_only = (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="reichi">'
-        f'{mark_svg(0, 0, 100, ACCENT)}</svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112" width="112" height="112" role="img" aria-label="reichi.it">'
+        f'{mark_svg(0, 0, 100, INK)}'
+        f'{bolt_svg(66, 58, 54, ACCENT, PAPER, ACCENT)}</svg>'
     )
     (BRAND_DIR / "reichi-it-mark.svg").write_text(mark_only, encoding="utf-8")
 
     build_icons()
     build_share_image(font)
-    for p in sorted(list(BRAND_DIR.iterdir()) + list(ICON_DIR.iterdir()) + [IT_DIR / "favicon.ico", IT_DIR / "assets" / "images" / "share-reichi-it.png"]):
+    for p in sorted(list(BRAND_DIR.iterdir()) + list(ICON_DIR.iterdir())
+                    + [IT_DIR / "favicon.ico", IT_DIR / "assets" / "images" / "share-reichi-it.png", logos_dir / "reichi-it.png"]):
         print(f"{p.relative_to(ROOT)}  {p.stat().st_size} bytes")
 
 
