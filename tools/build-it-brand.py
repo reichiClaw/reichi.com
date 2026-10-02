@@ -2,18 +2,19 @@
 """
 Erzeugt die Markenzeichen von reichi.it (Entwicklungsrechner, nicht auf dem Server nötig):
 
-  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi⚡it“ + Sechseck-R, für helle Flächen
+  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi it“ mit Blitz + Sechseck-R, für helle Flächen
   assets-src/brand/reichi-it-logo-dark.svg   dieselbe Marke für dunkle Flächen
   assets-src/brand/reichi-it-logo*.png       Pixelversionen (2400 px breit, transparent)
-  assets-src/brand/reichi-it-mark.svg        Sechseck-R mit dem Blitz als Abzeichen
+  assets-src/brand/reichi-it-mark.svg        Sechseck mit Blitz (Abzeichen)
   htdocs/it/favicon.ico, htdocs/it/assets/images/icons/*    Favicons (Blitz auf Tinte)
   htdocs/it/assets/images/share-reichi-it.png              Social-Sharing-Bild 1200×630
   htdocs/assets/images/logos/reichi-it.png                 Karte in der Projektzeile von reichi.com
 
 Die Wortmarke verwendet dieselbe Schriftidee wie die Website (serifenlose Systemschrift,
 fett, eng gesetzt); als Datei wird sie mit Inter Bold (SIL Open Font License) in Pfade
-umgewandelt, damit sie überall gleich aussieht. Der Punkt vor „it“ ist ein Blitz in der
-elektrischen Akzentfarbe mit kleinen Funken – die IT-Abteilung ist „leicht überlastet“.
+umgewandelt, damit sie überall gleich aussieht. Der Punkt vor „it“ ist ein einziger Blitz:
+auf der Grundlinie stehend, so hoch wie der i-Punkt, Schenkel so stark wie die Stämme der
+Schrift – die Buchstaben bleiben in Tinte, der Blitz ist das einzige farbige Element.
 Das Sechseck-R stammt aus dem vorhandenen safari-pinned-tab.svg der alten reichi.com.
 Dieselbe Blitzform steht als Inline-SVG in content-it.php (brand_suffix_html) und it.css.
 
@@ -44,31 +45,15 @@ ACCENT = "#00e6c3"        # elektrisches Blaugrün – nur für Flächen und Gra
 ACCENT_INK = "#00705f"    # dunkle Variante für Text auf Papier (5.4:1)
 LIGHT_INK = "#f3efe7"
 
-# Blitz mit Funken in einem 32×48-Kasten (Blitz y 8…48, Funken oben rechts).
-# Dieselben Pfade stehen in content-it.php (Kopfzeile) – bei Änderungen beides anpassen.
-BOLT_D = "M19 8 L5 31 H14.5 L12 48 L27 23 H17.5 Z"
-SPARKS_D = "M20 4 L21 0 M24 5 L27 1.5 M26.5 9 L31 8"
-BOLT_W, BOLT_H = 32.0, 48.0
-
-
-def bolt_svg(x: float, y: float, height: float, fill: str, stroke: str | None, spark: str) -> str:
-    """Blitz + Funken mit linker oberer Ecke (x, y) und Gesamthöhe height (Kasten 32×48)."""
-    s = height / BOLT_H
-    outline = f' stroke="{stroke}" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke"' if stroke else ""
-    return (
-        f'<g transform="translate({x:.2f} {y:.2f}) scale({s:.5f})">'
-        f'<path d="{BOLT_D}" fill="{fill}"{outline}/>'
-        f'<path d="{SPARKS_D}" fill="none" stroke="{spark}" stroke-width="2.2" stroke-linecap="round"/>'
-        "</g>"
-    )
-
-# Sechseck-R aus safari-pinned-tab.svg (100×100, y nach oben → Transform im <g>)
-MARK_PATHS = (
+# Sechseck-R aus safari-pinned-tab.svg (100×100, y nach oben → Transform im <g>); erster Pfad = Ring
+MARK_RING = (
     '<path d="M290 883 c-107 -63 -202 -118 -210 -123 -12 -7 -15 -47 -16 -242 -1 -128 1 -242 3 -254 '
     '4 -18 71 -62 248 -160 11 -6 54 -31 95 -56 41 -25 83 -44 93 -42 19 3 419 231 427 244 3 5 5 119 '
     '5 255 0 206 -3 248 -15 255 -70 45 -402 231 -417 234 -10 1 -106 -49 -213 -111z m373 -90 c83 -49 '
     '157 -94 162 -101 10 -13 14 -376 5 -385 -13 -13 -321 -187 -330 -187 -15 0 -313 172 -325 188 -6 8 '
     '-10 85 -10 192 0 147 3 183 16 195 20 21 301 184 317 184 7 1 81 -38 165 -86z"/>'
+)
+MARK_R = (
     '<path d="M380 709 c-58 -34 -108 -66 -112 -72 -12 -19 -9 -265 3 -272 6 -4 13 -5 15 -2 3 3 6 56 '
     '6 119 0 62 4 121 9 130 9 18 178 118 199 118 14 0 180 -92 180 -100 0 -3 -40 -29 -90 -58 -64 -37 '
     '-90 -58 -90 -72 0 -14 29 -36 103 -79 96 -57 137 -73 137 -52 0 8 -37 37 -65 51 -49 25 -125 74 '
@@ -76,13 +61,36 @@ MARK_PATHS = (
 )
 
 
-def mark_svg(x: float, y: float, size: float, color: str) -> str:
-    """Das Sechseck-R mit linker oberer Ecke (x, y) und Kantenlänge size."""
+def _mark_group(x: float, y: float, size: float, color: str, paths: str) -> str:
     s = size / 100
     return (
         f'<g transform="translate({x:.2f} {y + size:.2f}) scale({s * 0.1:.5f} {-s * 0.1:.5f})" fill="{color}">'
-        + MARK_PATHS + "</g>"
+        + paths + "</g>"
     )
+
+
+def mark_svg(x: float, y: float, size: float, color: str) -> str:
+    """Das Sechseck-R mit linker oberer Ecke (x, y) und Kantenlänge size."""
+    return _mark_group(x, y, size, color, MARK_RING + MARK_R)
+
+
+def hexagon_svg(x: float, y: float, size: float, color: str) -> str:
+    """Nur der Sechseck-Ring (ohne R) – Rahmen für das Abzeichen der IT-Abteilung."""
+    return _mark_group(x, y, size, color, MARK_RING)
+
+
+# Blitz: eine Form, zwei parallele Schenkel (Steigung 1:2), waagrechte Schultern, Spitze unten.
+# Kasten 52×100; die Schenkelstärke (21 Einheiten waagrecht ≈ 19 senkrecht zur Kante) entspricht
+# bei Höhe 0.768 em (Grundlinie bis i-Punkt) der Stammstärke von Inter Bold (0.147 em).
+# Dieselben Pfaddaten stehen in content-it.php (Kopfzeile) – bei Änderungen beides anpassen.
+BOLT_D = "M31 0H52L32 40H52L14 100L20 58H2Z"
+BOLT_W, BOLT_H = 52.0, 100.0
+
+
+def bolt_svg(x: float, y: float, height: float, fill: str) -> str:
+    """Blitz mit linker oberer Ecke des Kastens (x, y) und Höhe height."""
+    s = height / BOLT_H
+    return f'<path transform="translate({x:.2f} {y:.2f}) scale({s:.5f})" d="{BOLT_D}" fill="{fill}"/>'
 
 
 def text_paths(font: TTFont, text: str, size: float, x: float, baseline: float, tracking_em: float) -> tuple[str, float]:
@@ -106,8 +114,8 @@ def text_paths(font: TTFont, text: str, size: float, x: float, baseline: float, 
     return pen.getCommands(), pos
 
 
-def build_logo(font: TTFont, ink: str, it_color: str, bolt_stroke: str | None, out: Path) -> tuple[str, int, int]:
-    """Wortmarke: Mark + „reichi“ + Blitz + „it“. Gibt (svg, width, height) zurück."""
+def build_logo(font: TTFont, ink: str, bolt: str, out: Path) -> tuple[str, int, int]:
+    """Wortmarke: Sechseck-R + „reichi“ + Blitz + „it“. Gibt (svg, width, height) zurück."""
     size = 100.0            # Schriftgröße
     mark = 92.0             # Kantenlänge des Zeichens
     gap = 24.0
@@ -115,12 +123,12 @@ def build_logo(font: TTFont, ink: str, it_color: str, bolt_stroke: str | None, o
     baseline = pad + 84.0   # Grundlinie so, dass das x-Höhen-Zentrum auf der Mitte des Zeichens liegt
     x = pad + mark + gap
     d_word, w_word = text_paths(font, "reichi", size, x, baseline, -0.03)
-    # Blitz: Oberkante der Funken knapp über der Versalhöhe, Spitze ein Stück unter die Grundlinie
-    bolt_h = 0.92 * size
+    # Blitz steht auf der Grundlinie und reicht bis zur Höhe des i-Punkts (0.768 em in Inter)
+    bolt_h = 0.768 * size
     bolt_s = bolt_h / BOLT_H
-    bolt_x = x + w_word - 0.05 * size
-    bolt_y = baseline - 0.84 * size
-    it_x = bolt_x + BOLT_W * bolt_s - 0.03 * size
+    bolt_x = x + w_word + 0.05 * size
+    bolt_y = baseline - bolt_h
+    it_x = bolt_x + BOLT_W * bolt_s + 0.05 * size
     d_it, w_it = text_paths(font, "it", size, it_x, baseline, -0.03)
     width = round(it_x + w_it + pad)
     height = round(pad * 2 + mark)
@@ -129,8 +137,8 @@ def build_logo(font: TTFont, ink: str, it_color: str, bolt_stroke: str | None, o
         f'role="img" aria-label="reichi.it">'
         f'{mark_svg(pad, pad, mark, ink)}'
         f'<path fill="{ink}" d="{d_word}"/>'
-        f'{bolt_svg(bolt_x, bolt_y, bolt_h, ACCENT, bolt_stroke, ACCENT)}'
-        f'<path fill="{it_color}" d="{d_it}"/>'
+        f'{bolt_svg(bolt_x, bolt_y, bolt_h, bolt)}'
+        f'<path fill="{ink}" d="{d_it}"/>'
         "</svg>"
     )
     out.write_text(svg, encoding="utf-8")
@@ -152,14 +160,7 @@ def build_icons() -> None:
     icon_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
         f'<rect width="100" height="100" fill="{INK}"/>'
-        f'{bolt_svg(22, 6, 88, ACCENT, None, ACCENT)}'
-        "</svg>"
-    )
-    # unter 48 px: ohne Funken und größer, sonst bleibt nur Pixelbrei
-    icon_small = (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'<rect width="100" height="100" fill="{INK}"/>'
-        f'{bolt_svg(18, -12, 118, ACCENT, None, "none")}'
+        f'{bolt_svg(50 - BOLT_W * 0.72 / 2, 14, 72, ACCENT)}'
         "</svg>"
     )
     sizes = {
@@ -167,18 +168,18 @@ def build_icons() -> None:
         "apple-touch-icon.png": 180, "icon-192.png": 192, "icon-512.png": 512,
     }
     for name, px in sizes.items():
-        render_png(icon_small if px < 48 else icon_svg, ICON_DIR / name, width=px)
+        render_png(icon_svg, ICON_DIR / name, width=px)
     # favicon.ico mit 16/32/48 px
     frames = []
     for px in (48, 32, 16):
         buf = io.BytesIO()
-        cairosvg.svg2png(bytestring=(icon_small if px < 48 else icon_svg).encode("utf-8"), write_to=buf, output_width=px)
+        cairosvg.svg2png(bytestring=icon_svg.encode("utf-8"), write_to=buf, output_width=px)
         frames.append(Image.open(io.BytesIO(buf.getvalue())).convert("RGBA"))
     frames[0].save(IT_DIR / "favicon.ico", format="ICO", sizes=[(48, 48), (32, 32), (16, 16)], append_images=frames[1:])
     # Safari-Pinned-Tab: einfarbige Silhouette (Farbe setzt der Browser über das color-Attribut)
     pinned = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'{bolt_svg(17, 0, 100, "#000000", None, "#000000")}'
+        f'{bolt_svg(24, 0, 100, "#000000")}'
         "</svg>"
     )
     (ICON_DIR / "safari-pinned-tab.svg").write_text(pinned, encoding="utf-8")
@@ -187,7 +188,7 @@ def build_icons() -> None:
 def build_share_image(font: TTFont) -> None:
     """1200×630: Wortmarke groß, darunter eine Zeile, auf Papier mit Rasterpunkten."""
     w, h = 1200, 630
-    logo_svg, lw, lh = build_logo(font, INK, ACCENT_INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
+    logo_svg, lw, lh = build_logo(font, INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
     scale = 760 / lw
     inner = logo_svg[logo_svg.index(">") + 1 : logo_svg.rindex("</svg>")]
     sub_d, sub_w = text_paths(font, "Event-IT: Netzwerk, WLAN & Support", 40, 0, 0, -0.01)
@@ -215,21 +216,20 @@ def main() -> None:
     font = TTFont(str(FONT))
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
 
-    # hell: „it“ und Blitzkontur in dunklem Blaugrün (lesbar auf Papier), Blitzfläche elektrisch
-    light, _, _ = build_logo(font, INK, ACCENT_INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
-    # dunkel: „it“ und Blitz leuchten ohne Kontur
-    dark, _, _ = build_logo(font, LIGHT_INK, ACCENT, None, BRAND_DIR / "reichi-it-logo-dark.svg")
+    # hell: Tinte + Blitz in dunklem Blaugrün (5.4:1 auf Papier); dunkel: helle Tinte + elektrischer Blitz
+    light, _, _ = build_logo(font, INK, ACCENT_INK, BRAND_DIR / "reichi-it-logo.svg")
+    dark, _, _ = build_logo(font, LIGHT_INK, ACCENT, BRAND_DIR / "reichi-it-logo-dark.svg")
     render_png(light, BRAND_DIR / "reichi-it-logo.png", width=2400)
     render_png(dark, BRAND_DIR / "reichi-it-logo-dark.png", width=2400)
     # Karte in der Projektzeile von reichi.com (dunkler Hintergrund)
     logos_dir = ROOT / "htdocs" / "assets" / "images" / "logos"
     logos_dir.mkdir(parents=True, exist_ok=True)
     render_png(dark, logos_dir / "reichi-it.png", width=760)
-    # Abzeichen: Sechseck-R mit dem Blitz unten rechts
+    # Abzeichen der IT-Abteilung: dasselbe Sechseck wie reichi.com, innen der Blitz statt des R
     mark_only = (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112" width="112" height="112" role="img" aria-label="reichi.it">'
-        f'{mark_svg(0, 0, 100, INK)}'
-        f'{bolt_svg(66, 58, 54, ACCENT, PAPER, ACCENT)}</svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="reichi.it">'
+        f'{hexagon_svg(0, 0, 100, INK)}'
+        f'{bolt_svg(50 - BOLT_W * 0.46 / 2, 27, 46, ACCENT)}</svg>'
     )
     (BRAND_DIR / "reichi-it-mark.svg").write_text(mark_only, encoding="utf-8")
 

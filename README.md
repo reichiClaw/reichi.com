@@ -284,8 +284,9 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 
 - Light „paper“ background with the same film grain, an electric blue-green accent
   (`--accent` in `it.css`, used for fills, lines and glows only; text uses the darker
-  `--accent-ink`), reichi.com's red only on the primary button. The brand shows a lightning
-  bolt instead of the dot before „it“ (`brand_suffix_html` in `content-it.php`); the second
+  `--accent-ink`), reichi.com's red only on the primary button. The brand shows a single
+  geometric lightning bolt instead of the dot before „it“ (`brand_suffix_html` in
+  `content-it.php`; letters stay in ink, the bolt is the only coloured element); the second
   headline line and the bolt carry a soft glow that flickers briefly every few seconds
   (motion only without `prefers-reduced-motion`). Du-form, lighter tone, a few English lines
   (`lang="en"`).
