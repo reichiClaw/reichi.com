@@ -1,0 +1,336 @@
+/* ==========================================================================
+   reichi.it – Ergänzungen zu style.css (wird danach geladen)
+   Helles Papier statt Bühnenschwarz, Blau als Akzent, das Rot von reichi.com bleibt dem
+   Hauptknopf vorbehalten. Aufbau: 1. Tokens  2. Überschreibungen  3. Hero + Netzplan
+   4. Leistungen  5. Ablauf  6. Warum ich  7. Referenz  8. Formular  9. Motion
+   ========================================================================== */
+
+/* 1. Tokens -------------------------------------------------------------- */
+:root {
+  --bg: #f5f2eb;
+  --bg-2: #ece8df;
+  --bg-3: #e4dfd4;
+  --bg-4: #d8d2c5;
+  --ink: #15151a;
+  --ink-2: #4a4a52;
+  --ink-3: #6f6f78;
+  --line: rgba(21, 21, 26, 0.12);
+  --line-strong: rgba(21, 21, 26, 0.3);
+  /* Akzent: Blau. Alternative Grün: --accent #117a4d, --accent-ink #0f6a43, --accent-soft rgba(17,122,77,0.12) */
+  --accent: #0b6fb3;
+  --accent-ink: #085a92;
+  --accent-soft: rgba(11, 111, 179, 0.12);
+  --red: #d8371f;
+  --red-hover: #c43018;
+  --paper: #15151a;
+  --paper-ink: #f5f2eb;
+  --ok: #1f7a46;
+  --ok-soft: rgba(31, 122, 70, 0.12);
+  --panel: #fbfaf7;
+}
+
+/* 2. Überschreibungen von style.css ------------------------------------- */
+.site-header { background: rgba(245, 242, 235, 0.86); }
+.site-header.is-scrolled { background: rgba(245, 242, 235, 0.94); }
+@media (max-width: 63.99em) {
+  .js .site-nav { box-shadow: 0 30px 60px rgba(21, 21, 26, 0.12); }
+}
+.brand__suffix { color: var(--accent); font-weight: 650; }
+.brand:hover .brand__mark { color: var(--accent); }
+
+.button--primary { background: var(--red); border-color: var(--red); color: #fff; }
+.button--primary:hover { background: var(--red-hover); border-color: var(--red-hover); }
+.button--ghost:hover { background: rgba(21, 21, 26, 0.05); }
+.skip-link { background: var(--accent); color: #fff; }
+::selection { background: var(--accent); color: #fff; }
+code { background: var(--bg-3); }
+.eyebrow { color: var(--accent-ink); }
+
+.form { background: var(--panel); }
+.form__input { background: #fff; }
+.form__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.6rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a4a52' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+  cursor: pointer;
+}
+.form__error { color: var(--red); }
+.form__field--error .form__input { border-color: var(--red); }
+.form__req, .form__required-note span { color: var(--red); }
+.form-status { border-left-color: var(--accent); background: var(--accent-soft); }
+.form-status--success { border-left-color: var(--ok); background: var(--ok-soft); }
+
+.hire { background: linear-gradient(to bottom, var(--bg), var(--bg-2)); }
+.site-footer { background: var(--bg-2); }
+.legal__todo { background: rgba(214, 140, 0, 0.18); }
+
+/* 3. Hero + Netzplan ----------------------------------------------------- */
+.it-hero__title { font-size: clamp(2.8rem, 1.4rem + 5.2vw, 5.75rem); line-height: 0.95; letter-spacing: -0.045em; }
+.it-hero__title-b {
+  display: block;
+  margin-top: 0.3em;
+  font-size: 0.5em;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  text-wrap: balance;
+}
+.it-hero__tagline {
+  margin: 1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+.it-hero__tagline::before { content: "// "; color: var(--accent); }
+.it-hero .hero__roles { margin-top: 1.5rem; }
+.it-hero .hero__roles li + li::before { color: var(--accent); }
+
+.it-net__panel {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background-color: var(--panel);
+  /* Rasterpunkte wie auf Millimeterpapier */
+  background-image: radial-gradient(circle, rgba(21, 21, 26, 0.16) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  background-position: 10px 10px;
+  overflow: clip;
+}
+.it-net__svg, .it-net__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.it-net__canvas { pointer-events: none; }
+.it-net__edge { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.5; }
+.it-net__edge--dashed { stroke-dasharray: 4 7; stroke-opacity: 0.4; }
+.it-net__tag { fill: var(--bg); stroke: var(--ink); stroke-width: 1.25; }
+.it-net__node--core .it-net__tag { fill: var(--ink); }
+.it-net__node--core .it-net__label { fill: var(--bg); }
+.it-net__node--uplink .it-net__tag { stroke: var(--accent); stroke-width: 1.5; }
+.it-net__led { fill: var(--ok); }
+.it-net__label {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--ink);
+}
+.it-net__status {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.15rem;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-soft);
+}
+.hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
+@media (min-width: 48em) {
+  .it-net__panel { aspect-ratio: 4 / 5; }
+}
+@media (min-width: 64em) {
+  .it-net__panel { aspect-ratio: 1; }
+}
+
+/* 4. Leistungen ---------------------------------------------------------- */
+.services { border-top: 1px solid var(--line); }
+.services__list { list-style: none; display: grid; gap: 1.25rem; }
+.services__item {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.services__item:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+.services__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.services__index { color: var(--accent-ink); }
+.services__tag {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+}
+.services__name { font-size: var(--step-2); letter-spacing: -0.03em; }
+.services__text { color: var(--ink-2); font-size: var(--step-0); line-height: 1.45; text-wrap: pretty; }
+.services__points { list-style: none; display: grid; gap: 0.6rem; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.services__points li { position: relative; padding-left: 1.4rem; font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; }
+.services__points li::before {
+  /* kleiner Stecker: Rechteck mit Pin */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+}
+@media (min-width: 48em) {
+  .services__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .services__list { grid-template-columns: 1fr 1fr; }
+  .services__item:last-child { grid-column: 1 / -1; }
+}
+
+/* 5. Ablauf -------------------------------------------------------------- */
+.process { padding-top: 0; }
+.process__list { list-style: none; display: grid; gap: 2rem; counter-reset: step; }
+.process__step { position: relative; display: grid; gap: 0.5rem; padding-left: 3.25rem; }
+.process__marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--step--1);
+}
+.process__step:not(:last-child)::before {
+  /* das Patchkabel zwischen den Schritten */
+  content: "";
+  position: absolute;
+  left: calc(1.125rem - 0.75px);
+  top: 2.25rem;
+  bottom: -2rem;
+  width: 1.5px;
+  background: linear-gradient(to bottom, var(--accent), var(--line-strong));
+}
+.process__name { font-size: var(--step-1); }
+.process__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; max-width: 32rem; text-wrap: pretty; }
+@media (min-width: 64em) {
+  .process__list { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+  .process__step { padding-left: 0; padding-top: 3.25rem; }
+  .process__step:not(:last-child)::before {
+    left: 2.25rem;
+    right: -2rem;
+    top: calc(1.125rem - 0.75px);
+    bottom: auto;
+    width: auto;
+    height: 1.5px;
+    background: linear-gradient(to right, var(--accent), var(--line-strong));
+  }
+}
+
+/* 6. Warum ich ----------------------------------------------------------- */
+.why { border-top: 1px solid var(--line); background: var(--bg-2); }
+.why__body { display: grid; gap: 2.5rem 4rem; }
+.why__head { margin-bottom: 0; max-width: 52rem; }
+.why__points { list-style: none; display: grid; gap: 1.25rem 2rem; }
+.why__point { border-top: 1px solid var(--line-strong); padding-top: 1rem; }
+.why__name { font-size: var(--step-1); margin-bottom: 0.35rem; }
+.why__name::before { content: "> "; color: var(--accent); font-family: var(--font-mono); font-weight: 500; }
+.why__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; }
+.why__facts { margin: 0; }
+.why__quote { font-size: var(--step-2); }
+.why__quote::after { background: var(--accent); }
+@media (min-width: 40em) {
+  .why__points { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 64em) {
+  .why__body {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+    grid-template-areas:
+      "head  head"
+      "points facts"
+      "quote quote";
+  }
+  .why__head { grid-area: head; }
+  .why__points { grid-area: points; }
+  .why__facts { grid-area: facts; grid-template-columns: 1fr; align-self: start; }
+  .why__quote { grid-area: quote; }
+}
+
+/* 7. Referenz ------------------------------------------------------------ */
+.reference { border-top: 1px solid var(--line); }
+.reference__list { list-style: none; display: grid; gap: 1.25rem; }
+.reference__item {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.reference__item--more { background: transparent; border-style: dashed; border-color: var(--line-strong); }
+.reference__item--more .button { justify-self: start; margin-top: 0.5rem; }
+.reference__kind {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.reference__name { font-size: var(--step-2); letter-spacing: -0.03em; }
+.reference__text { color: var(--ink-2); }
+.reference__url {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+}
+@media (min-width: 48em) {
+  .reference__list { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+}
+
+/* 8. Formular / Kontakt -------------------------------------------------- */
+.hire__question { color: var(--ink) !important; }
+.contact__link .icon, .contact__address .icon { color: var(--accent); }
+
+/* 9. Motion -------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .js .services__item:nth-child(2), .js .process__step:nth-child(2) { transition-delay: 90ms; }
+  .js .services__item:nth-child(3), .js .process__step:nth-child(3) { transition-delay: 180ms; }
+  .js .process__step:nth-child(4) { transition-delay: 270ms; }
+  .hero__figure picture, .hero__stage { display: block; }
+  .it-net__panel { animation: settle 1400ms var(--ease) both; transform-origin: 50% 40%; }
+  @keyframes led-blink {
+    0%, 92%, 100% { opacity: 1; }
+    95% { opacity: 0.35; }
+  }
+  .it-net__led { animation: led-blink 4s linear infinite; }
+  .it-net__node:nth-child(2) .it-net__led { animation-delay: -1.3s; }
+  .it-net__node:nth-child(3) .it-net__led { animation-delay: -2.1s; }
+  .it-net__node:nth-child(4) .it-net__led { animation-delay: -0.6s; }
+  .it-net__node:nth-child(5) .it-net__led { animation-delay: -3.2s; }
+  .it-net__node:nth-child(6) .it-net__led { animation-delay: -1.9s; }
+  .it-net__node:nth-child(7) .it-net__led { animation-delay: -2.7s; }
+}
+
+@media print {
+  .it-net__canvas { display: none !important; }
+}
