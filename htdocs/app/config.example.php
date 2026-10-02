@@ -37,6 +37,9 @@ return [
     // Präfix für die Betreffzeile eingehender Anfragen.
     'mail_subject_prefix' => '[reichi.com] ',
 
+    // Kurzname der Website im Text der Anfrage-Mail („Neue Anfrage über reichi.com“).
+    'site_name' => 'reichi.com',
+
     // Mailversand über die PHP-Funktion mail() des Hosters. Auf false setzen, wenn
     // (noch) kein Mailsystem vorhanden ist – das Formular meldet dann ehrlich, dass
     // keine Zustellung möglich war, und zeigt die direkten Kontaktdaten.
@@ -111,4 +114,36 @@ return [
     // Auf true setzen, wenn die Website ausschließlich über HTTPS ausgeliefert wird
     // (Session-Cookie erhält dann das Secure-Flag auch hinter einem Proxy).
     'force_secure_cookie' => false,
+
+    // ------------------------------------------------------------------
+    // reichi.it – die IT-Abteilung (Ordner htdocs/it/, Inhalte in app/content-it.php)
+    // ------------------------------------------------------------------
+    // Die Domain reichi.it wird im Hosting-Panel auf den Ordner it/ gelegt; die Seite ist
+    // dann unter https://reichi.it/ erreichbar (und technisch auch unter www.reichi.com/it/,
+    // dort automatisch mit noindex). Alle Werte hier überlagern die Grundwerte oben.
+    'sites' => [
+        'it' => [
+            'base_url' => 'https://reichi.it',
+            // true = base_url zeigt direkt auf den Ordner it/; Links in canonical/og:url/sitemap
+            // enthalten den lokalen Unterordner dann nicht.
+            'own_domain' => true,
+            // Leer = aus. 'reichi.it' = Aufrufe über eine andere Adresse (www.reichi.com/it/)
+            // werden dauerhaft (301) auf die eigene Domain umgeleitet. Erst setzen, wenn die
+            // Domain im Panel eingerichtet ist und https://reichi.it/ funktioniert.
+            'enforce_host' => '',
+            'site_name' => 'reichi.it',
+            'mail_to' => 'reichi@reichi.it',
+            'mail_from' => 'website@reichi.it',
+            'mail_from_name' => 'reichi.it Website',
+            'mail_envelope_from' => 'website@reichi.it',
+            'mail_subject_prefix' => '[reichi.it] ',
+            // Cloudflare Turnstile braucht ein eigenes Widget für die Domain reichi.it
+            // (oder im bestehenden Widget reichi.it als weitere Domain eintragen).
+            'turnstile' => [
+                'site_key' => '',
+                'secret_key' => '',
+                'appearance' => 'always',
+            ],
+        ],
+    ],
 ];

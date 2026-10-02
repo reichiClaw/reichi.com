@@ -1,5 +1,5 @@
 /*
- * reichi.com – minimales Vanilla-JavaScript.
+ * reichi.com und reichi.it – minimales Vanilla-JavaScript.
  * Alles hier ist optional: Navigation, Inhalte und Formular funktionieren ohne JS.
  *  1. Mobile Navigation (Toggle, Escape, Fokus)
  *  2. Header-Zustand beim Scrollen
@@ -164,7 +164,8 @@
 
   /* 5. Formularstatus ---------------------------------------------------- */
   var status = doc.getElementById('form-status');
-  if (status && window.location.hash === '#hire') {
+  var statusSection = status ? status.closest('section[id]') : null;
+  if (status && statusSection && window.location.hash === '#' + statusSection.id) {
     // Erst nach dem Sprung des Browsers zum Fragment ausführen, sonst wird der Fokus wieder entfernt.
     var focusStatus = function () {
       setTimeout(function () {
@@ -201,7 +202,7 @@
       window.reichiTurnstileReady = function () {
         window.turnstile.render(widgetHost, {
           sitekey: siteKey,
-          theme: 'dark',
+          theme: form.getAttribute('data-turnstile-theme') || 'dark',
           language: 'de',
           action: 'contact',
           appearance: form.getAttribute('data-turnstile-appearance') || 'always',
