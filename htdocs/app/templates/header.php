@@ -20,8 +20,11 @@ $isHome = !empty($page['is_home']);
 $bodyClass = $page['body_class'] ?? '';
 // Optionale Abweichungen je Website (reichi.it): Zusatz zur Wortmarke, Farben, weitere Dateien.
 $brandSuffix = (string) ($site['brand_suffix'] ?? '');
-// Sichtbare Form des Zusatzes – darf Inline-SVG enthalten (reichi.it: Blitz statt Punkt), sonst der Text
-$brandSuffixHtml = isset($site['brand_suffix_html']) ? (string) $site['brand_suffix_html'] : e($brandSuffix);
+// Wortmarke als Bild statt Text (reichi.it: Ligatur mit Blitz als Negativform); Pfad relativ zu assets/
+$brandWordmark = (string) ($site['brand_wordmark'] ?? '');
+$brandWordHtml = $brandWordmark !== ''
+    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="360" height="78" decoding="async">'
+    : e($site['brand']) . ($brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '');
 $brandLabel = $site['brand'] . $brandSuffix . ' – Startseite';
 $themeColor = (string) ($site['theme_color'] ?? '#0d0d10');
 $personImage = (string) ($site['person_image'] ?? '/assets/images/photos/portrait-hood-800.jpg');
@@ -119,7 +122,7 @@ $jsonLd = $isHome
   <div class="site-header__inner">
     <a class="brand" href="<?= e($isHome ? '#top' : url('/')) ?>" aria-label="<?= e($brandLabel) ?>">
       <?= logo_mark('brand__mark') ?>
-      <span class="brand__word"><?= e($site['brand']) ?><?= $brandSuffix !== '' ? '<span class="brand__suffix">' . $brandSuffixHtml . '</span>' : '' ?></span>
+      <span class="brand__word"><?= $brandWordHtml ?></span>
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">

@@ -28,11 +28,9 @@ return [
     'site' => [
         'brand' => 'reichi',
         'brand_suffix' => '.it',
-        // Sichtbare Form in Kopf- und Fußzeile: Blitz statt Punkt (dieselbe Form wie im Logo,
-        // tools/build-it-brand.py). Einzige Stelle mit HTML in dieser Datei.
-        'brand_suffix_html' => '<svg class="brand__bolt" viewBox="0 0 52 100" width="52" height="100" aria-hidden="true" focusable="false">'
-            . '<path d="M31 0H52L32 40H52L14 100L20 58H2Z"/>'
-            . '</svg>it',
+        // Kopf- und Fußzeile zeigen die Wortmarke als Bild (Ligatur „it“ mit Blitz als Negativform,
+        // erzeugt von tools/build-it-brand.py); Pfad relativ zu assets/
+        'brand_wordmark' => 'images/reichi-it-wordmark.svg',
         'name' => 'Christian Reichinger',
         'title' => 'reichi.it – Event-IT: Netzwerk, WLAN & Support für Festivals und Events',
         'description' => 'Event-IT von Christian „reichi“ Reichinger: Netzwerk, WLAN und Internet am Gelände aufbauen, während der Show betreuen, vorher richtig planen. Für Festivals, Produktionsfirmen und Firmen-Events. Die IT-Abteilung von reichi.com.',

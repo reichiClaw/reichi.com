@@ -38,21 +38,11 @@
 @media (max-width: 63.99em) {
   .js .site-nav { box-shadow: 0 30px 60px rgba(21, 21, 26, 0.12); }
 }
-.brand__suffix { font-weight: inherit; }
 .brand:hover .brand__mark { color: var(--accent-ink); }
-/* der Blitz anstelle des Punkts vor „it“ (Inline-SVG aus content-it.php): steht auf der Grundlinie,
-   so hoch wie der i-Punkt, das einzige farbige Element der Marke */
-.brand__bolt {
-  display: inline-block;
-  width: auto;
-  height: 0.8em;
-  margin: 0 0.06em 0 0.07em;
-  vertical-align: -0.02em;
-  overflow: visible;
-  fill: var(--accent-ink);
-  filter: drop-shadow(0 0 3px var(--accent-glow));
-}
-.brand:hover .brand__bolt { filter: drop-shadow(0 0 6px var(--accent)); }
+/* Wortmarke als SVG-Bild (Ligatur „it“ mit Blitz als Negativform, Punkt als Knoten) – Höhe
+   so, dass die x-Höhe der des gesetzten Texts auf reichi.com entspricht */
+.brand__word:has(.brand__wordmark) { padding-top: 0; display: flex; }
+.brand__wordmark { display: block; height: 0.9em; width: auto; }
 
 .button--primary { background: var(--red); border-color: var(--red); color: #fff; }
 .button--primary:hover { background: var(--red-hover); border-color: var(--red-hover); }
@@ -363,13 +353,6 @@ code { background: var(--bg-3); }
     95% { text-shadow: 0 0 0.45em var(--accent-glow); }
   }
   .it-hero__title-b { animation: overload-glow 7s linear infinite; }
-  @keyframes overload-bolt {
-    0%, 90%, 100% { filter: drop-shadow(0 0 3px var(--accent-glow)); opacity: 1; }
-    92% { filter: drop-shadow(0 0 7px var(--accent)); opacity: 0.55; }
-    94% { filter: drop-shadow(0 0 3px var(--accent-glow)); opacity: 1; }
-    96% { filter: drop-shadow(0 0 7px var(--accent)); opacity: 0.7; }
-  }
-  .brand__bolt { animation: overload-bolt 5s linear infinite; }
 }
 
 @media print {

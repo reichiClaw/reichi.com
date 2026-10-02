@@ -284,10 +284,11 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 
 - Light „paper“ background with the same film grain, an electric blue-green accent
   (`--accent` in `it.css`, used for fills, lines and glows only; text uses the darker
-  `--accent-ink`), reichi.com's red only on the primary button. The brand shows a single
-  geometric lightning bolt instead of the dot before „it“ (`brand_suffix_html` in
-  `content-it.php`; letters stay in ink, the bolt is the only coloured element); the second
-  headline line and the bolt carry a soft glow that flickers briefly every few seconds
+  `--accent-ink`), reichi.com's red only on the primary button. The wordmark keeps the dot
+  (as a node in accent colour) and sets „it“ as a ligature whose stems form one block with
+  the lightning bolt cut out as negative space (`brand_wordmark` in `content-it.php`, an
+  SVG image in header and footer); the second
+  headline line carries a soft glow that flickers briefly every few seconds
   (motion only without `prefers-reduced-motion`). Du-form, lighter tone, a few English lines
   (`lang="en"`).
 - Hero: no photo but an inline-SVG network diagram (Uplink → Produktion → FOH/Stage/…).
@@ -301,7 +302,8 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 - Logo: `assets-src/brand/reichi-it-logo.svg|png` (for light surfaces),
   `reichi-it-logo-dark.svg|png` (for dark surfaces), `reichi-it-mark.svg` (badge). The script
   also writes the favicons, the share image and the card logo for reichi.com. Regenerate with
-  `python3 tools/build-it-brand.py` (needs `fonttools`, `cairosvg`, `pillow` and Inter Bold).
+  `python3 tools/build-it-brand.py` (needs `fonttools`, `cairosvg`, `pillow`, `skia-pathops` and
+  Inter Bold).
 
 ## Editing content
 
