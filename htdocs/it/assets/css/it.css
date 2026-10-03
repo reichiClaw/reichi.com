@@ -39,10 +39,10 @@
   .js .site-nav { box-shadow: 0 30px 60px rgba(21, 21, 26, 0.12); }
 }
 .brand:hover .brand__mark { color: var(--accent-ink); }
-/* Wortmarke als SVG-Bild (Ligatur „it“ mit Blitz als Negativform, Punkt als Knoten) – Höhe
-   so, dass die x-Höhe der des gesetzten Texts auf reichi.com entspricht */
+/* Wortmarke als SVG-Bild („.it“ als Negativform im Farbfeld) – Höhe so, dass die Buchstaben
+   so groß sind wie der gesetzte Text auf reichi.com; der Tag ragt oben und unten etwas darüber */
 .brand__word:has(.brand__wordmark) { padding-top: 0; display: flex; }
-.brand__wordmark { display: block; height: 0.9em; width: auto; }
+.brand__wordmark { display: block; height: 1.04em; width: auto; }
 
 .button--primary { background: var(--red); border-color: var(--red); color: #fff; }
 .button--primary:hover { background: var(--red-hover); border-color: var(--red-hover); }

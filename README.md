@@ -284,10 +284,9 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 
 - Light „paper“ background with the same film grain, an electric blue-green accent
   (`--accent` in `it.css`, used for fills, lines and glows only; text uses the darker
-  `--accent-ink`), reichi.com's red only on the primary button. The wordmark keeps the dot
-  (as a node in accent colour) and sets „it“ as a ligature whose stems form one block with
-  the lightning bolt cut out as negative space (`brand_wordmark` in `content-it.php`, an
-  SVG image in header and footer); the second
+  `--accent-ink`), reichi.com's red only on the primary button. The wordmark sets „reichi“ in ink
+  and „.it“ knocked out of a rounded accent tag (`brand_wordmark` in `content-it.php`, an
+  SVG image in header and footer; the bolt lives in favicon and badge); the second
   headline line carries a soft glow that flickers briefly every few seconds
   (motion only without `prefers-reduced-motion`). Du-form, lighter tone, a few English lines
   (`lang="en"`).

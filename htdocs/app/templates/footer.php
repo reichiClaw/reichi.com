@@ -13,8 +13,9 @@ $isHome = !empty($page['is_home']);
 $site = $content['site'];
 $brandSuffix = (string) ($site['brand_suffix'] ?? '');
 $brandWordmark = (string) ($site['brand_wordmark'] ?? '');
+[$brandWordmarkW, $brandWordmarkH] = $site['brand_wordmark_size'] ?? [0, 0];
 $brandWordHtml = $brandWordmark !== ''
-    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="360" height="78" decoding="async">'
+    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="' . (int) $brandWordmarkW . '" height="' . (int) $brandWordmarkH . '" decoding="async">'
     : e($site['brand']) . ($brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '');
 $hireHref = $content['nav_cta']['href'];
 // „Mehr“-Spalte: eigene Linkliste der Website oder (reichi.com) die verbundenen Projekte.

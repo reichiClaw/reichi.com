@@ -28,9 +28,10 @@ return [
     'site' => [
         'brand' => 'reichi',
         'brand_suffix' => '.it',
-        // Kopf- und Fußzeile zeigen die Wortmarke als Bild (Ligatur „it“ mit Blitz als Negativform,
-        // erzeugt von tools/build-it-brand.py); Pfad relativ zu assets/
+        // Kopf- und Fußzeile zeigen die Wortmarke als Bild („.it“ als Negativform im Farbfeld,
+        // erzeugt von tools/build-it-brand.py – das Skript gibt die Größe aus); Pfad relativ zu assets/
         'brand_wordmark' => 'images/reichi-it-wordmark.svg',
+        'brand_wordmark_size' => [392, 90],
         'name' => 'Christian Reichinger',
         'title' => 'reichi.it – Event-IT: Netzwerk, WLAN & Support für Festivals und Events',
         'description' => 'Event-IT von Christian „reichi“ Reichinger: Netzwerk, WLAN und Internet am Gelände aufbauen, während der Show betreuen, vorher richtig planen. Für Festivals, Produktionsfirmen und Firmen-Events. Die IT-Abteilung von reichi.com.',
