@@ -22,8 +22,9 @@ $bodyClass = $page['body_class'] ?? '';
 $brandSuffix = (string) ($site['brand_suffix'] ?? '');
 // Wortmarke als Bild statt Text (reichi.it: Ligatur mit Blitz als Negativform); Pfad relativ zu assets/
 $brandWordmark = (string) ($site['brand_wordmark'] ?? '');
+[$brandWordmarkW, $brandWordmarkH] = $site['brand_wordmark_size'] ?? [0, 0];
 $brandWordHtml = $brandWordmark !== ''
-    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="360" height="78" decoding="async">'
+    ? '<img class="brand__wordmark" src="' . e(asset($brandWordmark)) . '" alt="" width="' . (int) $brandWordmarkW . '" height="' . (int) $brandWordmarkH . '" decoding="async">'
     : e($site['brand']) . ($brandSuffix !== '' ? '<span class="brand__suffix">' . e($brandSuffix) . '</span>' : '');
 $brandLabel = $site['brand'] . $brandSuffix . ' – Startseite';
 $themeColor = (string) ($site['theme_color'] ?? '#0d0d10');

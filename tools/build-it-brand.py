@@ -2,7 +2,7 @@
 """
 Erzeugt die Markenzeichen von reichi.it (Entwicklungsrechner, nicht auf dem Server nötig):
 
-  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi it“ mit Blitz + Sechseck-R, für helle Flächen
+  assets-src/brand/reichi-it-logo.svg        Wortmarke „reichi“ + Tag „.it“ + Sechseck-R, für helle Flächen
   assets-src/brand/reichi-it-logo-dark.svg   dieselbe Marke für dunkle Flächen
   assets-src/brand/reichi-it-logo*.png       Pixelversionen (2400 px breit, transparent)
   assets-src/brand/reichi-it-mark.svg        Sechseck mit Blitz (Abzeichen)
@@ -13,9 +13,9 @@ Erzeugt die Markenzeichen von reichi.it (Entwicklungsrechner, nicht auf dem Serv
 
 Die Wortmarke verwendet dieselbe Schriftidee wie die Website (serifenlose Systemschrift,
 fett, eng gesetzt); als Datei wird sie mit Inter Bold (SIL Open Font License) in Pfade
-umgewandelt, damit sie überall gleich aussieht. Der Punkt bleibt und wird zum Knoten in
-Akzentfarbe; „it“ ist eine Ligatur: i- und t-Stamm sind bis zur x-Höhe zu einem Block
-verbunden, der Blitz ist als Negativform herausgeschnitten (Boolesche Pfade mit skia-pathops).
+umgewandelt, damit sie überall gleich aussieht. „reichi“ steht in Tinte, „.it“ als
+Negativform in einem abgerundeten Farbfeld (wie ein Kabel-Tag; Boolesche Pfade mit
+skia-pathops). Der Blitz lebt in Favicon und Abzeichen.
 Das Sechseck-R stammt aus dem vorhandenen safari-pinned-tab.svg der alten reichi.com.
 Die Website bindet htdocs/it/assets/images/reichi-it-wordmark.svg ein (brand_word_html).
 
@@ -90,11 +90,14 @@ BOLT_POINTS = ((31, 0), (52, 0), (32, 40), (52, 40), (14, 100), (20, 58), (2, 58
 BOLT_D = "M31 0H52L32 40H52L14 100L20 58H2Z"
 BOLT_W, BOLT_H = 52.0, 100.0
 
-# Wortmarke: Laufweite, Abstand i-Stamm → t-Stamm in der Ligatur, Rand des Blitzlochs, Blitzbreite
+# Wortmarke: Laufweite; Farbfeld „.it“: Abstand zum Wort, Innenabstand, Überstand über den i-Punkt
+# (0.768 em) bzw. unter die Grundlinie, Eckradius – alles in em
 WORD_TRACKING = -0.03
-LIG_GAP = 0.22
-LIG_MARGIN = 0.055
-LIG_BOLT_XS = 0.74
+TAG_GAP = 0.14
+TAG_PAD_X = 0.12
+TAG_TOP = 0.83
+TAG_BOTTOM = 0.065
+TAG_RADIUS = 0.14
 
 
 def bolt_svg(x: float, y: float, height: float, fill: str) -> str:
@@ -151,58 +154,38 @@ def _d(path: pathops.Path) -> str:
 
 
 def wordmark(font: TTFont, size: float, x: float, baseline: float) -> dict:
-    """„reichi.it“: Buchstaben in Tinte, der Punkt als Knoten in Akzentfarbe, „it“ als Ligatur:
-    i-Stamm und t-Stamm sind bis zur x-Höhe zu einem Block verbunden, aus dem der Blitz als
-    Negativform geschnitten ist. Liefert Pfaddaten und Maße (Ursprung links auf der Grundlinie)."""
+    """„reichi.it“: „reichi“ in Tinte, „.it“ als Negativform in einem abgerundeten Farbfeld
+    (Kabel-Tag). Liefert Pfaddaten und Maße (Ursprung links auf der Grundlinie)."""
     track = WORD_TRACKING * size
     word = pathops.Path()
     pos = x
     for ch in "reichi":
         word.addPath(_glyph(font, ch, size, pos, baseline))
         pos += _advance(font, ch, size) + track
-    # Punkt → perfekter Kreis gleicher Größe (Knoten)
-    px0, py0, px1, py1 = _bounds(font, ".", size)
-    dot = {"cx": pos + (px0 + px1) / 2, "cy": baseline - (py0 + py1) / 2, "r": (px1 - px0) / 2}
-    pos += _advance(font, ".", size) + track
-    # Ligatur „it“
-    i_x = pos
-    i_right = i_x + _bounds(font, "i", size)[2]
-    t0 = _glyph(font, "t", size, 0, baseline)
-    probe_y = baseline - 0.3 * size
-    probe = pathops.Path()
-    probe.moveTo(-size, probe_y - 1); probe.lineTo(2 * size, probe_y - 1); probe.lineTo(2 * size, probe_y + 1); probe.lineTo(-size, probe_y + 1); probe.close()
-    t_stem_left = pathops.op(t0, probe, pathops.PathOp.INTERSECTION).bounds[0]
-    t_x = i_right + LIG_GAP * size - t_stem_left
-    lig = pathops.Path()
-    lig.addPath(_glyph(font, "i", size, i_x, baseline))
-    lig.addPath(_glyph(font, "t", size, t_x, baseline))
-    x_height = font["OS/2"].sxHeight * size / font["head"].unitsPerEm
-    block = pathops.Path()
-    block.moveTo(i_right - 1, baseline); block.lineTo(t_x + t_stem_left + 1, baseline)
-    block.lineTo(t_x + t_stem_left + 1, baseline - x_height); block.lineTo(i_right - 1, baseline - x_height); block.close()
-    lig = pathops.op(lig, block, pathops.PathOp.UNION)
-    # Blitz (Logo-Geometrie, schmaler) als Loch im Block
-    margin = LIG_MARGIN * size
-    top = baseline - x_height + margin
-    h = x_height - 2 * margin
-    k = h / BOLT_H
-    w = BOLT_W * LIG_BOLT_XS * k
-    cx = (i_right + t_x + t_stem_left) / 2
-    hole = pathops.Path()
-    for n, (bx, by) in enumerate(BOLT_POINTS):
-        (hole.moveTo if n == 0 else hole.lineTo)(cx - w / 2 + bx * LIG_BOLT_XS * k, top + by * k)
-    hole.close()
-    lig = pathops.op(lig, hole, pathops.PathOp.DIFFERENCE)
-    right = t_x + _bounds(font, "t", size)[2]
-    return {"word": _d(word), "dot": dot, "lig": _d(lig), "right": right, "top": baseline - 0.768 * size, "bottom": baseline + 0.01 * size}
+    pos -= track
+    # Farbfeld: Abstand zum Wort, Innenabstand, Höhe von knapp über dem i-Punkt bis knapp unter die Grundlinie
+    x0 = pos + TAG_GAP * size
+    text_x = x0 + TAG_PAD_X * size
+    txt = pathops.Path()
+    pos = text_x
+    for ch in ".it":
+        txt.addPath(_glyph(font, ch, size, pos, baseline))
+        pos += _advance(font, ch, size) + track
+    x1 = pos - track + TAG_PAD_X * size
+    top = baseline - TAG_TOP * size
+    bottom = baseline + TAG_BOTTOM * size
+    r = TAG_RADIUS * size
+    tag = pathops.Path()
+    tag.moveTo(x0 + r, top); tag.lineTo(x1 - r, top); tag.quadTo(x1, top, x1, top + r)
+    tag.lineTo(x1, bottom - r); tag.quadTo(x1, bottom, x1 - r, bottom)
+    tag.lineTo(x0 + r, bottom); tag.quadTo(x0, bottom, x0, bottom - r)
+    tag.lineTo(x0, top + r); tag.quadTo(x0, top, x0 + r, top); tag.close()
+    tag = pathops.op(tag, txt, pathops.PathOp.DIFFERENCE)
+    return {"word": _d(word), "tag": _d(tag), "right": x1, "top": top, "bottom": bottom}
 
 
 def wordmark_svg(wm: dict, ink: str, accent: str) -> str:
-    return (
-        f'<path fill="{ink}" d="{wm["word"]}"/>'
-        f'<circle cx="{wm["dot"]["cx"]:.2f}" cy="{wm["dot"]["cy"]:.2f}" r="{wm["dot"]["r"]:.2f}" fill="{accent}"/>'
-        f'<path fill="{ink}" d="{wm["lig"]}"/>'
-    )
+    return f'<path fill="{ink}" d="{wm["word"]}"/><path fill="{accent}" d="{wm["tag"]}"/>'
 
 
 def build_logo(font: TTFont, ink: str, accent: str, out: Path) -> tuple[str, int, int]:
@@ -238,7 +221,7 @@ def build_header_wordmark(font: TTFont) -> None:
         f'role="img" aria-label="reichi.it">{wordmark_svg(wm, INK, ACCENT_INK)}</svg>'
     )
     (IT_DIR / "assets" / "images" / "reichi-it-wordmark.svg").write_text(svg, encoding="utf-8")
-    print(f"wordmark viewBox 0 {top:.2f} {w} {h}  ratio {w / h:.3f}")
+    print(f"wordmark viewBox 0 {top:.2f} {w} {h}  → brand_wordmark_size in content-it.php: [{w}, {h}]")
 
 
 def render_png(svg: str, out: Path, width: int | None = None, background: str | None = None) -> None:
