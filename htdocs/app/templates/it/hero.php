@@ -20,16 +20,18 @@ $hero = $content['hero'];
 $labels = $hero['diagram_nodes'];
 $ground = $hero['ground'];
 
-// Knoten im 1000×1000-Koordinatenraum des Geländebilds: [x, y, Beschriftung]. Reihenfolge wie
-// $labels. Der Punkt sitzt auf dem Objekt (Mast, Container, Turm …), das Schild hängt darüber.
+// Knoten im 1000×1000-Koordinatenraum des Geländebilds: [x, y, Beschriftung, Lage des Schilds].
+// Reihenfolge wie $labels. Der Punkt sitzt auf dem Objekt (Mast, Container, Turm …), das Schild
+// hängt darüber – oder mit 'below' darunter, wo es sonst etwas verdecken würde (das Logo auf dem
+// Containerdach) oder mit einem Nachbarn zusammenstieße.
 $nodes = [
-    [690, 215, $labels[0]],  // Uplink – Funkmast
-    [815, 400, $labels[1]],  // Produktion (Core) – Bürocontainer
-    [480, 430, $labels[2]],  // FOH – Mischturm
-    [300, 200, $labels[3]],  // Stage – Bühnendach
-    [590, 290, $labels[4]],  // Backstage – Nightliner und Pagoden
-    [650, 560, $labels[5]],  // Kassa – Ticketbox am Eingang
-    [240, 610, $labels[6]],  // Guest Wi-Fi – Camping
+    [690, 215, $labels[0]],           // Uplink – Funkmast
+    [741, 454, $labels[1], 'below'],  // Produktion (Core) – Bürocontainer, vordere linke Ecke am Boden
+    [480, 430, $labels[2]],           // FOH – Mischturm
+    [300, 200, $labels[3]],           // Stage – Bühnendach
+    [590, 290, $labels[4]],           // Backstage – Nightliner und Pagoden
+    [650, 560, $labels[5], 'below'],  // Kassa – Ticketbox am Eingang
+    [240, 610, $labels[6]],           // Guest Wi-Fi – Camping
 ];
 // Leitungen als Indexpaare (Versorger zuerst); 'dashed' = Reserve (im simulierten Störfall aktiv).
 $edges = [
@@ -75,10 +77,18 @@ $groundSet = implode(', ', array_map(
             <?php endforeach; ?>
           </g>
           <g class="it-net__nodes">
-            <?php foreach ($nodes as $i => [$x, $y, $label]): ?>
-              <?php $w = $tagW($label); $core = $i === 1; $h = $core ? 50 : 44; $top = -22 - $h; ?>
+            <?php foreach ($nodes as $i => $node): ?>
+              <?php
+                [$x, $y, $label] = $node;
+                $below = ($node[3] ?? '') === 'below';
+                $w = $tagW($label);
+                $core = $i === 1;
+                $h = $core ? 50 : 44;
+                $top = $below ? 22 : -22 - $h;
+                $dir = $below ? 1 : -1;
+              ?>
               <g class="it-net__node<?= $core ? ' it-net__node--core' : '' ?><?= $i === 0 ? ' it-net__node--uplink' : '' ?>" data-x="<?= $x ?>" data-y="<?= $y ?>"<?= in_array($i, $accessPoints, true) ? ' data-ap' : '' ?> transform="translate(<?= $x ?> <?= $y ?>)">
-                <line class="it-net__stem" x1="0" y1="-8" x2="0" y2="-22"/>
+                <line class="it-net__stem" x1="0" y1="<?= 8 * $dir ?>" x2="0" y2="<?= 22 * $dir ?>"/>
                 <rect class="it-net__tag" x="<?= -$w / 2 ?>" y="<?= $top ?>" width="<?= $w ?>" height="<?= $h ?>" rx="6"/>
                 <text class="it-net__label" x="0" y="<?= $top + $h / 2 ?>" dominant-baseline="central" text-anchor="middle"><?= e($label) ?></text>
                 <circle class="it-net__led" cx="0" cy="0" r="7"/>
