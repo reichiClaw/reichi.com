@@ -1,9 +1,17 @@
 /*
  * reichi.it – Ergänzung zu main.js: der Netzplan im Hero lebt.
- * Auf einer Canvas über dem Inline-SVG laufen „Pakete“ vom Uplink über den Core zu den
- * Knoten (und gelegentlich zurück); mit Maus leuchtet der Zeiger die Umgebung weich an
- * und Knoten in Zeigernähe bekommen einen Ring. Ohne JavaScript, ohne Maus oder mit
- * prefers-reduced-motion bleibt der statische Plan – nichts hier ist nötig.
+ *
+ * 1. Pakete laufen vom Uplink über den Core zu den Knoten (und gelegentlich zurück).
+ * 2. Alle paar Sekunden fällt eine Leitung aus: Marker auf der Leitung, der betroffene Teil des
+ *    Plans wird kurz dunkel, dann nimmt der Verkehr die gestrichelte Reserveverbindung, bis die
+ *    Leitung zurück ist (Störung → Umleitung → wiederhergestellt). Statuszeile und Terminal melden es.
+ * 3. Hinter dem SVG atmet unter den Access-Point-Knoten ein weiches Versorgungsfeld (eigene Canvas).
+ *    Mit Maus wird der Zeiger zum Endgerät, das sich beim nächsten AP anmeldet (Linie + Pegelanzeige;
+ *    der Pegel ist aus dem Abstand gerechnet, keine Messung).
+ * 4. Der Terminal-Streifen unter dem Plan tippt die Zeilen aus content-it.php in Schleife.
+ *
+ * Ohne JavaScript, ohne Maus (nur 1, 2, 3 ohne Endgerät, 4) oder mit prefers-reduced-motion
+ * (gar nichts) bleibt der statische Plan mit den ersten drei Terminal-Zeilen – nichts hier ist nötig.
  */
 (function () {
   'use strict';
@@ -13,7 +21,12 @@
   var panel = root.querySelector('.it-net__panel');
   var svg = root.querySelector('.it-net__svg');
   var canvas = root.querySelector('.it-net__canvas');
+  var fieldCanvas = root.querySelector('.it-net__field');
+  var log = root.querySelector('.it-net__log');
+  var statusDot = root.querySelector('.it-net__status');
+  var statusText = root.querySelector('.it-net__meta');
   var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+  var fctx = fieldCanvas && fieldCanvas.getContext ? fieldCanvas.getContext('2d') : null;
   if (!panel || !svg || !ctx) { return; }
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -22,39 +35,84 @@
 
   var VIEW = 600; // viewBox-Kantenlänge des SVG
   var style = getComputedStyle(document.documentElement);
-  var accent = (style.getPropertyValue('--accent') || '#00e6c3').trim();
-  var accentInk = (style.getPropertyValue('--accent-ink') || '#00705f').trim();
-  var ink = (style.getPropertyValue('--ink') || '#15151a').trim();
+  function token(name, fallback) { return (style.getPropertyValue(name) || fallback).trim(); }
+  var accent = token('--accent', '#00e6c3');
+  var accentInk = token('--accent-ink', '#00705f');
+  var ink = token('--ink', '#15151a');
+  var ink2 = token('--ink-2', '#4a4a52');
+  var red = token('--red', '#d8371f');
+  var ok = token('--ok', '#1f7a46');
+  var panelBg = token('--panel', '#fbfaf7');
+  var labelEl = svg.querySelector('.it-net__label');
+  var monoFont = labelEl ? getComputedStyle(labelEl).fontFamily : 'monospace';
 
-  var nodes = Array.prototype.map.call(svg.querySelectorAll('.it-net__node'), function (el) {
-    return { x: parseFloat(el.getAttribute('data-x')), y: parseFloat(el.getAttribute('data-y')) };
+  function map(list, fn) { return Array.prototype.map.call(list, fn); }
+
+  var nodes = map(svg.querySelectorAll('.it-net__node'), function (el) {
+    var label = el.querySelector('.it-net__label');
+    return {
+      x: parseFloat(el.getAttribute('data-x')),
+      y: parseFloat(el.getAttribute('data-y')),
+      label: label ? label.textContent.trim() : '',
+      ap: el.hasAttribute('data-ap')
+    };
   });
-  var edges = Array.prototype.map.call(svg.querySelectorAll('.it-net__edge'), function (el) {
+  var edges = map(svg.querySelectorAll('.it-net__edge'), function (el) {
     return {
       a: parseInt(el.getAttribute('data-a'), 10),
       b: parseInt(el.getAttribute('data-b'), 10),
-      dashed: el.classList.contains('it-net__edge--dashed')
+      dashed: el.classList.contains('it-net__edge--dashed'),
+      el: el
     };
   });
   if (nodes.length < 2 || !edges.length) { return; }
+  var aps = [];
+  nodes.forEach(function (n, i) { if (n.ap) { aps.push(i); } });
+  var reserve = -1;
+  edges.forEach(function (e, i) { if (e.dashed && reserve === -1) { reserve = i; } });
 
-  // Baum: welche Leitungen führen von einem Knoten weiter weg vom Uplink (Index 0)?
-  var downstream = nodes.map(function () { return []; });
-  var upstream = nodes.map(function () { return null; });
-  edges.forEach(function (edge, i) {
-    if (edge.dashed) { return; }
-    downstream[edge.a].push({ edge: i, to: edge.b });
-    upstream[edge.b] = { edge: i, to: edge.a };
+  // Routing: Baum vom Uplink (Index 0) über die aktiven Leitungen. Die gestrichelte Reserve
+  // zählt nur, wenn useReserve gesetzt ist; failedEdge ist gesperrt.
+  var downstream, upstream, reachable;
+  function route(failedEdge, useReserve) {
+    downstream = nodes.map(function () { return []; });
+    upstream = nodes.map(function () { return null; });
+    reachable = nodes.map(function () { return false; });
+    var queue = [0];
+    reachable[0] = true;
+    while (queue.length) {
+      var n = queue.shift();
+      edges.forEach(function (e, i) {
+        if (i === failedEdge || (e.dashed && !useReserve)) { return; }
+        var other = e.a === n ? e.b : (e.b === n ? e.a : -1);
+        if (other === -1 || reachable[other]) { return; }
+        reachable[other] = true;
+        downstream[n].push({ edge: i, to: other });
+        upstream[other] = { edge: i, to: n };
+        queue.push(other);
+      });
+    }
+  }
+  // Welche Leitungen dürfen ausfallen, ohne dass über die Reserve ein Knoten unerreichbar bleibt?
+  var failable = [];
+  edges.forEach(function (e, i) {
+    if (e.dashed) { return; }
+    route(i, true);
+    if (reachable.every(Boolean)) { failable.push(i); }
   });
+  route(-1, false);
 
   var width = 0, height = 0, dpr = 1, scale = 1, ox = 0, oy = 0;
   function size() {
     width = panel.clientWidth;
     height = panel.clientHeight;
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    [canvas, fieldCanvas].forEach(function (c) {
+      if (!c) { return; }
+      c.width = Math.round(width * dpr);
+      c.height = Math.round(height * dpr);
+      c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
     // „meet“-Abbildung wie das SVG: Quadrat mittig, Ränder bleiben frei
     scale = Math.min(width, height) / VIEW;
     ox = (width - VIEW * scale) / 2;
@@ -63,77 +121,297 @@
   function px(v) { return ox + v * scale; }
   function py(v) { return oy + v * scale; }
 
-  // Pakete: laufen entlang einer Leitung von a nach b (t 0 → 1)
+  // Pakete: laufen entlang einer Leitung von from nach to (t 0 → 1)
   var pulses = [];
   var SPEED = 0.55; // Leitungen pro Sekunde
-  function spawn(edgeIndex, forward, down) {
-    pulses.push({ edge: edgeIndex, t: 0, forward: forward, down: down });
+  function spawn(edgeIndex, from, to, down) {
+    pulses.push({ edge: edgeIndex, from: from, to: to, t: 0, down: down });
   }
   function wave() {
-    if (downstream[0].length) { spawn(downstream[0][0].edge, true, true); }
+    downstream[0].forEach(function (next) { spawn(next.edge, 0, next.to, true); });
   }
   function echo() {
-    // Antwort eines zufälligen Blatt-Knotens zurück Richtung Uplink
+    // Antwort eines zufälligen erreichbaren Blatt-Knotens zurück Richtung Uplink
     var leaves = [];
-    nodes.forEach(function (n, i) { if (i !== 0 && !downstream[i].length && upstream[i]) { leaves.push(i); } });
+    nodes.forEach(function (n, i) { if (i !== 0 && reachable[i] && !downstream[i].length && upstream[i]) { leaves.push(i); } });
     if (!leaves.length) { return; }
     var from = leaves[Math.floor(Math.random() * leaves.length)];
-    spawn(upstream[from].edge, false, false);
+    spawn(upstream[from].edge, from, upstream[from].to, false);
   }
 
-  var pointer = { x: 0, y: 0, tx: 0, ty: 0, active: false, alpha: 0 };
-  var rings = []; // kurz aufleuchtende Ringe an Knoten in Zeigernähe
-  var lastNear = -1;
+  // Terminal-Streifen: Zeilen aus dem Markup, danach übernimmt das Skript die Liste.
+  var lines = [], events = {}, ticker = null;
+  if (log) {
+    lines = map(log.querySelectorAll('li'), function (el) { return el.textContent.trim(); }).filter(Boolean);
+    events = {
+      down: log.getAttribute('data-event-down') || '',
+      reroute: log.getAttribute('data-event-reroute') || '',
+      up: log.getAttribute('data-event-up') || ''
+    };
+    while (log.firstChild) { log.removeChild(log.firstChild); }
+    root.classList.add('it-net--live');
+    ticker = { queue: [], el: null, text: '', pos: 0, charT: 0, idle: 1.2, idx: 0 };
+  }
+  function say(text, kind) {
+    if (ticker && text) { ticker.queue.push({ text: text, kind: kind }); }
+  }
+  function tick(dt) {
+    if (!ticker) { return; }
+    if (!ticker.el) {
+      if (!ticker.queue.length && lines.length) {
+        ticker.idle -= dt;
+        if (ticker.idle <= 0) { say(lines[ticker.idx++ % lines.length], ''); }
+      }
+      if (ticker.queue.length) {
+        var item = ticker.queue.shift();
+        var li = document.createElement('li');
+        li.className = 'it-net__line' + (item.kind ? ' it-net__line--' + item.kind : '');
+        log.appendChild(li);
+        while (log.children.length > 3) { log.removeChild(log.firstChild); }
+        ticker.el = li;
+        ticker.text = item.text;
+        ticker.pos = 0;
+        ticker.charT = 0;
+      }
+      return;
+    }
+    ticker.charT += dt;
+    var perChar = 1 / 34;
+    while (ticker.charT >= perChar && ticker.pos < ticker.text.length) {
+      ticker.charT -= perChar;
+      ticker.pos++;
+    }
+    ticker.el.textContent = ticker.text.slice(0, ticker.pos);
+    if (ticker.pos >= ticker.text.length) {
+      ticker.el = null;
+      ticker.idle = 3.4 + Math.random() * 1.8;
+    }
+  }
 
-  var running = false, rafId = 0, lastT = 0, waveTimer = 0, echoTimer = 0;
+  // Störung: eine Leitung fällt aus, der Verkehr nimmt die Reserve, dann kommt die Leitung zurück.
+  var fault = { edge: -1, via: -1, phase: 'ok', t: 0, timer: 6 + Math.random() * 3 };
+  function setStatus(warn) {
+    if (statusDot) { statusDot.classList.toggle('is-warn', warn); }
+    if (statusText) {
+      var text = statusText.getAttribute(warn ? 'data-meta-failover' : 'data-meta-ok');
+      if (text) { statusText.textContent = text; }
+    }
+  }
+  function eventText(kind, e) {
+    return (events[kind] || '')
+      .replace('{a}', nodes[e.a].label)
+      .replace('{b}', nodes[e.b].label)
+      .replace('{via}', fault.via !== -1 ? nodes[fault.via].label : '');
+  }
+  function faultStart() {
+    var edge = failable[Math.floor(Math.random() * failable.length)];
+    var e = edges[edge], r = edges[reserve];
+    fault.edge = edge;
+    fault.phase = 'down';
+    fault.t = 0;
+    fault.via = r ? (r.a === e.b ? r.b : r.a) : -1;
+    // Erst ist der Teil hinter der Leitung weg (Feld wird dunkel), die Umleitung folgt in faultReroute()
+    route(edge, false);
+    for (var i = pulses.length - 1; i >= 0; i--) {
+      if (pulses[i].edge === edge) { pulses.splice(i, 1); }
+    }
+    e.el.classList.add('is-down');
+    setStatus(true);
+    say(eventText('down', e), 'down');
+  }
+  function faultReroute() {
+    fault.phase = 'rerouted';
+    route(fault.edge, true);
+    if (edges[reserve]) { edges[reserve].el.classList.add('is-active'); }
+    say(eventText('reroute', edges[fault.edge]), 'ok');
+    if (fault.via !== -1) { rings.push({ node: fault.via, t: 0, color: accentInk }); }
+  }
+  function faultResolve(silent) {
+    var e = edges[fault.edge];
+    e.el.classList.remove('is-down');
+    if (edges[reserve]) { edges[reserve].el.classList.remove('is-active'); }
+    route(-1, false);
+    setStatus(false);
+    if (!silent) {
+      rings.push({ node: e.a, t: 0, color: ok });
+      rings.push({ node: e.b, t: 0, color: ok });
+      say(eventText('up', e), 'up');
+    }
+    fault.phase = 'ok';
+    fault.edge = -1;
+    fault.timer = 9 + Math.random() * 5;
+  }
+  function faultStep(dt) {
+    if (!failable.length || reserve === -1) { return; }
+    if (fault.phase === 'ok') {
+      fault.timer -= dt;
+      if (fault.timer <= 0) { faultStart(); }
+      return;
+    }
+    fault.t += dt;
+    if (fault.phase === 'down' && fault.t > 0.8) { faultReroute(); }
+    if (fault.t > 6) { faultResolve(false); }
+  }
+  function drawFaultMarker() {
+    if (fault.edge === -1) { return; }
+    var e = edges[fault.edge];
+    var mx = px((nodes[e.a].x + nodes[e.b].x) / 2);
+    var my = py((nodes[e.a].y + nodes[e.b].y) / 2);
+    var pulse = 0.5 + 0.5 * Math.sin(time * 7);
+    ctx.beginPath();
+    ctx.arc(mx, my, 15 + pulse * 7, 0, Math.PI * 2);
+    ctx.strokeStyle = hexAlpha(red, 0.45 * (1 - pulse));
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(mx, my, 8.5 + pulse * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = hexAlpha(red, 0.92);
+    ctx.fill();
+    ctx.strokeStyle = panelBg;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(mx - 3.2, my - 3.2); ctx.lineTo(mx + 3.2, my + 3.2);
+    ctx.moveTo(mx + 3.2, my - 3.2); ctx.lineTo(mx - 3.2, my + 3.2);
+    ctx.stroke();
+  }
+
+  // Versorgungsfeld der Access Points (hinter dem SVG)
+  var fieldAlpha = nodes.map(function () { return 1; });
+  function drawField() {
+    if (!fctx) { return; }
+    fctx.clearRect(0, 0, width, height);
+    aps.forEach(function (i, k) {
+      var n = nodes[i];
+      fieldAlpha[i] += ((reachable[i] ? 1 : 0.18) - fieldAlpha[i]) * 0.08;
+      var breathe = 0.5 + 0.5 * Math.sin(time * 0.55 + k * 1.9);
+      var r = (86 + 22 * breathe) * scale;
+      var x = px(n.x), y = py(n.y), a = fieldAlpha[i];
+      var g = fctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, hexAlpha(accent, 0.26 * a));
+      g.addColorStop(0.5, hexAlpha(accent, 0.12 * a));
+      g.addColorStop(1, hexAlpha(accent, 0));
+      fctx.fillStyle = g;
+      fctx.beginPath();
+      fctx.arc(x, y, r, 0, Math.PI * 2);
+      fctx.fill();
+      fctx.strokeStyle = hexAlpha(accentInk, 0.11 * a);
+      fctx.lineWidth = 1;
+      fctx.stroke();
+    });
+  }
+
+  // Zeiger als Endgerät
+  var pointer = { x: 0, y: 0, tx: 0, ty: 0, active: false, alpha: 0 };
+  var assoc = -1, assocDist = 0, dashOffset = 0;
+  var rings = []; // kurz aufleuchtende Ringe an Knoten
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function drawClient(dt) {
+    if (!pointer.active && pointer.alpha <= 0.01) { assoc = -1; return; }
+    pointer.x += (pointer.tx - pointer.x) * 0.12;
+    pointer.y += (pointer.ty - pointer.y) * 0.12;
+    pointer.alpha += ((pointer.active ? 1 : 0) - pointer.alpha) * 0.1;
+    var a = pointer.alpha;
+
+    // Zeigerlicht
+    var r = Math.max(width, height) * 0.28;
+    var g = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, r);
+    g.addColorStop(0, hexAlpha(accent, 0.2 * a));
+    g.addColorStop(1, hexAlpha(accent, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, width, height);
+
+    // Anmeldung beim nächsten erreichbaren Access Point
+    var near = -1, best = 175 * scale;
+    aps.forEach(function (i) {
+      if (!reachable[i]) { return; }
+      var d = Math.hypot(px(nodes[i].x) - pointer.x, py(nodes[i].y) - pointer.y);
+      if (d < best) { best = d; near = i; }
+    });
+    if (pointer.active) {
+      if (near !== -1 && near !== assoc) { rings.push({ node: near, t: 0, color: accentInk }); }
+      assoc = near;
+    }
+    if (assoc === -1) { return; }
+    if (pointer.active) { assocDist = best; }
+    var n = nodes[assoc], ax = px(n.x), ay = py(n.y);
+
+    dashOffset -= dt * 40;
+    ctx.save();
+    ctx.setLineDash([3, 5]);
+    ctx.lineDashOffset = dashOffset;
+    ctx.strokeStyle = hexAlpha(accentInk, 0.6 * a);
+    ctx.lineWidth = 1.25;
+    ctx.beginPath();
+    ctx.moveTo(pointer.x, pointer.y);
+    ctx.lineTo(ax, ay);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(pointer.x, pointer.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = hexAlpha(ink, a);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(pointer.x, pointer.y, 9, 0, Math.PI * 2);
+    ctx.strokeStyle = hexAlpha(accentInk, 0.75 * a);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Pegel aus dem Abstand gerechnet (Schema, keine Messung)
+    var rssi = Math.max(-88, Math.round(-38 - (assocDist / scale) * 0.3));
+    var text = n.label.toUpperCase() + '  ' + rssi + ' dBm';
+    ctx.font = '500 11px ' + monoFont;
+    ctx.textBaseline = 'middle';
+    var tw = Math.ceil(ctx.measureText(text).width) + 14;
+    var bx = Math.min(width - tw - 4, Math.max(4, pointer.x + 14));
+    var by = Math.max(4, pointer.y - 32);
+    roundRect(bx, by, tw, 21, 3);
+    ctx.fillStyle = hexAlpha(panelBg, 0.94 * a);
+    ctx.fill();
+    ctx.strokeStyle = hexAlpha(ink, 0.3 * a);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = hexAlpha(ink2, a);
+    ctx.fillText(text, bx + 7, by + 10.5);
+  }
+
+  var running = false, rafId = 0, lastT = 0, time = 0, waveTimer = 0, echoTimer = 0;
   var onScreen = true;
 
   function step(now) {
     rafId = 0;
     var dt = Math.min(0.05, (now - (lastT || now)) / 1000);
     lastT = now;
+    time += dt;
 
     waveTimer -= dt;
     if (waveTimer <= 0) { wave(); waveTimer = 2.6 + Math.random() * 1.2; }
     echoTimer -= dt;
     if (echoTimer <= 0) { echo(); echoTimer = 3.9 + Math.random() * 2.5; }
+    faultStep(dt);
 
+    drawField();
     ctx.clearRect(0, 0, width, height);
-
-    // Zeigerlicht
-    if (pointer.active || pointer.alpha > 0.01) {
-      pointer.x += (pointer.tx - pointer.x) * 0.12;
-      pointer.y += (pointer.ty - pointer.y) * 0.12;
-      pointer.alpha += ((pointer.active ? 1 : 0) - pointer.alpha) * 0.1;
-      var r = Math.max(width, height) * 0.28;
-      var g = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, r);
-      g.addColorStop(0, hexAlpha(accent, 0.2 * pointer.alpha));
-      g.addColorStop(1, hexAlpha(accent, 0));
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, width, height);
-
-      // nächster Knoten in Zeigernähe bekommt einen Ring
-      var near = -1, best = 70 * scale;
-      nodes.forEach(function (n, i) {
-        var d = Math.hypot(px(n.x) - pointer.tx, py(n.y) - pointer.ty);
-        if (d < best) { best = d; near = i; }
-      });
-      if (pointer.active && near !== -1 && near !== lastNear) {
-        rings.push({ node: near, t: 0 });
-        lastNear = near;
-      }
-      if (near === -1) { lastNear = -1; }
-    }
+    drawClient(dt);
 
     // Ringe
     for (var k = rings.length - 1; k >= 0; k--) {
       var ring = rings[k];
       ring.t += dt * 1.6;
       if (ring.t >= 1) { rings.splice(k, 1); continue; }
-      var n = nodes[ring.node];
+      var rn = nodes[ring.node];
       ctx.beginPath();
-      ctx.arc(px(n.x), py(n.y), (18 + ring.t * 26) * scale, 0, Math.PI * 2);
-      ctx.strokeStyle = hexAlpha(accentInk, 0.6 * (1 - ring.t));
+      ctx.arc(px(rn.x), py(rn.y), (18 + ring.t * 26) * scale, 0, Math.PI * 2);
+      ctx.strokeStyle = hexAlpha(ring.color, 0.65 * (1 - ring.t));
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -142,16 +420,14 @@
     for (var i = pulses.length - 1; i >= 0; i--) {
       var p = pulses[i];
       p.t += dt * SPEED;
-      var e = edges[p.edge];
-      var from = nodes[p.forward ? e.a : e.b];
-      var to = nodes[p.forward ? e.b : e.a];
+      var from = nodes[p.from];
+      var to = nodes[p.to];
       if (p.t >= 1) {
         pulses.splice(i, 1);
-        var arrived = p.forward ? e.b : e.a;
         if (p.down) {
-          downstream[arrived].forEach(function (next) { spawn(next.edge, true, true); });
-        } else if (arrived !== 0 && upstream[arrived]) {
-          spawn(upstream[arrived].edge, false, false);
+          downstream[p.to].forEach(function (next) { spawn(next.edge, p.to, next.to, true); });
+        } else if (p.to !== 0 && upstream[p.to]) {
+          spawn(upstream[p.to].edge, p.to, upstream[p.to].to, false);
         }
         continue;
       }
@@ -185,6 +461,9 @@
       ctx.fill();
     }
 
+    drawFaultMarker();
+    tick(dt);
+
     if (running && onScreen && !document.hidden) {
       rafId = window.requestAnimationFrame(step);
     } else {
@@ -214,7 +493,7 @@
       pointer.active = true;
       start();
     });
-    panel.addEventListener('mouseleave', function () { pointer.active = false; lastNear = -1; });
+    panel.addEventListener('mouseleave', function () { pointer.active = false; });
   }
 
   if ('IntersectionObserver' in window) {
@@ -234,7 +513,9 @@
       running = false;
       pulses.length = 0;
       rings.length = 0;
+      if (fault.edge !== -1) { faultResolve(true); }
       ctx.clearRect(0, 0, width, height);
+      if (fctx) { fctx.clearRect(0, 0, width, height); }
     } else {
       start();
     }

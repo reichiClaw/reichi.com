@@ -110,10 +110,13 @@ code { background: var(--bg-3); }
   background-position: 10px 10px;
   overflow: clip;
 }
-.it-net__svg, .it-net__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.it-net__canvas { pointer-events: none; }
-.it-net__edge { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.5; }
+.it-net__svg, .it-net__canvas, .it-net__field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.it-net__canvas, .it-net__field { pointer-events: none; }
+.it-net__edge { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.5; transition: stroke 350ms var(--ease), stroke-opacity 350ms var(--ease), stroke-width 350ms var(--ease); }
 .it-net__edge--dashed { stroke-dasharray: 4 7; stroke-opacity: 0.4; }
+/* Simulierte Störung (it.js): die betroffene Leitung ist rot gestrichelt, die Reserve wird zur Hauptleitung */
+.it-net__edge.is-down { stroke: var(--red); stroke-dasharray: 3 6; stroke-opacity: 0.75; }
+.it-net__edge--dashed.is-active { stroke: var(--accent-ink); stroke-dasharray: none; stroke-opacity: 0.9; stroke-width: 2.25; }
 .it-net__tag { fill: var(--bg); stroke: var(--ink); stroke-width: 1.25; }
 .it-net__node--core .it-net__tag { fill: var(--ink); }
 .it-net__node--core .it-net__label { fill: var(--bg); }
@@ -140,6 +143,36 @@ code { background: var(--bg-3); }
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 1px var(--accent-ink), 0 0 6px var(--accent-glow);
+  transition: background 300ms var(--ease), box-shadow 300ms var(--ease);
+}
+.it-net__status.is-warn { background: var(--red); box-shadow: 0 0 0 1px var(--red-hover), 0 0 6px rgba(216, 55, 31, 0.45); }
+/* Terminal-Streifen unter dem Plan: ohne JavaScript stehen die ersten drei Zeilen, it.js tippt sie in Schleife */
+.it-net__log {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0.55rem 0.8rem;
+  min-height: calc(3 * 1.55em + 1.1rem);
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+}
+.it-net__log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.it-net__log li::before { content: "> "; color: var(--accent); }
+.it-net:not(.it-net--live) .it-net__log li:nth-child(n+4) { display: none; }
+.it-net__line--down { color: #ff9d8c; }
+.it-net__line--ok, .it-net__line--up { color: var(--accent); }
+.it-net--live .it-net__log li:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: -0.15em;
+  background: var(--accent);
 }
 .hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
 @media (min-width: 48em) {
@@ -352,8 +385,11 @@ code { background: var(--bg-3); }
     95% { text-shadow: 0 0 0.45em var(--accent-glow); }
   }
   .it-hero__title-b { animation: overload-glow 7s linear infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+  .it-net--live .it-net__log li:last-child::after { animation: caret 1s steps(1) infinite; }
+  .it-net__log { animation: rise 800ms var(--ease) 400ms both; }
 }
 
 @media print {
-  .it-net__canvas { display: none !important; }
+  .it-net__canvas, .it-net__field, .it-net__log { display: none !important; }
 }

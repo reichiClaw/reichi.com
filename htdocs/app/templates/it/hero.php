@@ -1,8 +1,9 @@
 <?php
 /**
  * reichi.it – Hero: Überschrift, englische Zeile, Leistungs-Chips, Einleitung, zwei Aktionen
- * und rechts ein schematischer Netzplan (Inline-SVG). it.js legt eine Canvas darüber, auf der
- * Datenpakete entlang der Leitungen laufen und der Mauszeiger die Knoten „anleuchtet“.
+ * und rechts ein schematischer Netzplan (Inline-SVG). it.js legt eine Canvas dahinter (WLAN-
+ * Versorgungsfeld) und eine darüber (Datenpakete, simulierter Leitungsausfall mit Umleitung,
+ * Mauszeiger als Endgerät) und tippt im Terminal-Streifen darunter Statuszeilen.
  * Die Klassen hero/hero__copy/hero__figure stammen aus style.css (Layout + Parallax aus main.js).
  */
 
@@ -26,10 +27,12 @@ $nodes = [
     [118, 500, $labels[5]],  // Kassa
     [300, 528, $labels[6]],  // Guest Wi-Fi
 ];
-// Leitungen als Indexpaare; 'dashed' = redundante Querverbindung.
+// Leitungen als Indexpaare; 'dashed' = redundante Querverbindung (im simulierten Störfall aktiv).
 $edges = [
     [0, 1], [1, 2], [1, 3], [2, 5], [3, 4], [1, 6], [2, 3, 'dashed'],
 ];
+// Knoten mit Access Point (Versorgungsfeld + Anmeldung des Zeiger-Endgeräts): alle außer Uplink und Core.
+$accessPoints = [2, 3, 4, 5, 6];
 $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2) + 26);
 ?>
 <section class="hero it-hero" aria-labelledby="hero-title">
@@ -52,6 +55,7 @@ $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2)
 
     <figure class="hero__figure it-net" data-it-net>
       <div class="it-net__panel">
+        <canvas class="it-net__field" aria-hidden="true"></canvas>
         <svg class="it-net__svg" viewBox="0 0 600 600" role="img" aria-labelledby="it-net-title" focusable="false">
           <title id="it-net-title"><?= e($hero['diagram_label']) ?></title>
           <g class="it-net__edges" fill="none" stroke-linecap="round">
@@ -63,7 +67,7 @@ $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2)
           <g class="it-net__nodes">
             <?php foreach ($nodes as $i => [$x, $y, $label]): ?>
               <?php $w = $tagW($label); $core = $i === 1; $h = $core ? 40 : 34; ?>
-              <g class="it-net__node<?= $core ? ' it-net__node--core' : '' ?><?= $i === 0 ? ' it-net__node--uplink' : '' ?>" data-x="<?= $x ?>" data-y="<?= $y ?>" transform="translate(<?= $x ?> <?= $y ?>)">
+              <g class="it-net__node<?= $core ? ' it-net__node--core' : '' ?><?= $i === 0 ? ' it-net__node--uplink' : '' ?>" data-x="<?= $x ?>" data-y="<?= $y ?>"<?= in_array($i, $accessPoints, true) ? ' data-ap' : '' ?> transform="translate(<?= $x ?> <?= $y ?>)">
                 <rect class="it-net__tag" x="<?= -$w / 2 ?>" y="<?= -$h / 2 ?>" width="<?= $w ?>" height="<?= $h ?>" rx="4"/>
                 <circle class="it-net__led" cx="<?= -$w / 2 + 13 ?>" cy="0" r="3.5"/>
                 <text class="it-net__label" x="<?= -$w / 2 + 24 ?>" y="0" dominant-baseline="central"><?= e($label) ?></text>
@@ -73,9 +77,17 @@ $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2)
         </svg>
         <canvas class="it-net__canvas" aria-hidden="true"></canvas>
       </div>
+      <ul class="it-net__log" aria-hidden="true"
+          data-event-down="<?= e($hero['log_events']['down']) ?>"
+          data-event-reroute="<?= e($hero['log_events']['reroute']) ?>"
+          data-event-up="<?= e($hero['log_events']['up']) ?>">
+        <?php foreach ($hero['log_lines'] as $line): ?>
+          <li><?= e($line) ?></li>
+        <?php endforeach; ?>
+      </ul>
       <figcaption class="hero__caption">
         <span class="hero__caption-label"><?= e($hero['diagram_caption']) ?></span>
-        <span class="hero__caption-meta"><span class="it-net__status" aria-hidden="true"></span><?= e($hero['diagram_meta']) ?></span>
+        <span class="hero__caption-meta"><span class="it-net__status" aria-hidden="true"></span><span class="it-net__meta" data-meta-ok="<?= e($hero['diagram_meta']) ?>" data-meta-failover="<?= e($hero['diagram_meta_failover']) ?>"><?= e($hero['diagram_meta']) ?></span></span>
       </figcaption>
     </figure>
   </div>

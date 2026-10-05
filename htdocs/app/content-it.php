@@ -109,6 +109,25 @@ return [
         'diagram_nodes' => ['Uplink', 'Produktion', 'FOH', 'Stage', 'Backstage', 'Kassa', 'Guest Wi-Fi'],
         'diagram_caption' => 'Netzplan, schematisch',
         'diagram_meta' => 'All nodes up',
+        // Statuszeile, solange it.js eine Leitung „ausfallen“ lässt und über die Reserve umleitet
+        'diagram_meta_failover' => 'Rerouted · link down',
+        // Terminal-Streifen unter dem Netzplan. Mit JavaScript werden die Zeilen nacheinander getippt
+        // (Schleife), ohne JavaScript oder mit reduzierter Bewegung stehen die ersten drei fest.
+        // Nur Aussagen, die auch im übrigen Text stehen – keine erfundenen Zahlen.
+        'log_lines' => [
+            'uplink: up · reserve-leitung standby',
+            'core: 7 nodes reachable',
+            'wlan: crew · presse · kassa · guest getrennt',
+            'qos: produktion & kassa priorisiert',
+            'switches & aps: unifi · online',
+            'monitoring: alles grün · keine alarme',
+        ],
+        // Meldungen der simulierten Störung; {a} und {b} sind die Enden der Leitung, {via} der Umweg.
+        'log_events' => [
+            'down' => 'link {a} – {b} down',
+            'reroute' => 'reroute via {via} · ok',
+            'up' => 'link {a} – {b} restored',
+        ],
     ],
 
     // ------------------------------------------------------------------
