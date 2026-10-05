@@ -364,6 +364,8 @@ code { background: var(--bg-3); }
 .projects { padding-top: var(--section); border-top: 1px solid var(--line); }
 .projects__item { background: var(--panel); }
 .projects__link:hover { background: var(--bg); }
+/* „.com“ in der Farbe von reichi.com (das Rot in der Variante für helles Papier, wie der Hauptknopf) */
+.projects__brand-suffix { color: var(--red); }
 
 /* 8. Formular / Kontakt -------------------------------------------------- */
 .hire__question { color: var(--ink) !important; }
