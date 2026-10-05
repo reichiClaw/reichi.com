@@ -40,6 +40,7 @@ render('it/services');
 render('it/process');
 render('it/why');
 render('it/reference');
+render('sections/projects');
 render('it/contact', [
     'formStatus' => $formStatus,
     'formErrors' => is_array($formErrors) ? $formErrors : [],

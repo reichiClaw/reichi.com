@@ -56,7 +56,8 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     .htaccess            404 rewrite that works as own domain and as /it/ subfolder
     assets/css/it.css    light theme + reichi.it components (loaded after style.css)
     assets/js/it.js      the animated network plan over the festival ground in the hero
-    assets/css/style.css, assets/js/main.js, assets/images/grain.png
+    assets/css/style.css, assets/js/main.js, assets/images/grain.png,
+    assets/images/logos/{bleedingstar,rstream}.png
                          COPIES of the shared files (tools/sync-it-assets.sh)
     assets/images/festival-ground-{960,640}.webp   the isometric festival ground (hero)
     assets/images/icons/, favicon.ico, share-reichi-it.png, robots.txt, sitemap.xml
@@ -303,6 +304,10 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
   terminal lines remain.
 - Form: same partial and same protection; the subject is a select (Aufbau, Betrieb vor
   Ort, Beratung, Sonstiges). Inquiries go to `reichi@reichi.it`, redirect anchor `#anfrage`.
+- „Verbundene Projekte“ reuses `sections/projects.php` with its own list in `content-it.php`
+  (reichi.com, BleedingStar, R-Stream). The reichi.com card is a text wordmark with the
+  hexagon mark (`'logo' => ['brand' => …]`), the two logo files are copies kept in sync by
+  `tools/sync-it-assets.sh`; the white BleedingStar logo is inverted for the light page.
 - Impressum and Datenschutz use the shared templates in `app/templates/legal/` with the
   same owner data; reichi.it adds one sentence (same media owner as reichi.com) and has
   no image credits.

@@ -88,6 +88,7 @@ return [
         ['label' => 'Ablauf', 'href' => '/#ablauf'],
         ['label' => 'Warum ich', 'href' => '/#warum'],
         ['label' => 'Referenz', 'href' => '/#referenz'],
+        ['label' => 'Projekte', 'href' => '/#projekte'],
         ['label' => 'Kontakt', 'href' => '/#contact'],
     ],
     'nav_cta' => ['label' => 'Anfrage', 'href' => '/#anfrage'],
@@ -233,6 +234,45 @@ return [
         ],
         'more_label' => 'Bühnen-Referenzen seit 2007 stehen auf reichi.com',
         'more_url' => 'https://www.reichi.com/#portfolio',
+    ],
+
+    // ------------------------------------------------------------------
+    // Verbundene Projekte – gleiches Template wie auf reichi.com (sections/projects.php).
+    // Logos liegen als Kopien in it/assets/images/logos/ (tools/sync-it-assets.sh); auf dem hellen
+    // Papier werden weiße Logos per 'invert' dunkel gestellt, schwarze bleiben wie sie sind.
+    // ------------------------------------------------------------------
+    'projects' => [
+        'eyebrow' => 'Network',
+        'title' => 'Verbundene Projekte',
+        'items' => [
+            [
+                'id' => 'reichi-com',
+                'name' => 'reichi.com',
+                'text' => 'Tontechnik & Touring: FOH, Monitor und Tourmanagement – das Hauptgeschäft seit 2007.',
+                'url' => 'https://www.reichi.com/',
+                'link_label' => 'reichi.com',
+                // Wortmarke als Text mit dem Sechseck-Zeichen (logo_mark), kein Bild
+                'logo' => ['brand' => 'reichi', 'suffix' => '.com', 'alt' => 'reichi.com'],
+            ],
+            [
+                'id' => 'bleedingstar',
+                'name' => 'BleedingStar',
+                'text' => 'Label, Distribution, Rental and Services.',
+                'url' => 'http://www.bleedingstar.at',
+                'link_label' => 'bleedingstar.at',
+                // Weißes Logo – auf hellem Grund invertiert
+                'logo' => ['file' => 'bleedingstar.png', 'width' => 508, 'height' => 148, 'alt' => 'BleedingStar', 'invert' => true],
+            ],
+            [
+                'id' => 'rstream',
+                'name' => 'R-Stream',
+                'text' => 'Live streaming.',
+                'url' => 'https://www.rstream.at/',
+                'link_label' => 'rstream.at',
+                // Schwarz auf transparent – passt so auf das Papier
+                'logo' => ['file' => 'rstream.png', 'width' => 744, 'height' => 182, 'alt' => 'R-Stream'],
+            ],
+        ],
     ],
 
     // ------------------------------------------------------------------

@@ -779,6 +779,19 @@ main:focus { outline: none; }
 .projects__link:hover { background: var(--bg-2); }
 .projects__logo img { width: 100%; max-width: 11rem; height: auto; }
 .projects__logo--invert img { filter: invert(1) brightness(1.1); }
+/* Wortmarke aus Text (reichi.com-Karte auf reichi.it): Sechseck + Name, wie die Kopfzeile */
+.projects__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+}
+.projects__brand-mark { width: 2.25rem; height: 2.25rem; flex: none; }
+.projects__brand-suffix { color: var(--accent-ink); }
 .projects__body { display: grid; gap: 0.25rem; }
 .projects__name { font-size: var(--step-2); font-weight: 750; letter-spacing: -0.025em; line-height: 1.1; }
 .projects__text { color: var(--ink-2); }

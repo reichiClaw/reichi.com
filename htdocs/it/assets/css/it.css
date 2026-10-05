@@ -359,6 +359,12 @@ code { background: var(--bg-3); }
   .reference__list { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 }
 
+/* 7b. Verbundene Projekte (Template sections/projects.php) ---------------- */
+/* Auf reichi.com hängt die Zeile ohne Abstand an der Galerie; hier ist sie ein eigener Abschnitt */
+.projects { padding-top: var(--section); border-top: 1px solid var(--line); }
+.projects__item { background: var(--panel); }
+.projects__link:hover { background: var(--bg); }
+
 /* 8. Formular / Kontakt -------------------------------------------------- */
 .hire__question { color: var(--ink) !important; }
 .contact__link .icon, .contact__address .icon { color: var(--accent-ink); }

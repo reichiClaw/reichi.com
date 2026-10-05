@@ -13,7 +13,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/htdocs/assets"
 DST="$ROOT/htdocs/it/assets"
 
-FILES="css/style.css js/main.js images/grain.png"
+# The two logo files are the "Verbundene Projekte" cards on reichi.it.
+FILES="css/style.css js/main.js images/grain.png images/logos/bleedingstar.png images/logos/rstream.png"
 
 status=0
 for f in $FILES; do
