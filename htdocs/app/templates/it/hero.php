@@ -1,9 +1,11 @@
 <?php
 /**
  * reichi.it – Hero: Überschrift, englische Zeile, Leistungs-Chips, Einleitung, zwei Aktionen
- * und rechts ein schematischer Netzplan (Inline-SVG). it.js legt eine Canvas dahinter (WLAN-
- * Versorgungsfeld) und eine darüber (Datenpakete, simulierter Leitungsausfall mit Umleitung,
- * Mauszeiger als Endgerät) und tippt im Terminal-Streifen darunter Statuszeilen.
+ * und rechts das Festivalgelände: ein isometrisches Modell (Bild, tools/build-it-ground.py) mit
+ * dem Netzplan darüber (Inline-SVG: Leitungen und Knoten-Schilder). it.js legt eine Canvas
+ * zwischen Bild und SVG (WLAN-Versorgungsfeld) und eine darüber (Datenpakete, simulierter
+ * Leitungsausfall mit Umleitung, Mauszeiger als Endgerät) und tippt im Terminal-Streifen
+ * darunter Statuszeilen.
  * Die Klassen hero/hero__copy/hero__figure stammen aus style.css (Layout + Parallax aus main.js).
  */
 
@@ -16,24 +18,31 @@ if (!defined('PUBLIC_DIR')) {
 
 $hero = $content['hero'];
 $labels = $hero['diagram_nodes'];
+$ground = $hero['ground'];
 
-// Knoten des Netzplans im 600×600-Koordinatenraum: [x, y, Beschriftung]. Reihenfolge wie $labels.
+// Knoten im 1000×1000-Koordinatenraum des Geländebilds: [x, y, Beschriftung]. Reihenfolge wie
+// $labels. Der Punkt sitzt auf dem Objekt (Mast, Container, Turm …), das Schild hängt darüber.
 $nodes = [
-    [300, 72, $labels[0]],   // Uplink
-    [300, 232, $labels[1]],  // Produktion (Core)
-    [140, 350, $labels[2]],  // FOH
-    [460, 350, $labels[3]],  // Stage
-    [478, 500, $labels[4]],  // Backstage
-    [118, 500, $labels[5]],  // Kassa
-    [300, 528, $labels[6]],  // Guest Wi-Fi
+    [690, 215, $labels[0]],  // Uplink – Funkmast
+    [815, 400, $labels[1]],  // Produktion (Core) – Bürocontainer
+    [480, 430, $labels[2]],  // FOH – Mischturm
+    [300, 200, $labels[3]],  // Stage – Bühnendach
+    [590, 290, $labels[4]],  // Backstage – Nightliner und Pagoden
+    [650, 560, $labels[5]],  // Kassa – Ticketbox am Eingang
+    [240, 610, $labels[6]],  // Guest Wi-Fi – Camping
 ];
-// Leitungen als Indexpaare; 'dashed' = redundante Querverbindung (im simulierten Störfall aktiv).
+// Leitungen als Indexpaare (Versorger zuerst); 'dashed' = Reserve (im simulierten Störfall aktiv).
 $edges = [
-    [0, 1], [1, 2], [1, 3], [2, 5], [3, 4], [1, 6], [2, 3, 'dashed'],
+    [0, 1], [1, 4], [4, 3], [1, 2], [1, 5], [2, 6], [2, 3, 'dashed'],
 ];
 // Knoten mit Access Point (Versorgungsfeld + Anmeldung des Zeiger-Endgeräts): alle außer Uplink und Core.
 $accessPoints = [2, 3, 4, 5, 6];
-$tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2) + 26);
+$tagW = static fn(string $label): int => max(110, (int) (mb_strlen($label) * 15.5) + 44);
+$groundSrc = asset('images/' . $ground['file'] . '-' . $ground['widths'][0] . '.webp');
+$groundSet = implode(', ', array_map(
+    static fn(int $w): string => asset('images/' . $ground['file'] . '-' . $w . '.webp') . ' ' . $w . 'w',
+    $ground['widths']
+));
 ?>
 <section class="hero it-hero" aria-labelledby="hero-title">
   <div class="hero__inner">
@@ -55,8 +64,9 @@ $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2)
 
     <figure class="hero__figure it-net" data-it-net>
       <div class="it-net__panel">
+        <img class="it-net__ground" src="<?= e($groundSrc) ?>" srcset="<?= e($groundSet) ?>" sizes="(max-width: 47.99em) 100vw, (max-width: 63.99em) 50vw, 32rem" width="<?= (int) $ground['widths'][0] ?>" height="<?= (int) $ground['widths'][0] ?>" alt="" decoding="async" fetchpriority="high">
         <canvas class="it-net__field" aria-hidden="true"></canvas>
-        <svg class="it-net__svg" viewBox="0 0 600 600" role="img" aria-labelledby="it-net-title" focusable="false">
+        <svg class="it-net__svg" viewBox="0 0 1000 1000" role="img" aria-labelledby="it-net-title" focusable="false">
           <title id="it-net-title"><?= e($hero['diagram_label']) ?></title>
           <g class="it-net__edges" fill="none" stroke-linecap="round">
             <?php foreach ($edges as $edge): ?>
@@ -66,11 +76,12 @@ $tagW = static fn(string $label): int => max(64, (int) (mb_strlen($label) * 9.2)
           </g>
           <g class="it-net__nodes">
             <?php foreach ($nodes as $i => [$x, $y, $label]): ?>
-              <?php $w = $tagW($label); $core = $i === 1; $h = $core ? 40 : 34; ?>
+              <?php $w = $tagW($label); $core = $i === 1; $h = $core ? 50 : 44; $top = -22 - $h; ?>
               <g class="it-net__node<?= $core ? ' it-net__node--core' : '' ?><?= $i === 0 ? ' it-net__node--uplink' : '' ?>" data-x="<?= $x ?>" data-y="<?= $y ?>"<?= in_array($i, $accessPoints, true) ? ' data-ap' : '' ?> transform="translate(<?= $x ?> <?= $y ?>)">
-                <rect class="it-net__tag" x="<?= -$w / 2 ?>" y="<?= -$h / 2 ?>" width="<?= $w ?>" height="<?= $h ?>" rx="4"/>
-                <circle class="it-net__led" cx="<?= -$w / 2 + 13 ?>" cy="0" r="3.5"/>
-                <text class="it-net__label" x="<?= -$w / 2 + 24 ?>" y="0" dominant-baseline="central"><?= e($label) ?></text>
+                <line class="it-net__stem" x1="0" y1="-8" x2="0" y2="-22"/>
+                <rect class="it-net__tag" x="<?= -$w / 2 ?>" y="<?= $top ?>" width="<?= $w ?>" height="<?= $h ?>" rx="6"/>
+                <text class="it-net__label" x="0" y="<?= $top + $h / 2 ?>" dominant-baseline="central" text-anchor="middle"><?= e($label) ?></text>
+                <circle class="it-net__led" cx="0" cy="0" r="7"/>
               </g>
             <?php endforeach; ?>
           </g>

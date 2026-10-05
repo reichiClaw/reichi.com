@@ -104,10 +104,13 @@ return [
         'chips' => ['Netzwerk & WLAN', 'Internet-Uplink', 'Betrieb vor Ort', 'Beratung'],
         'primary' => ['label' => 'Anfrage senden', 'href' => '#anfrage'],
         'secondary' => ['label' => 'Was ich mache', 'href' => '#leistungen'],
+        // Geländemodell unter dem Netzplan: htdocs/it/assets/images/{file}-{width}.webp aus
+        // tools/build-it-ground.py (erzeugtes Bild, kein Foto eines echten Geländes)
+        'ground' => ['file' => 'festival-ground', 'widths' => [960, 640]],
         // Beschriftungen der Netzwerk-Grafik (Knoten in der Reihenfolge der Darstellung)
-        'diagram_label' => 'Schematischer Netzplan eines Festivalgeländes: Internet-Uplink, Produktionsbüro, FOH, Bühne, Backstage, Kassa und Gäste-WLAN',
+        'diagram_label' => 'Modell eines Festivalgeländes mit schematischem Netzplan: Internet-Uplink am Funkmast, Produktionsbüro, FOH-Turm, Bühne, Backstage, Kassa am Eingang und Gäste-WLAN am Camping',
         'diagram_nodes' => ['Uplink', 'Produktion', 'FOH', 'Stage', 'Backstage', 'Kassa', 'Guest Wi-Fi'],
-        'diagram_caption' => 'Netzplan, schematisch',
+        'diagram_caption' => 'Gelände & Netz, schematisch',
         'diagram_meta' => 'All nodes up',
         // Statuszeile, solange it.js eine Leitung „ausfallen“ lässt und über die Reserve umleitet
         'diagram_meta_failover' => 'Rerouted · link down',

@@ -1,17 +1,18 @@
 /*
- * reichi.it – Ergänzung zu main.js: der Netzplan im Hero lebt.
+ * reichi.it – Ergänzung zu main.js: der Netzplan über dem Festivalgelände im Hero lebt.
  *
  * 1. Pakete laufen vom Uplink über den Core zu den Knoten (und gelegentlich zurück).
  * 2. Alle paar Sekunden fällt eine Leitung aus: Marker auf der Leitung, der betroffene Teil des
- *    Plans wird kurz dunkel, dann nimmt der Verkehr die gestrichelte Reserveverbindung, bis die
+ *    Geländes wird kurz dunkel, dann nimmt der Verkehr die gestrichelte Reserveverbindung, bis die
  *    Leitung zurück ist (Störung → Umleitung → wiederhergestellt). Statuszeile und Terminal melden es.
- * 3. Hinter dem SVG atmet unter den Access-Point-Knoten ein weiches Versorgungsfeld (eigene Canvas).
- *    Mit Maus wird der Zeiger zum Endgerät, das sich beim nächsten AP anmeldet (Linie + Pegelanzeige;
- *    der Pegel ist aus dem Abstand gerechnet, keine Messung).
+ * 3. Zwischen Geländebild und SVG atmet unter den Access-Point-Knoten ein weiches Versorgungsfeld
+ *    (eigene Canvas). Mit Maus wird der Zeiger zum Endgerät, das sich beim nächsten AP anmeldet
+ *    (Linie + Pegelanzeige; der Pegel ist aus dem Abstand gerechnet, keine Messung).
  * 4. Der Terminal-Streifen unter dem Plan tippt die Zeilen aus content-it.php in Schleife.
  *
- * Ohne JavaScript, ohne Maus (nur 1, 2, 3 ohne Endgerät, 4) oder mit prefers-reduced-motion
- * (gar nichts) bleibt der statische Plan mit den ersten drei Terminal-Zeilen – nichts hier ist nötig.
+ * Koordinaten kommen aus dem SVG (data-x/data-y im viewBox-Raum des Bilds, hero.php). Ohne
+ * JavaScript, ohne Maus (nur 1, 2, 3 ohne Endgerät, 4) oder mit prefers-reduced-motion (gar nichts)
+ * bleiben Bild und statischer Plan mit den ersten drei Terminal-Zeilen – nichts hier ist nötig.
  */
 (function () {
   'use strict';
@@ -33,7 +34,9 @@
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   if (reduceMotion.matches) { return; }
 
-  var VIEW = 600; // viewBox-Kantenlänge des SVG
+  // viewBox-Kantenlänge des SVG (= Koordinatenraum des Geländebilds); Längen unten in diesen Einheiten
+  var VIEW = (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width) || 1000;
+  var U = VIEW / 1000;
   var style = getComputedStyle(document.documentElement);
   function token(name, fallback) { return (style.getPropertyValue(name) || fallback).trim(); }
   var accent = token('--accent', '#00e6c3');
@@ -285,7 +288,7 @@
       var n = nodes[i];
       fieldAlpha[i] += ((reachable[i] ? 1 : 0.18) - fieldAlpha[i]) * 0.08;
       var breathe = 0.5 + 0.5 * Math.sin(time * 0.55 + k * 1.9);
-      var r = (86 + 22 * breathe) * scale;
+      var r = (145 + 36 * breathe) * U * scale;
       var x = px(n.x), y = py(n.y), a = fieldAlpha[i];
       var g = fctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, hexAlpha(accent, 0.26 * a));
@@ -330,7 +333,7 @@
     ctx.fillRect(0, 0, width, height);
 
     // Anmeldung beim nächsten erreichbaren Access Point
-    var near = -1, best = 175 * scale;
+    var near = -1, best = 290 * U * scale;
     aps.forEach(function (i) {
       if (!reachable[i]) { return; }
       var d = Math.hypot(px(nodes[i].x) - pointer.x, py(nodes[i].y) - pointer.y);
@@ -367,7 +370,7 @@
     ctx.stroke();
 
     // Pegel aus dem Abstand gerechnet (Schema, keine Messung)
-    var rssi = Math.max(-88, Math.round(-38 - (assocDist / scale) * 0.3));
+    var rssi = Math.max(-88, Math.round(-38 - (assocDist / (U * scale)) * 0.18));
     var text = n.label.toUpperCase() + '  ' + rssi + ' dBm';
     ctx.font = '500 11px ' + monoFont;
     ctx.textBaseline = 'middle';
@@ -410,7 +413,7 @@
       if (ring.t >= 1) { rings.splice(k, 1); continue; }
       var rn = nodes[ring.node];
       ctx.beginPath();
-      ctx.arc(px(rn.x), py(rn.y), (18 + ring.t * 26) * scale, 0, Math.PI * 2);
+      ctx.arc(px(rn.x), py(rn.y), (30 + ring.t * 44) * U * scale, 0, Math.PI * 2);
       ctx.strokeStyle = hexAlpha(ring.color, 0.65 * (1 - ring.t));
       ctx.lineWidth = 1.5;
       ctx.stroke();

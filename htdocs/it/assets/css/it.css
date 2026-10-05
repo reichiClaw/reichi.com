@@ -110,28 +110,36 @@ code { background: var(--bg-3); }
   background-position: 10px 10px;
   overflow: clip;
 }
-.it-net__svg, .it-net__canvas, .it-net__field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-/* Mausereignisse nimmt das Panel entgegen (it.js); das SVG bleibt durchlässig, sonst zeigt der
-   Browser seinen <title> als Tooltip über dem Plan */
-.it-net__canvas, .it-net__field, .it-net__svg { pointer-events: none; }
-.it-net__edge { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.5; transition: stroke 350ms var(--ease), stroke-opacity 350ms var(--ease), stroke-width 350ms var(--ease); }
-.it-net__edge--dashed { stroke-dasharray: 4 7; stroke-opacity: 0.4; }
+/* Schichten im Panel (von unten): Geländemodell, Versorgungsfeld (Canvas), Netzplan (SVG), Pakete (Canvas).
+   Bild und SVG sind quadratisch und mittig eingepasst, dadurch liegen die Knoten auf den Objekten. */
+.it-net__ground, .it-net__svg, .it-net__canvas, .it-net__field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.it-net__ground { object-fit: contain; }
+/* Mausereignisse nimmt das Panel entgegen (it.js); Bild und SVG bleiben durchlässig, sonst zeigt der
+   Browser den SVG-<title> als Tooltip über dem Plan */
+.it-net__ground, .it-net__canvas, .it-net__field, .it-net__svg { pointer-events: none; }
+/* Leitungen und Schilder liegen auf dem Bild; ein heller Schein hebt sie von Gras und Bühne ab */
+.it-net__edges { filter: drop-shadow(0 0 1.5px rgba(251, 250, 247, 0.9)); }
+.it-net__edge { stroke: var(--ink); stroke-opacity: 0.7; stroke-width: 2.5; transition: stroke 350ms var(--ease), stroke-opacity 350ms var(--ease), stroke-width 350ms var(--ease); }
+.it-net__edge--dashed { stroke-dasharray: 7 11; stroke-opacity: 0.5; }
 /* Simulierte Störung (it.js): die betroffene Leitung ist rot gestrichelt, die Reserve wird zur Hauptleitung */
-.it-net__edge.is-down { stroke: var(--red); stroke-dasharray: 3 6; stroke-opacity: 0.75; }
-.it-net__edge--dashed.is-active { stroke: var(--accent-ink); stroke-dasharray: none; stroke-opacity: 0.9; stroke-width: 2.25; }
-.it-net__tag { fill: var(--bg); stroke: var(--ink); stroke-width: 1.25; }
+.it-net__edge.is-down { stroke: var(--red); stroke-dasharray: 5 10; stroke-opacity: 0.85; }
+.it-net__edge--dashed.is-active { stroke: var(--accent-ink); stroke-dasharray: none; stroke-opacity: 0.95; stroke-width: 3.5; }
+.it-net__nodes { filter: drop-shadow(0 2px 3px rgba(21, 21, 26, 0.25)); }
+.it-net__stem { stroke: var(--ink); stroke-opacity: 0.6; stroke-width: 2; }
+.it-net__tag { fill: var(--bg); stroke: var(--ink); stroke-width: 2; }
 .it-net__node--core .it-net__tag { fill: var(--ink); }
 .it-net__node--core .it-net__label { fill: var(--bg); }
-.it-net__node--uplink .it-net__tag { stroke: var(--accent-ink); stroke-width: 1.5; }
+.it-net__node--uplink .it-net__tag { stroke: var(--accent-ink); stroke-width: 2.5; }
+/* Standort-Punkt auf dem Objekt, zugleich die blinkende LED */
 .it-net__led {
   fill: var(--accent);
-  stroke: var(--accent-ink);
-  stroke-width: 0.75;
-  filter: drop-shadow(0 0 2.5px var(--accent-glow));
+  stroke: var(--panel);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px var(--accent-glow));
 }
 .it-net__label {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 24px;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -147,6 +155,7 @@ code { background: var(--bg-3); }
   box-shadow: 0 0 0 1px var(--accent-ink), 0 0 6px var(--accent-glow);
   transition: background 300ms var(--ease), box-shadow 300ms var(--ease);
 }
+.it-net .hero__caption-meta { white-space: nowrap; }
 .it-net__status.is-warn { background: var(--red); box-shadow: 0 0 0 1px var(--red-hover), 0 0 6px rgba(216, 55, 31, 0.45); }
 /* Terminal-Streifen unter dem Plan: ohne JavaScript stehen die ersten drei Zeilen, it.js tippt sie in Schleife */
 .it-net__log {
@@ -177,12 +186,6 @@ code { background: var(--bg-3); }
   background: var(--accent);
 }
 .hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
-@media (min-width: 48em) {
-  .it-net__panel { aspect-ratio: 4 / 5; }
-}
-@media (min-width: 64em) {
-  .it-net__panel { aspect-ratio: 1; }
-}
 
 /* 4. Leistungen ---------------------------------------------------------- */
 .services { border-top: 1px solid var(--line); }
