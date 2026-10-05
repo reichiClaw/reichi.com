@@ -256,15 +256,17 @@ code { background: var(--bg-3); }
 
 /* 6. Warum ich ----------------------------------------------------------- */
 .why { border-top: 1px solid var(--line); background: var(--bg-2); }
-.why__body { display: grid; gap: 2.5rem 4rem; }
-.why__head { margin-bottom: 0; max-width: 52rem; }
-.why__points { list-style: none; display: grid; gap: 1.25rem 2rem; }
+/* Die Bereiche müssen auch einspaltig benannt sein: .about__facts/.about__quote tragen in
+   style.css grid-area: facts/quote und würden sonst in derselben impliziten Zelle landen. */
+.why__body { display: grid; gap: 2.5rem 4rem; grid-template-areas: "head" "points" "facts" "quote"; }
+.why__head { grid-area: head; margin-bottom: 0; max-width: 52rem; }
+.why__points { grid-area: points; list-style: none; display: grid; gap: 1.25rem 2rem; }
 .why__point { border-top: 1px solid var(--line-strong); padding-top: 1rem; }
 .why__name { font-size: var(--step-1); margin-bottom: 0.35rem; }
 .why__name::before { content: "> "; color: var(--accent-ink); font-family: var(--font-mono); font-weight: 500; }
 .why__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; }
-.why__facts { margin: 0; }
-.why__quote { font-size: var(--step-2); }
+.why__facts { grid-area: facts; margin: 0; }
+.why__quote { grid-area: quote; font-size: var(--step-2); }
 .why__quote::after { background: var(--accent); }
 @media (min-width: 40em) {
   .why__points { grid-template-columns: 1fr 1fr; }
@@ -277,10 +279,7 @@ code { background: var(--bg-3); }
       "points facts"
       "quote quote";
   }
-  .why__head { grid-area: head; }
-  .why__points { grid-area: points; }
-  .why__facts { grid-area: facts; grid-template-columns: 1fr; align-self: start; }
-  .why__quote { grid-area: quote; }
+  .why__facts { grid-template-columns: 1fr; align-self: start; }
 }
 
 /* 7. Referenz ------------------------------------------------------------ */
