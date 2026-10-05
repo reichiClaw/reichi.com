@@ -111,7 +111,9 @@ code { background: var(--bg-3); }
   overflow: clip;
 }
 .it-net__svg, .it-net__canvas, .it-net__field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.it-net__canvas, .it-net__field { pointer-events: none; }
+/* Mausereignisse nimmt das Panel entgegen (it.js); das SVG bleibt durchlässig, sonst zeigt der
+   Browser seinen <title> als Tooltip über dem Plan */
+.it-net__canvas, .it-net__field, .it-net__svg { pointer-events: none; }
 .it-net__edge { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.5; transition: stroke 350ms var(--ease), stroke-opacity 350ms var(--ease), stroke-width 350ms var(--ease); }
 .it-net__edge--dashed { stroke-dasharray: 4 7; stroke-opacity: 0.4; }
 /* Simulierte Störung (it.js): die betroffene Leitung ist rot gestrichelt, die Reserve wird zur Hauptleitung */
