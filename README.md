@@ -55,9 +55,10 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     index.php, contact.php, 404.php, impressum/, datenschutz/   same pattern, SITE = 'it'
     .htaccess            404 rewrite that works as own domain and as /it/ subfolder
     assets/css/it.css    light theme + reichi.it components (loaded after style.css)
-    assets/js/it.js      the animated network diagram in the hero
+    assets/js/it.js      the animated network plan over the festival ground in the hero
     assets/css/style.css, assets/js/main.js, assets/images/grain.png
                          COPIES of the shared files (tools/sync-it-assets.sh)
+    assets/images/festival-ground-{960,640}.webp   the isometric festival ground (hero)
     assets/images/icons/, favicon.ico, share-reichi-it.png, robots.txt, sitemap.xml
   app/                   PHP code – not reachable from the browser (.htaccess + PHP guard)
     bootstrap.php        shared entry (config, helpers, content, security headers)
@@ -78,6 +79,7 @@ assets-src/originals/    untouched originals downloaded from the old site (do no
 assets-src/brand/        reichi.it logo files (SVG + PNG, light and dark) – do not upload
 tools/build-images.py    optional dev helper to regenerate image derivatives
 tools/build-it-brand.py  optional dev helper: reichi.it logo, favicons, share image
+tools/build-it-ground.py optional dev helper: keys and crops the festival-ground picture for the reichi.it hero
 tools/sync-it-assets.sh  copies style.css / main.js / grain.png into htdocs/it/assets/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 ```
@@ -290,9 +292,15 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
   headline line carries a soft glow that flickers briefly every few seconds
   (motion only without `prefers-reduced-motion`). Du-form, lighter tone, a few English lines
   (`lang="en"`).
-- Hero: no photo but an inline-SVG network diagram (Uplink → Produktion → FOH/Stage/…).
-  `it.js` draws travelling packets along the lines and a soft pointer glow on a canvas
-  above it – mouse only, nothing with `prefers-reduced-motion` or without JavaScript.
+- Hero: an isometric model of a festival ground (generated picture, backdrop keyed out by
+  `tools/build-it-ground.py`, see ASSETS.md) with the network plan laid over it as inline SVG
+  (`app/templates/it/hero.php`: node coordinates in the picture's 1000×1000 box, fibre runs,
+  a dashed reserve link). `it.js` adds two canvases: a breathing Wi-Fi coverage field under the
+  access points, travelling packets, a simulated link failure every few seconds (red marker,
+  traffic reroutes over the reserve link, status line and terminal strip report it) and – mouse
+  only – the pointer as a client device that associates with the nearest AP. Nothing moves with
+  `prefers-reduced-motion`; without JavaScript the picture, the static plan and the first three
+  terminal lines remain.
 - Form: same partial and same protection; the subject is a select (Aufbau, Betrieb vor
   Ort, Beratung, Sonstiges). Inquiries go to `reichi@reichi.it`, redirect anchor `#anfrage`.
 - Impressum and Datenschutz use the shared templates in `app/templates/legal/` with the
