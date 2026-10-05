@@ -35,6 +35,8 @@ with its own white background and is placed on a light plate in the design.
 
 | local file(s) | source file | original size | linked to | alt text | light_bg | note |
 |---|---|---|---|---|---|---|
+| `kik.png` | supplied by the owner (uploaded to the server 2026-09-25, not from the old site) | 227×369 | kik-ried.com | KiK – Kunst im Keller, Ried im Innkreis | no | **black line drawing on transparent** – displayed inverted (white) via CSS, `invert => true` |
+| `wdb.webp` | supplied by the owner (uploaded to the server 2026-09-25, not from the old site) | 755×1024 | woodstock.at | Woodstock der Blasmusik | no | white on transparent |
 | `supervision-400/800.png` | `2018/11/supervision_front.png` | 962×169 | supervision-music.at | Supervision | no | white wordmark |
 | `max-the-sax-400/800.png` | `2018/11/Max_logo_positiv_BG.png` | 2500×735 | maxthesax.at | Max the Sax | **yes** | black on white |
 | `soulsanity.png` | `2018/11/SoulSanity-Logo.png` | 131×100 | soul-sanity.com | SoulSanity | no | small original, shown ≤ 52 px high |

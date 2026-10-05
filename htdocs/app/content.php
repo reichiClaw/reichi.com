@@ -204,6 +204,9 @@ return [
         'title' => 'Kunden',
         'claim' => 'I rocked the crowd with these cool clients!',
         'items' => [
+            // Schwarze Strichzeichnung auf transparent; 'invert' stellt sie per CSS weiß dar (wie das R-Stream-Logo).
+            ['name' => 'KiK – Kunst im Keller', 'url' => 'https://www.kik-ried.com/', 'file' => 'kik.png', 'width' => 227, 'height' => 369, 'alt' => 'KiK – Kunst im Keller, Ried im Innkreis', 'light_bg' => false, 'invert' => true],
+            ['name' => 'Woodstock der Blasmusik', 'url' => 'https://www.woodstock.at/', 'file' => 'wdb.webp', 'width' => 755, 'height' => 1024, 'alt' => 'Woodstock der Blasmusik', 'light_bg' => false],
             ['name' => 'Supervision', 'url' => 'https://www.supervision-music.at/', 'file' => 'supervision-400.png', 'file2x' => 'supervision-800.png', 'width' => 400, 'height' => 70, 'alt' => 'Supervision', 'light_bg' => false],
             ['name' => 'Max the Sax', 'url' => 'https://www.maxthesax.at/', 'file' => 'max-the-sax-400.png', 'file2x' => 'max-the-sax-800.png', 'width' => 400, 'height' => 118, 'alt' => 'Max the Sax', 'light_bg' => true],
             ['name' => 'SoulSanity', 'url' => 'https://www.soul-sanity.com/', 'file' => 'soulsanity.png', 'width' => 131, 'height' => 100, 'alt' => 'SoulSanity', 'light_bg' => false],

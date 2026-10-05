@@ -693,6 +693,7 @@ main:focus { outline: none; }
 .clients__logo:hover { transform: translateY(-2px); }
 .clients__logo--plate { background: var(--paper); padding: 0.5rem 0.75rem; }
 .clients__logo--plate img { max-height: 2.5rem; }
+.clients__logo--invert img { filter: invert(1) brightness(1.1); }
 
 /* 5.5 Fotos */
 .gallery__grid {

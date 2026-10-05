@@ -44,7 +44,7 @@ $clients = $content['clients'];
       </header>
       <ul class="clients__list">
         <?php foreach ($clients['items'] as $logo): ?>
-          <?php $cls = 'clients__logo' . ($logo['light_bg'] ? ' clients__logo--plate' : ''); ?>
+          <?php $cls = 'clients__logo' . ($logo['light_bg'] ? ' clients__logo--plate' : '') . (!empty($logo['invert']) ? ' clients__logo--invert' : ''); ?>
           <li class="clients__item">
             <?php if (!empty($logo['url'])): ?>
               <a class="<?= $cls ?>" href="<?= e($logo['url']) ?>" rel="noopener noreferrer" target="_blank" title="<?= e($logo['name']) ?> (externer Link)">
