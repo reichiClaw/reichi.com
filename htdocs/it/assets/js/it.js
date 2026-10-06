@@ -9,9 +9,14 @@
  *    (eigene Canvas). Mit Maus wird der Zeiger zum Endgerät, das sich beim nächsten AP anmeldet
  *    (Linie + Pegelanzeige; der Pegel ist aus dem Abstand gerechnet, keine Messung).
  * 4. Der Terminal-Streifen unter dem Plan tippt die Zeilen aus content-it.php in Schleife.
+ * 5. (eigener Block am Ende) Strom im Textblock: an der leuchtenden zweiten Überschriftzeile
+ *    springen kleine Funken von den Buchstaben, ab und zu kriecht ein Lichtbogen an der Grundlinie
+ *    entlang; alle 11–16 s eine Überspannung – Überschrift und Tagline flackern, die Zeile flammt
+ *    auf, Schläge laufen über die ganze Zeile, ein Blitz schlägt von der ersten Zeile über.
+ *    Die Grafik rechts ist davon nicht betroffen.
  *
  * Koordinaten kommen aus dem SVG (data-x/data-y im viewBox-Raum des Bilds, hero.php). Ohne
- * JavaScript, ohne Maus (nur 1, 2, 3 ohne Endgerät, 4) oder mit prefers-reduced-motion (gar nichts)
+ * JavaScript, ohne Maus (nur 1, 2, 3 ohne Endgerät, 4, 5) oder mit prefers-reduced-motion (gar nichts)
  * bleiben Bild und statischer Plan mit den ersten drei Terminal-Zeilen – nichts hier ist nötig.
  */
 (function () {
@@ -527,5 +532,254 @@
   size();
   waveTimer = 0.9; // erstes Paket kurz nach dem Einstieg
   echoTimer = 3;
+  start();
+})();
+
+/*
+ * 5. Strom im Textblock. Eigene Canvas (.it-spark) über .hero__copy, 3rem größer als der Block
+ * (it.css). Alle Positionen kommen aus den Zeilenboxen des Texts (Range.getClientRects), also
+ * stimmen sie bei jedem Umbruch und jeder Breite. Läuft nur sichtbar, ohne Maus-Bedingung, nicht
+ * mit prefers-reduced-motion. Die beiden Überschriftzeilen sind die „Leiter“: Zeile A („IT fürs
+ * Event.“) schwarz, Zeile B (.it-hero__title-b) leuchtend – an B passiert fast alles.
+ */
+(function () {
+  'use strict';
+
+  var copy = document.querySelector('[data-it-spark]');
+  var canvas = copy && copy.querySelector('.it-spark');
+  var title = copy && copy.querySelector('.it-hero__title');
+  var titleB = title && title.querySelector('.it-hero__title-b');
+  var tagline = copy && copy.querySelector('.it-hero__tagline');
+  var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+  if (!copy || !ctx || !titleB) { return; }
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (reduceMotion.matches) { return; }
+
+  var style = getComputedStyle(document.documentElement);
+  function token(name, fallback) { return (style.getPropertyValue(name) || fallback).trim(); }
+  var accent = token('--accent', '#00e6c3');
+  var accentInk = token('--accent-ink', '#00705f');
+  var core = token('--accent-core', '#eafffb');
+
+  // Zeitabstände in Sekunden: [min, Spanne]
+  var CRACKLE_EVERY = [1.2, 2];   // kleiner Funke an einer Buchstabenkante
+  var CRAWL_EVERY = [4.5, 4];     // Kriechstrom an der Grundlinie
+  var SURGE_EVERY = [11, 5];      // Überspannung
+  var SURGE_FIRST = 7;            // erste Überspannung nach dem Laden
+  var SURGE_LEN = 1.4;
+
+  var width = 0, height = 0, dpr = 1, pad = 0;
+  function size() {
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Überstand der Canvas über den Textblock (3rem laut CSS) – gemessen
+    pad = copy.getBoundingClientRect().left - canvas.getBoundingClientRect().left;
+  }
+
+  // Zeilenboxen eines Knotens in Canvas-Koordinaten
+  function rectsOf(range) {
+    var base = copy.getBoundingClientRect();
+    return Array.prototype.filter.call(range.getClientRects(), function (r) { return r.width > 30 && r.height > 10; })
+      .map(function (r) { return { x: r.left - base.left + pad, y: r.top - base.top + pad, w: r.width, h: r.height }; });
+  }
+  function lineA() {
+    var range = document.createRange();
+    range.setStart(title, 0);
+    range.setEndBefore(titleB);
+    return rectsOf(range);
+  }
+  function lineB() {
+    var range = document.createRange();
+    range.selectNodeContents(titleB);
+    return rectsOf(range);
+  }
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+
+  // Blitzlinie: Punkte mit Querversatz, an den Enden ohne Versatz
+  function bolt(x1, y1, x2, y2, jag, segs) {
+    var pts = [[x1, y1]];
+    var dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+    var nx = -dy / len, ny = dx / len;
+    for (var i = 1; i < segs; i++) {
+      var t = i / segs, env = Math.sin(t * Math.PI);
+      var off = (Math.random() * 2 - 1) * jag * env;
+      pts.push([x1 + dx * t + nx * off, y1 + dy * t + ny * off]);
+    }
+    pts.push([x2, y2]);
+    return pts;
+  }
+  function stroke(pts) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i][0], pts[i][1]); }
+    ctx.stroke();
+  }
+  function drawBolt(pts, alpha, haloW, coreW) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = alpha * 0.4; ctx.strokeStyle = accentInk; ctx.lineWidth = haloW + 2.5; stroke(pts);
+    ctx.globalAlpha = alpha * 0.85; ctx.strokeStyle = accent; ctx.lineWidth = haloW; stroke(pts);
+    ctx.globalAlpha = alpha; ctx.strokeStyle = core; ctx.lineWidth = coreW; stroke(pts);
+    ctx.restore();
+  }
+
+  var arcs = []; // { pts, t, life, hw, cw, crawl }
+
+  // kleiner Funke an der Ober- oder Unterkante einer leuchtenden Zeile
+  function crackle(strong) {
+    var lines = lineB();
+    if (!lines.length) { return; }
+    var r = pick(lines);
+    var top = Math.random() < 0.5;
+    var x = r.x + 8 + Math.random() * (r.w - 16);
+    var y = top ? r.y + r.h * 0.12 : r.y + r.h * 0.88;
+    var a = (top ? -Math.PI / 2 : Math.PI / 2) + (Math.random() - 0.5) * 1.6;
+    var l = (strong ? 16 : 9) + Math.random() * (strong ? 26 : 12);
+    arcs.push({ pts: bolt(x, y, x + Math.cos(a) * l, y + Math.sin(a) * l, 4, 4), t: 0, life: 0.08 + Math.random() * 0.07, hw: 2.4, cw: 1.1 });
+  }
+  // Kriechstrom entlang der Grundlinie (oder Oberkante) – ganz oder ein Stück
+  function crawl(r, top, strong) {
+    var y = top ? r.y + r.h * 0.1 : r.y + r.h * 0.9;
+    var x1 = r.x - 4, x2 = r.x + r.w + 4;
+    if (!strong) {
+      var s = Math.random() * 0.5, e = s + 0.3 + Math.random() * 0.3;
+      x2 = x1 + (r.w + 8) * Math.min(1, e);
+      x1 = x1 + (r.w + 8) * s;
+    }
+    arcs.push({
+      pts: bolt(x1, y, x2, y, strong ? 5 : 3, Math.max(6, Math.round((x2 - x1) / 12))),
+      t: 0, life: (strong ? 0.22 : 0.16) + Math.random() * 0.1, hw: strong ? 3 : 2.2, cw: strong ? 1.4 : 1, crawl: true
+    });
+  }
+  // Überschlag von Zeile A auf Zeile B
+  function bridge() {
+    var a = lineA()[0], b = lineB()[0];
+    if (!a || !b) { return; }
+    var x = b.x + 20 + Math.random() * Math.min(a.w, b.w) * 0.8;
+    arcs.push({ pts: bolt(x + (Math.random() - 0.5) * 30, a.y + a.h * 0.92, x, b.y + b.h * 0.1, 7, 6), t: 0, life: 0.14 + Math.random() * 0.08, hw: 2.6, cw: 1.2 });
+  }
+  // kurzer Sprung zwischen zwei Zeilen von B, wenn sie umbricht
+  function hop() {
+    var lines = lineB();
+    if (lines.length < 2) { return; }
+    var x = lines[1].x + 10 + Math.random() * (Math.min(lines[0].w, lines[1].w) - 20);
+    arcs.push({ pts: bolt(x + (Math.random() - 0.5) * 16, lines[0].y + lines[0].h * 0.9, x, lines[1].y + lines[1].h * 0.1, 4, 4), t: 0, life: 0.12, hw: 2.2, cw: 1 });
+  }
+
+  var surge = null;
+  var surgeTimer = SURGE_FIRST, crackleTimer = 1, crawlTimer = 2.5;
+  function after(base) { return base[0] + Math.random() * base[1]; }
+  function startSurge() {
+    surge = { t: 0, fired: {} };
+    titleB.classList.add('is-surge');
+    title.classList.add('is-flicker');
+    if (tagline) { tagline.classList.add('is-flicker'); }
+    window.setTimeout(function () { titleB.classList.remove('is-surge'); }, 1100);
+    window.setTimeout(function () {
+      title.classList.remove('is-flicker');
+      if (tagline) { tagline.classList.remove('is-flicker'); }
+    }, 850);
+    surgeTimer = after(SURGE_EVERY);
+  }
+  function surgeStep(dt) {
+    surge.t += dt;
+    var lines = lineB();
+    // drei Schläge im Abstand von 80 ms über jede leuchtende Zeile, unten und (zweimal) oben
+    for (var k = 0; k < 3; k++) {
+      var when = 0.02 + k * 0.08;
+      if (surge.t >= when && !surge.fired[k]) {
+        surge.fired[k] = true;
+        lines.forEach(function (r) {
+          crawl(r, false, true);
+          if (k < 2) { crawl(r, true, true); }
+        });
+        if (k === 0) { bridge(); hop(); }
+        if (k === 2) { bridge(); }
+      }
+    }
+    if (surge.t < 0.6 && Math.random() < 0.55) { crackle(true); }
+    if (surge.t > SURGE_LEN) { surge = null; }
+  }
+
+  var running = false, rafId = 0, lastT = 0, onScreen = true;
+  function step(now) {
+    rafId = 0;
+    var dt = Math.min(0.05, (now - (lastT || now)) / 1000);
+    lastT = now;
+
+    crackleTimer -= dt;
+    if (crackleTimer <= 0) { crackle(false); crackleTimer = after(CRACKLE_EVERY); }
+    crawlTimer -= dt;
+    if (crawlTimer <= 0) {
+      var lines = lineB();
+      if (lines.length) { crawl(pick(lines), Math.random() < 0.3, false); }
+      if (Math.random() < 0.35) { hop(); }
+      crawlTimer = after(CRAWL_EVERY);
+    }
+    surgeTimer -= dt;
+    if (surgeTimer <= 0 && !surge) { startSurge(); }
+    if (surge) { surgeStep(dt); }
+
+    ctx.clearRect(0, 0, width, height);
+    for (var i = arcs.length - 1; i >= 0; i--) {
+      var a = arcs[i];
+      a.t += dt;
+      if (a.t >= a.life) { arcs.splice(i, 1); continue; }
+      var k = a.t / a.life;
+      var alpha = (k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8) * (0.7 + 0.3 * Math.random());
+      // innere Punkte leicht zittern lassen, damit der Bogen „kriecht“
+      if (Math.random() < 0.6) {
+        for (var j = 1; j < a.pts.length - 1; j++) {
+          a.pts[j][0] += (Math.random() - 0.5) * 1.4;
+          a.pts[j][1] += (Math.random() - 0.5) * (a.crawl ? 1.8 : 1.4);
+        }
+      }
+      drawBolt(a.pts, alpha, a.hw, a.cw);
+    }
+
+    if (running && onScreen && !document.hidden) {
+      rafId = window.requestAnimationFrame(step);
+    } else {
+      lastT = 0;
+    }
+  }
+  function start() {
+    if (!running) { running = true; }
+    if (!rafId && onScreen && !document.hidden) { rafId = window.requestAnimationFrame(step); }
+  }
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      onScreen = entries[0].isIntersecting;
+      if (onScreen) { start(); }
+    }).observe(copy);
+  }
+  document.addEventListener('visibilitychange', start);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(function () { size(); }).observe(copy);
+  } else {
+    window.addEventListener('resize', size);
+  }
+  reduceMotion.addEventListener && reduceMotion.addEventListener('change', function () {
+    if (reduceMotion.matches) {
+      running = false;
+      arcs.length = 0;
+      surge = null;
+      titleB.classList.remove('is-surge');
+      title.classList.remove('is-flicker');
+      if (tagline) { tagline.classList.remove('is-flicker'); }
+      ctx.clearRect(0, 0, width, height);
+    } else {
+      start();
+    }
+  });
+
+  size();
   start();
 })();

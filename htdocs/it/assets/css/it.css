@@ -23,6 +23,7 @@
   --accent-ink: #00705f;
   --accent-soft: rgba(0, 230, 195, 0.16);
   --accent-glow: rgba(0, 230, 195, 0.55);
+  --accent-core: #eafffb; /* Kern eines Funkens, fast weiß */
   --red: #d8371f;
   --red-hover: #c43018;
   --paper: #15151a;
@@ -97,6 +98,18 @@ code { background: var(--bg-3); }
 .it-hero__tagline::before { content: "// "; color: var(--accent-ink); }
 .it-hero .hero__roles { margin-top: 1.5rem; }
 .it-hero .hero__roles li + li::before { color: var(--accent-ink); }
+/* Canvas für Funken und Kriechstrom um die Überschrift (it.js, Teil 5). Ragt 3rem über den
+   Textblock hinaus, damit Funken am Rand nicht abgeschnitten werden; der Rand ist für die
+   Positionsrechnung in it.js maßgeblich (gemessen, nicht angenommen). */
+.it-hero .hero__copy { position: relative; }
+.it-spark {
+  position: absolute;
+  inset: -3rem;
+  width: calc(100% + 6rem);
+  height: calc(100% + 6rem);
+  pointer-events: none;
+  display: none; /* sichtbar nur unter prefers-reduced-motion: no-preference, siehe Abschnitt 9 */
+}
 
 .it-net__panel {
   position: relative;
@@ -398,6 +411,32 @@ code { background: var(--bg-3); }
     95% { text-shadow: 0 0 0.45em var(--accent-glow); }
   }
   .it-hero__title-b { animation: overload-glow 7s linear infinite; }
+  /* Überspannung (it.js, Teil 5): die leuchtende Zeile flammt für gut eine Sekunde auf (die
+     Farbe geht kurz Richtung --accent, nur im Moment des Schlags) … */
+  .it-hero__title-b.is-surge {
+    animation: none;
+    color: #00a88f;
+    text-shadow: 0 0 1em var(--accent), 0 0 0.3em var(--accent), 0 0 0.06em #fff;
+  }
+  /* … und Überschrift samt Tagline flackern wie eine Lampe am überlasteten Stromkreis */
+  @keyframes power-flicker {
+    0%, 100% { opacity: 1; }
+    5% { opacity: 0.25; }
+    11% { opacity: 1; }
+    18% { opacity: 0.4; }
+    26% { opacity: 1; }
+    34% { opacity: 0.7; }
+    40% { opacity: 1; }
+    54% { opacity: 0.5; }
+    61% { opacity: 1; }
+    76% { opacity: 0.8; }
+    82% { opacity: 1; }
+  }
+  /* Die Überschrift behält ihre Einstiegsanimation „rise“ (style.css) in der Liste, sonst
+     würde sie nach dem Flackern noch einmal von unten einblenden. */
+  .it-hero__title.is-flicker { animation: rise 800ms var(--ease) 80ms both, power-flicker 800ms steps(1) 1; }
+  .it-hero__tagline.is-flicker { animation: power-flicker 800ms steps(1) 1; }
+  .it-spark { display: block; }
   @keyframes caret { 50% { opacity: 0; } }
   .it-net--live .it-net__log li:last-child::after { animation: caret 1s steps(1) infinite; }
   .it-net__log { animation: rise 800ms var(--ease) 400ms both; }

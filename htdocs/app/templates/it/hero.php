@@ -5,7 +5,8 @@
  * dem Netzplan darüber (Inline-SVG: Leitungen und Knoten-Schilder). it.js legt eine Canvas
  * zwischen Bild und SVG (WLAN-Versorgungsfeld) und eine darüber (Datenpakete, simulierter
  * Leitungsausfall mit Umleitung, Mauszeiger als Endgerät) und tippt im Terminal-Streifen
- * darunter Statuszeilen.
+ * darunter Statuszeilen. Links liegt eine weitere Canvas über dem Textblock: Funken und
+ * Kriechstrom an der leuchtenden zweiten Überschriftzeile, alle paar Sekunden eine Überspannung.
  * Die Klassen hero/hero__copy/hero__figure stammen aus style.css (Layout + Parallax aus main.js).
  */
 
@@ -48,9 +49,11 @@ $groundSet = implode(', ', array_map(
 ?>
 <section class="hero it-hero" aria-labelledby="hero-title">
   <div class="hero__inner">
-    <div class="hero__copy">
+    <div class="hero__copy" data-it-spark>
       <p class="eyebrow hero__eyebrow"><?= e($hero['eyebrow']) ?></p>
       <h1 class="hero__title it-hero__title" id="hero-title"><?= e($hero['headline_a']) ?> <span class="it-hero__title-b"><?= e($hero['headline_b']) ?></span></h1>
+      <?php /* Funken und Kriechstrom um die Überschrift (it.js, Teil 5); ohne JavaScript bleibt die Fläche leer */ ?>
+      <canvas class="it-spark" aria-hidden="true"></canvas>
       <p class="it-hero__tagline" lang="en"><?= e($hero['tagline']) ?></p>
       <ul class="hero__roles" aria-label="Leistungen">
         <?php foreach ($hero['chips'] as $chip): ?>

@@ -299,9 +299,13 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
   a dashed reserve link). `it.js` adds two canvases: a breathing Wi-Fi coverage field under the
   access points, travelling packets, a simulated link failure every few seconds (red marker,
   traffic reroutes over the reserve link, status line and terminal strip report it) and – mouse
-  only – the pointer as a client device that associates with the nearest AP. Nothing moves with
-  `prefers-reduced-motion`; without JavaScript the picture, the static plan and the first three
-  terminal lines remain.
+  only – the pointer as a client device that associates with the nearest AP. A third canvas
+  (`.it-spark`) lies over the text block only: small sparks jump off the letters of the glowing
+  headline line, now and then a current crawls along its baseline, and every 11–16 s a power
+  surge makes headline and tagline flicker while strikes run along the whole line – the picture
+  on the right is never touched. Positions come from the text's line boxes, so it follows any
+  wrap. Nothing moves with `prefers-reduced-motion`; without JavaScript the picture, the static
+  plan and the first three terminal lines remain.
 - Form: same partial and same protection; the subject is a select (Aufbau, Betrieb vor
   Ort, Beratung, Sonstiges). Inquiries go to `reichi@reichi.it`, redirect anchor `#anfrage`.
 - „Verbundene Projekte“ reuses `sections/projects.php` with its own list in `content-it.php`
