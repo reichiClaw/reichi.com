@@ -424,7 +424,10 @@ code { background: var(--bg-3); }
     76% { opacity: 0.8; }
     82% { opacity: 1; }
   }
-  .it-hero__title.is-flicker, .it-hero__tagline.is-flicker { animation: power-flicker 800ms steps(1) 1; }
+  /* Die Überschrift behält ihre Einstiegsanimation „rise“ (style.css) in der Liste, sonst
+     würde sie nach dem Flackern noch einmal von unten einblenden. */
+  .it-hero__title.is-flicker { animation: rise 800ms var(--ease) 80ms both, power-flicker 800ms steps(1) 1; }
+  .it-hero__tagline.is-flicker { animation: power-flicker 800ms steps(1) 1; }
   .it-spark { display: block; }
   @keyframes caret { 50% { opacity: 0; } }
   .it-net--live .it-net__log li:last-child::after { animation: caret 1s steps(1) infinite; }
