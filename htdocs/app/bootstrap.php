@@ -21,7 +21,8 @@ if (PHP_VERSION_ID < 80100) {
 define('APP_DIR', __DIR__);
 
 // Welche Website läuft? 'main' = reichi.com (htdocs/), 'it' = reichi.it (htdocs/it/, eigene
-// Inhalte in content-it.php). Die öffentlichen PHP-Dateien der Unterseite definieren SITE.
+// Inhalte in content-it.php), 'rstream' = rstream.at (htdocs/rstream/, content-rstream.php).
+// Die öffentlichen PHP-Dateien der Unterseiten definieren SITE.
 if (!defined('SITE')) {
     define('SITE', 'main');
 }
@@ -38,7 +39,7 @@ $configFile = APP_DIR . '/config.php';
 $config = require file_exists($configFile) ? $configFile : APP_DIR . '/config.example.php';
 $config['using_example_config'] = !file_exists($configFile);
 
-// Abweichende Werte je Website (config.php: 'sites' => ['it' => [...]]) überlagern die Grundwerte.
+// Abweichende Werte je Website (config.php: 'sites' => ['it' => [...], 'rstream' => [...]]) überlagern die Grundwerte.
 if (SITE !== 'main' && isset($config['sites'][SITE]) && is_array($config['sites'][SITE])) {
     $config = array_replace($config, $config['sites'][SITE]);
 }

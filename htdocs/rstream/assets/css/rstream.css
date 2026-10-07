@@ -1,0 +1,391 @@
+/* ==========================================================================
+   rstream.at – Ergänzungen zu style.css (wird danach geladen)
+   Regieraum-Schwarz mit einem leichten Blaustich, ein Sender-Violett als Akzent (Flächen, Linien,
+   Leuchten) mit einer hellen Variante für Text; Tally-Rot steht für „Live“ und bleibt der
+   Sendeanzeige und dem Hauptknopf vorbehalten, Tally-Grün für die Vorschau. Die Bausteine
+   Leistungen, Ablauf, Warum ich und Karten stehen in style.css (Abschnitt 9b, gemeinsam mit
+   reichi.it) und werden hier nur über die Tokens gefärbt.
+   Aufbau: 1. Tokens  2. Überschreibungen  3. Hero + Multiviewer  4. Szenen  5. Einsatzbereiche
+   7b. Projekte  8. Formular  9. Motion
+   ========================================================================== */
+
+/* 1. Tokens -------------------------------------------------------------- */
+:root {
+  --bg: #0b0b10;
+  --bg-2: #111118;
+  --bg-3: #181822;
+  --bg-4: #22222e;
+  --ink: #f3efe7;
+  --ink-2: #bab4ad;
+  --ink-3: #928d95;
+  --line: rgba(243, 239, 231, 0.12);
+  --line-strong: rgba(243, 239, 231, 0.28);
+  /* Akzent: Sender-Violett. --accent für Flächen, Linien, Leuchten und den Hauptknopf (dunkle
+     Schrift darauf: 5:1), Text immer in --accent-ink (9:1 auf dem Grund). */
+  --accent: #b14dff;
+  --accent-hover: #c06cff;
+  --accent-ink: #cfa2ff;
+  --accent-soft: rgba(177, 77, 255, 0.16);
+  --accent-glow: rgba(177, 77, 255, 0.55);
+  /* Tally */
+  --live: #ff3b4e;
+  --live-glow: rgba(255, 59, 78, 0.55);
+  --pvw: #39d98a;
+  --paper: #f3efe7;
+  --paper-ink: #0b0b10;
+  --ok: #39d98a;
+  --ok-soft: rgba(57, 217, 138, 0.12);
+  --panel: #101017;
+}
+
+/* 2. Überschreibungen von style.css ------------------------------------- */
+.site-header { background: rgba(11, 11, 16, 0.82); }
+.site-header.is-scrolled { background: rgba(11, 11, 16, 0.92); }
+.brand:hover .brand__mark { color: var(--accent-ink); }
+/* Wortmarke „STREAM“ als SVG-Bild neben dem Sechseck-Zeichen (das im Original-Logo das „R“ ist).
+   Höhe wie im Original: Versalhöhe etwa die Hälfte des Sechsecks (2rem bzw. im Fuß 2.4rem). */
+.brand__word:has(.brand__wordmark) { padding-top: 0.05em; display: flex; }
+.brand__wordmark { display: block; height: 1.02rem; width: auto; }
+.brand--footer .brand__wordmark { height: 1.2rem; }
+
+.button--primary { background: var(--accent); border-color: var(--accent); color: var(--paper-ink); }
+.button--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.skip-link { background: var(--accent); color: var(--paper-ink); }
+::selection { background: var(--accent); color: var(--paper-ink); }
+.eyebrow { color: var(--accent-ink); }
+
+.form { background: var(--panel); }
+.form__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.6rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bab4ad' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+  cursor: pointer;
+}
+.form__error { color: #ff8a97; }
+.form__field--error .form__input { border-color: var(--live); }
+.form__req, .form__required-note span { color: var(--accent-ink); }
+.form-status { border-left-color: var(--accent); background: var(--accent-soft); }
+.form-status--success { border-left-color: var(--ok); background: var(--ok-soft); }
+
+.site-footer { background: var(--bg-2); }
+
+/* 3. Hero + Multiviewer -------------------------------------------------- */
+/* Etwas kleiner als auf reichi.it, damit „Dein Event. Live.“ bis hinunter zu 64em in einer Zeile steht */
+.rs-hero__title { font-size: clamp(2.6rem, 1rem + 4.2vw, 4.6rem); line-height: 0.95; letter-spacing: -0.045em; }
+.rs-hero__title-b {
+  display: block;
+  margin-top: 0.3em;
+  font-size: 0.5em;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--accent-ink);
+  /* leichtes Senderlicht hinter der zweiten Zeile */
+  text-shadow: 0 0 0.45em var(--accent-glow);
+  text-wrap: balance;
+}
+.rs-hero__tagline {
+  margin: 1rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+.rs-hero__tagline::before { content: "// "; color: var(--accent-ink); }
+.rs-hero .hero__roles { margin-top: 1.5rem; }
+.rs-hero .hero__roles li + li::before { color: var(--accent-ink); }
+.hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
+
+/* Das Panel: Kopfzeile, Programmbild + Pegel, vier Kamerakacheln */
+.rs-mv__panel {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background-color: var(--panel);
+  background-image: linear-gradient(to bottom, rgba(243, 239, 231, 0.03), transparent 30%);
+  overflow: clip;
+}
+.rs-mv__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.rs-mv__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.5rem 0.15rem 0.4rem;
+  border-radius: 3px;
+  background: var(--live);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px var(--live-glow);
+}
+.rs-mv__live-dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: #fff; }
+.rs-mv__tc { color: var(--ink); font-variant-numeric: tabular-nums; }
+.rs-mv__enc { margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rs-mv__main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; }
+.rs-mv__tile {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: clip;
+  border-radius: 4px;
+  background: #000;
+  border: 2px solid rgba(243, 239, 231, 0.08);
+}
+/* Zeilenraster wie auf einem Vorschaumonitor */
+.rs-mv__tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.14) 2px 3px);
+}
+.rs-mv__scene { position: absolute; inset: 0; display: block; }
+.rs-mv__scene--next { opacity: 0; }
+.rs-mv__tag {
+  position: absolute;
+  left: 0.4rem;
+  top: 0.4rem;
+  z-index: 1;
+  padding: 0.1rem 0.35rem;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rs-mv__tag--pgm { background: var(--live); color: #fff; font-weight: 700; }
+.rs-mv__shot {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: rgba(243, 239, 231, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+/* Safe-Area-Markierung im Programmbild */
+.rs-mv__safe { position: absolute; inset: 6% 5%; border: 1px dashed rgba(243, 239, 231, 0.16); pointer-events: none; }
+.rs-mv__pgm { border-color: rgba(243, 239, 231, 0.16); }
+
+.rs-mv__cams { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+.rs-mv__cam { cursor: default; transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease); }
+.rs-mv__cam .rs-mv__tag { font-size: 0.56rem; left: 0.3rem; top: 0.3rem; padding: 0.05rem 0.25rem; }
+.rs-mv__cam .rs-mv__shot { font-size: 0.56rem; right: 0.3rem; bottom: 0.3rem; }
+/* In schmalen Kacheln (Handy) nur Kameraname und Tally, sonst stößt die Einstellung ans Tally */
+@media (max-width: 29.99em) {
+  .rs-mv__cam .rs-mv__shot { display: none; }
+}
+.rs-mv__tally {
+  display: none;
+  position: absolute;
+  left: 0.3rem;
+  bottom: 0.3rem;
+  z-index: 1;
+  padding: 0.05rem 0.25rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rs-mv__cam.is-pgm { border-color: var(--live); box-shadow: 0 0 0 1px rgba(255, 59, 78, 0.35), 0 0 12px var(--live-glow); }
+.rs-mv__cam.is-pgm .rs-mv__tally { display: block; background: var(--live); color: #fff; }
+.rs-mv__cam.is-pgm .rs-mv__tally::before { content: attr(data-pgm); }
+.rs-mv__cam.is-pvw { border-color: var(--pvw); }
+.rs-mv__cam.is-pvw .rs-mv__tally { display: block; background: var(--pvw); color: #06130c; }
+.rs-mv__cam.is-pvw .rs-mv__tally::before { content: attr(data-pvw); }
+
+/* Tonpegel: zwei Säulen, Füllstand über --level (rstream.js), Spitzenwert-Haltelinie über --peak */
+.rs-mv__audio { display: flex; gap: 0.35rem; }
+.rs-mv__meter { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+.rs-mv__meter-fill {
+  --level: 0.62;
+  --peak: 0.7;
+  position: relative;
+  flex: 1;
+  width: 0.7rem;
+  border-radius: 2px;
+  /* Skala fest auf der ganzen Säule; eine dunkle Abdeckung von oben gibt den Pegel frei */
+  background: linear-gradient(to top, var(--pvw) 0 62%, #ffd34d 62% 84%, var(--live) 84%);
+  overflow: clip;
+}
+.rs-mv__meter-fill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-3);
+  transform-origin: top;
+  transform: scaleY(calc(1 - var(--level)));
+}
+.rs-mv__meter-fill::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--peak) * 100%);
+  height: 2px;
+  background: rgba(243, 239, 231, 0.85);
+}
+.rs-mv__meter-ch { font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.08em; color: var(--ink-3); }
+
+/* Statuspunkt in der Bildunterschrift: Tally-Rot („On air“) */
+.rs-mv__status {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.15rem;
+  border-radius: 50%;
+  background: var(--live);
+  box-shadow: 0 0 6px var(--live-glow);
+}
+.rs-mv .hero__caption-meta { white-space: nowrap; }
+
+/* Terminal-Streifen unter dem Panel: ohne JavaScript stehen die ersten drei Zeilen, rstream.js tippt sie in Schleife */
+.rs-mv__log {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0.55rem 0.8rem;
+  min-height: calc(3 * 1.55em + 1.1rem);
+  background: #050507;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+}
+.rs-mv__log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-mv__log li::before { content: "> "; color: var(--accent-ink); }
+.rs-mv:not(.rs-mv--live) .rs-mv__log li:nth-child(n+4) { display: none; }
+.rs-mv__line--cut { color: var(--ink); }
+.rs-mv__line--cut::before { color: var(--live); }
+.rs-mv--live .rs-mv__log li:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: -0.15em;
+  background: var(--accent-ink);
+}
+
+/* 4. Szenen – stilisierte Kamerabilder aus Verläufen (keine Fotos) ------- */
+/* Totale: Bühne von vorne, Lichtkegel von oben, dunkler Boden */
+.rs-scene--wide {
+  background:
+    linear-gradient(to top, #07070a 0 20%, transparent 42%),
+    linear-gradient(104deg, transparent 27%, rgba(177, 77, 255, 0.26) 28%, transparent 32%),
+    linear-gradient(94deg, transparent 46%, rgba(130, 170, 255, 0.2) 47%, transparent 50%),
+    linear-gradient(78deg, transparent 60%, rgba(177, 77, 255, 0.24) 61%, transparent 65%),
+    radial-gradient(ellipse 70% 60% at 50% -10%, rgba(177, 77, 255, 0.5), transparent 70%),
+    linear-gradient(to bottom, #15121f, #0d0b14);
+}
+/* Gesang: warmer Verfolger, Silhouette in der Mitte */
+.rs-scene--vocals {
+  background:
+    radial-gradient(ellipse 7% 12% at 50% 47%, #140b11 0 88%, transparent 100%),
+    radial-gradient(ellipse 22% 30% at 50% 102%, #140b11 0 90%, transparent 100%),
+    radial-gradient(ellipse 42% 60% at 50% 40%, rgba(255, 214, 170, 0.75), rgba(255, 140, 90, 0.22) 48%, transparent 72%),
+    radial-gradient(circle at 50% 130%, rgba(177, 77, 255, 0.35), transparent 55%),
+    #0e0a10;
+}
+/* Drums: kühles Gegenlicht, Beckenglanz */
+.rs-scene--drums {
+  background:
+    radial-gradient(ellipse 16% 6% at 30% 52%, rgba(220, 230, 255, 0.7), transparent 100%),
+    radial-gradient(ellipse 13% 5% at 68% 46%, rgba(220, 230, 255, 0.6), transparent 100%),
+    radial-gradient(ellipse 30% 26% at 50% 78%, rgba(60, 70, 110, 0.9), transparent 100%),
+    linear-gradient(to top, #06070c 0 22%, transparent 50%),
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgba(90, 140, 255, 0.45), transparent 65%),
+    #0b0d16;
+}
+/* Publikum: Handylichter im Dunkel, violetter Schein von der Bühne */
+.rs-scene--crowd {
+  background:
+    radial-gradient(circle at 8% 66%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 19% 58%, rgba(255, 255, 255, 0.8) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 31% 70%, rgba(255, 255, 255, 0.85) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 44% 61%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 56% 74%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 67% 57%, rgba(255, 255, 255, 0.85) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 78% 68%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.75) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 25% 80%, rgba(255, 255, 255, 0.6) 0 1px, transparent 2.6px),
+    radial-gradient(circle at 73% 82%, rgba(255, 255, 255, 0.65) 0 1px, transparent 2.6px),
+    linear-gradient(to top, #050508 0 30%, transparent 62%),
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(177, 77, 255, 0.45), transparent 65%),
+    #0f0c16;
+}
+
+/* 5. Einsatzbereiche (Karten aus 9b.4) ----------------------------------- */
+.usecases .section__head { max-width: 60rem; }
+@media (min-width: 48em) {
+  .usecases__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .usecases__list .reference__item--more { grid-column: 1 / -1; }
+}
+
+/* 7b. Verbundene Projekte (Template sections/projects.php) ---------------- */
+/* Auf reichi.com hängt die Zeile ohne Abstand an der Galerie; hier ist sie ein eigener Abschnitt */
+.projects { padding-top: var(--section); border-top: 1px solid var(--line); }
+.projects__item { background: var(--panel); }
+.projects__link:hover { background: var(--bg-3); }
+/* „.com“ im Rot von reichi.com */
+.projects__brand-suffix { color: #ff7362; }
+
+/* 8. Formular / Kontakt -------------------------------------------------- */
+.contact__link .icon, .contact__address .icon { color: var(--accent-ink); }
+
+/* 9. Motion -------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .rs-mv__panel { animation: settle 1400ms var(--ease) both; transform-origin: 50% 40%; }
+  @keyframes live-blink {
+    0%, 45%, 100% { opacity: 1; }
+    50%, 95% { opacity: 0.25; }
+  }
+  .rs-mv__live-dot { animation: live-blink 1.6s steps(1) infinite; }
+  /* Das Programmbild fährt langsam ran und wieder zurück, wie eine Kamera auf dem Stativ */
+  @keyframes rs-pan {
+    from { transform: scale(1) translate(0, 0); }
+    to { transform: scale(1.08) translate(-1.5%, 1%); }
+  }
+  .rs-mv__pgm .rs-mv__scene { animation: rs-pan 14s ease-in-out infinite alternate; }
+  /* Blende: die obere Szenen-Ebene wird eingeblendet (rstream.js setzt is-mixing), sonst harter Schnitt */
+  .rs-mv__pgm.is-mixing .rs-mv__scene--next { opacity: 1; transition: opacity 600ms ease-in-out; }
+  .rs-mv__meter-fill::before { transition: transform 80ms linear; }
+  .rs-mv__meter-fill::after { transition: bottom 300ms ease-out; }
+  /* Senderlicht: alle paar Sekunden pulst das Leuchten der zweiten Zeile kurz */
+  @keyframes on-air-glow {
+    0%, 88%, 100% { text-shadow: 0 0 0.45em var(--accent-glow); }
+    92% { text-shadow: 0 0 0.9em var(--accent), 0 0 0.2em var(--accent-glow); }
+    96% { text-shadow: 0 0 0.4em var(--accent-glow); }
+  }
+  .rs-hero__title-b { animation: on-air-glow 8s linear infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+  .rs-mv--live .rs-mv__log li:last-child::after { animation: caret 1s steps(1) infinite; }
+  .rs-mv__log { animation: rise 800ms var(--ease) 400ms both; }
+}
+
+@media print {
+  .rs-mv__log, .rs-mv__audio { display: none !important; }
+}

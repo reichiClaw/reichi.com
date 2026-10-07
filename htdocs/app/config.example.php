@@ -116,11 +116,13 @@ return [
     'force_secure_cookie' => false,
 
     // ------------------------------------------------------------------
-    // reichi.it – die IT-Abteilung (Ordner htdocs/it/, Inhalte in app/content-it.php)
+    // Abteilungs-Websites: reichi.it (Ordner htdocs/it/, Inhalte in app/content-it.php) und
+    // rstream.at (Ordner htdocs/rstream/, Inhalte in app/content-rstream.php)
     // ------------------------------------------------------------------
     // Die Domain reichi.it wird im Hosting-Panel auf den Ordner it/ gelegt; die Seite ist
     // dann unter https://reichi.it/ erreichbar (und technisch auch unter www.reichi.com/it/,
-    // dort automatisch mit noindex). Alle Werte hier überlagern die Grundwerte oben.
+    // dort automatisch mit noindex). Gleiches gilt für rstream.at und den Ordner rstream/.
+    // Alle Werte je Website überlagern die Grundwerte oben.
     'sites' => [
         'it' => [
             'base_url' => 'https://reichi.it',
@@ -139,6 +141,27 @@ return [
             'mail_subject_prefix' => '[reichi.it] ',
             // Cloudflare Turnstile braucht ein eigenes Widget für die Domain reichi.it
             // (oder im bestehenden Widget reichi.it als weitere Domain eintragen).
+            'turnstile' => [
+                'site_key' => '',
+                'secret_key' => '',
+                'appearance' => 'always',
+            ],
+        ],
+        'rstream' => [
+            'base_url' => 'https://www.rstream.at',
+            'own_domain' => true,
+            // Leer = aus. 'www.rstream.at' = Aufrufe über eine andere Adresse (www.reichi.com/rstream/)
+            // werden dauerhaft (301) auf die eigene Domain umgeleitet. Erst setzen, wenn die
+            // Domain im Panel eingerichtet ist und https://www.rstream.at/ funktioniert.
+            'enforce_host' => '',
+            'site_name' => 'rstream.at',
+            // Postfächer unter rstream.at müssen beim Hoster bestehen (siehe MIGRATION.md).
+            'mail_to' => 'office@rstream.at',
+            'mail_from' => 'website@rstream.at',
+            'mail_from_name' => 'rstream.at Website',
+            'mail_envelope_from' => 'website@rstream.at',
+            'mail_subject_prefix' => '[rstream.at] ',
+            // Eigenes Turnstile-Widget für die Domain rstream.at (oder als weitere Domain eintragen).
             'turnstile' => [
                 'site_key' => '',
                 'secret_key' => '',
