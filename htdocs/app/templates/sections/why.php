@@ -1,5 +1,5 @@
 <?php
-/** reichi.it – Warum ich: Einleitung, vier Punkte, Fakten, ein Satz zum Mitnehmen. */
+/** Warum ich: Einleitung, Punkte, Fakten, ein Satz zum Mitnehmen – gemeinsam für reichi.it und rstream.at ($content['why']). */
 
 declare(strict_types=1);
 

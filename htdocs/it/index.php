@@ -36,12 +36,12 @@ $page = [
 
 render('header', ['page' => $page]);
 render('it/hero');
-render('it/services');
-render('it/process');
-render('it/why');
+render('sections/services');
+render('sections/process');
+render('sections/why');
 render('it/reference');
 render('sections/projects');
-render('it/contact', [
+render('sections/inquiry', [
     'formStatus' => $formStatus,
     'formErrors' => is_array($formErrors) ? $formErrors : [],
     'formValues' => is_array($formValues) ? $formValues : [],

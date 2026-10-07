@@ -1,5 +1,9 @@
 <?php
-/** reichi.it – Leistungen: drei nummerierte Karten (Aufbauen, Betreiben, Beraten) mit Stichpunkten. */
+/**
+ * Leistungen: nummerierte Karten mit Stichpunkten – gemeinsam für die Abteilungs-Websites
+ * (reichi.it: Aufbauen, Betreiben, Beraten; rstream.at: Produzieren, Übertragen, Festhalten).
+ * Liest $content['services']; Gestaltung in style.css, Abschnitt „Abteilungs-Websites“.
+ */
 
 declare(strict_types=1);
 

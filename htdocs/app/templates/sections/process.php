@@ -1,5 +1,5 @@
 <?php
-/** reichi.it – Ablauf: vier Schritte als „Patchkabel“-Strang. */
+/** Ablauf: Schritte an einem „Patchkabel“-Strang – gemeinsam für reichi.it und rstream.at ($content['process']). */
 
 declare(strict_types=1);
 

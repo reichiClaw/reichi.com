@@ -2,7 +2,7 @@
    reichi.com – Stylesheet
    Plain CSS, keine Abhängigkeiten. Aufbau:
    1. Design-Tokens  2. Basis  3. Bausteine  4. Header  5. Abschnitte
-   6. Formular  7. Footer  8. Lightbox  9. Rechtliche Seiten  10. Motion
+   6. Formular  7. Footer  8. Lightbox  9. Rechtliche Seiten  9b. Abteilungs-Websites  10. Motion
    ========================================================================== */
 
 /* 1. Design-Tokens ------------------------------------------------------- */
@@ -23,6 +23,7 @@
   --paper-ink: #0c0c0f;
   --ok: #7bd88f;
   --ok-soft: rgba(123, 216, 143, 0.12);
+  --panel: #121216; /* Karten- und Panelfläche der Abteilungs-Websites; in it.css/rstream.css überschrieben */
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
@@ -1022,6 +1023,183 @@ main:focus { outline: none; }
 .legal__list li::marker { color: var(--accent); }
 .legal__todo { background: rgba(255, 179, 71, 0.16); color: var(--ink); border-radius: 3px; font-family: var(--font-mono); font-size: 0.85em; }
 
+/* 9b. Abteilungs-Websites (reichi.it, rstream.at) ------------------------ */
+/* Bausteine der Einseiter in htdocs/it/ und htdocs/rstream/ (Templates sections/services,
+   process, why, inquiry und it/reference bzw. rstream/usecases). Alle Farben kommen aus den
+   Tokens, das Theme der jeweiligen Website (it.css hell, rstream.css dunkel-violett) färbt sie.
+   reichi.com verwendet diese Klassen nicht. */
+/* 9b.1 Leistungen ---------------------------------------------------------- */
+.services { border-top: 1px solid var(--line); }
+.services__list { list-style: none; display: grid; gap: 1.25rem; }
+.services__item {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.services__item:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+.services__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.services__index { color: var(--accent-ink); }
+.services__tag {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+}
+.services__name { font-size: var(--step-2); letter-spacing: -0.03em; }
+.services__text { color: var(--ink-2); font-size: var(--step-0); line-height: 1.45; text-wrap: pretty; }
+.services__points { list-style: none; display: grid; gap: 0.6rem; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.services__points li { position: relative; padding-left: 1.4rem; font-size: var(--step--1); color: var(--ink-2); line-height: 1.5; }
+.services__points li::before {
+  /* kleiner Stecker: Rechteck mit Pin */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1.5px solid var(--accent-ink);
+  border-radius: 2px;
+  background: var(--accent-soft);
+}
+@media (min-width: 48em) {
+  .services__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .services__list { grid-template-columns: 1fr 1fr; }
+  .services__item:last-child { grid-column: 1 / -1; }
+}
+
+/* 9b.2 Ablauf -------------------------------------------------------------- */
+.process { padding-top: 0; }
+.process__list { list-style: none; display: grid; gap: 2rem; counter-reset: step; }
+.process__step { position: relative; display: grid; gap: 0.5rem; padding-left: 3.25rem; }
+.process__marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1.5px solid var(--accent-ink);
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--step--1);
+}
+.process__step:not(:last-child)::before {
+  /* das Patchkabel zwischen den Schritten */
+  content: "";
+  position: absolute;
+  left: calc(1.125rem - 0.75px);
+  top: 2.25rem;
+  bottom: -2rem;
+  width: 1.5px;
+  background: linear-gradient(to bottom, var(--accent-ink), var(--accent) 30%, var(--line-strong));
+}
+.process__name { font-size: var(--step-1); }
+.process__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; max-width: 32rem; text-wrap: pretty; }
+@media (min-width: 64em) {
+  .process__list { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+  .process__step { padding-left: 0; padding-top: 3.25rem; }
+  .process__step:not(:last-child)::before {
+    left: 2.25rem;
+    right: -2rem;
+    top: calc(1.125rem - 0.75px);
+    bottom: auto;
+    width: auto;
+    height: 1.5px;
+    background: linear-gradient(to right, var(--accent-ink), var(--accent) 30%, var(--line-strong));
+  }
+}
+
+/* 9b.3 Warum ich ----------------------------------------------------------- */
+.why { border-top: 1px solid var(--line); background: var(--bg-2); }
+/* Die Bereiche müssen auch einspaltig benannt sein: .about__facts/.about__quote tragen in
+   style.css grid-area: facts/quote und würden sonst in derselben impliziten Zelle landen. */
+.why__body { display: grid; gap: 2.5rem 4rem; grid-template-areas: "head" "points" "facts" "quote"; }
+.why__head { grid-area: head; margin-bottom: 0; max-width: 52rem; }
+.why__points { grid-area: points; list-style: none; display: grid; gap: 1.25rem 2rem; }
+.why__point { border-top: 1px solid var(--line-strong); padding-top: 1rem; }
+.why__name { font-size: var(--step-1); margin-bottom: 0.35rem; }
+.why__name::before { content: "> "; color: var(--accent-ink); font-family: var(--font-mono); font-weight: 500; }
+.why__text { color: var(--ink-2); font-size: var(--step--1); line-height: 1.5; }
+.why__facts { grid-area: facts; margin: 0; }
+.why__quote { grid-area: quote; font-size: var(--step-2); }
+.why__quote::after { background: var(--accent); }
+@media (min-width: 40em) {
+  .why__points { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 64em) {
+  .why__body {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+    grid-template-areas:
+      "head  head"
+      "points facts"
+      "quote quote";
+  }
+  .why__facts { grid-template-columns: 1fr; align-self: start; }
+}
+
+/* 9b.4 Referenz / Karten ------------------------------------------------------------ */
+.reference { border-top: 1px solid var(--line); }
+.reference__list { list-style: none; display: grid; gap: 1.25rem; }
+.reference__item {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.reference__item--more { background: transparent; border-style: dashed; border-color: var(--line-strong); }
+.reference__item--more .button { justify-self: start; margin-top: 0.5rem; }
+.reference__kind {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.reference__name { font-size: var(--step-2); letter-spacing: -0.03em; }
+.reference__text { color: var(--ink-2); }
+.reference__url {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+}
+@media (min-width: 48em) {
+  .reference__list { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+}
+
 /* 10. Motion --------------------------------------------------------------- */
 /* Alles hier ist Zusatz: ohne JavaScript oder mit reduzierter Bewegung ist die Seite
    sofort vollständig sichtbar. Animiert werden nur opacity und transform. */
@@ -1044,6 +1222,10 @@ main:focus { outline: none; }
   .js .gallery__item:nth-child(4) { transition-delay: 270ms; }
   .js .skills__item:nth-child(5),
   .js .gallery__item:nth-child(5) { transition-delay: 360ms; }
+  /* Abteilungs-Websites: Leistungs-Karten und Ablauf-Schritte */
+  .js .services__item:nth-child(2), .js .process__step:nth-child(2) { transition-delay: 90ms; }
+  .js .services__item:nth-child(3), .js .process__step:nth-child(3) { transition-delay: 180ms; }
+  .js .process__step:nth-child(4) { transition-delay: 270ms; }
 
   /* 10.2 Hero-Einstieg: Text steigt gestaffelt auf, Porträt setzt sich sanft,
      die Bühnenkante zieht sich auf. Das Bild selbst bleibt sofort sichtbar (LCP). */

@@ -1,7 +1,8 @@
 <?php
 /**
- * reichi.it – Anfrage & Kontakt: Text, direkte Kontaktdaten und das gemeinsame Formular.
- * Erwartet $formStatus, $formErrors, $formValues, $formMessage aus it/index.php.
+ * Anfrage & Kontakt der Abteilungs-Websites (reichi.it, rstream.at): Text, direkte Kontaktdaten
+ * und das gemeinsame Formular (reichi.com hat dafür sections/hire.php mit Foto).
+ * Erwartet $formStatus, $formErrors, $formValues, $formMessage aus der index.php der Website.
  */
 
 declare(strict_types=1);
