@@ -8,7 +8,8 @@ Erzeugt die Markendateien von rstream.at aus dem vorhandenen R-Stream-Logo
   assets-src/brand/rstream-logo*.png           Pixelversionen (2400 px breit, transparent)
   htdocs/rstream/assets/images/rstream-mark.svg       Sechseck-R allein (Kopf- und Fußzeile, brand_mark)
   htdocs/rstream/assets/images/rstream-wordmark.svg   „STREAM“ allein (Kopf- und Fußzeile, brand_wordmark)
-  htdocs/rstream/favicon.ico, htdocs/rstream/assets/images/icons/*   Favicons (Sechseck-R in Violett auf Tinte)
+  htdocs/rstream/favicon.ico, htdocs/rstream/assets/images/icons/*   Favicons (Sechseck-R in Violett,
+                                                      transparent; Apple-Touch-Icon auf hellem Grund)
   htdocs/rstream/assets/images/share-rstream.png      Social-Sharing-Bild 1200×630
   htdocs/assets/images/logos/rstream.png              Karte in der Projektzeile von reichi.com
                                                       (Sechseck violett, „STREAM“ hell, 760 px)
@@ -161,22 +162,32 @@ def main() -> None:
     print(f"brand_mark_size in content-rstream.php: [{round(mx1 - mx0 + 2 * pad)}, {round(my1 - my0 + 2 * pad)}]")
     print(f"brand_wordmark_size in content-rstream.php: [{round(wx1 - wx0 + 2 * pad)}, {round(wy1 - wy0 + 2 * pad)}]")
 
-    # Favicons: Sechseck-R in Violett auf Tinte – unterscheidet den Tab von reichi.com (weißes R
-    # auf Schwarz) und reichi.it (Blitz auf Tinte)
+    # Favicons: Sechseck-R in Violett, freigestellt (transparent) – das Sechseck ist selbst die
+    # Fläche, der Tab braucht keine dunkle Kachel. Unterscheidet den Tab von reichi.com (weißes R
+    # auf Schwarz) und reichi.it (Blitz auf Tinte). Nur das Apple-Touch-Icon bekommt einen hellen
+    # Grund, weil iOS Transparenz schwarz füllt.
     mh = my1 - my0
-    s = 74 / mh
+    s = 90 / mh
+    mark_centered = path_svg(mark, ACCENT, f"translate({50 - (mx1 - mx0) * s / 2 - mx0 * s:.3f} {5 - my0 * s:.3f}) scale({s:.5f})")
     icon_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'<rect width="100" height="100" fill="{INK}"/>'
-        f'{path_svg(mark, ACCENT, f"translate({50 - (mx1 - mx0) * s / 2 - mx0 * s:.3f} {13 - my0 * s:.3f}) scale({s:.5f})")}'
+        f"{mark_centered}"
+        "</svg>"
+    )
+    s_touch = 74 / mh
+    touch_svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
+        f'<rect width="100" height="100" fill="{LIGHT_INK}"/>'
+        f'{path_svg(mark, ACCENT, f"translate({50 - (mx1 - mx0) * s_touch / 2 - mx0 * s_touch:.3f} {13 - my0 * s_touch:.3f}) scale({s_touch:.5f})")}'
         "</svg>"
     )
     sizes = {
         "favicon-16x16.png": 16, "favicon-32x32.png": 32, "android-chrome-96x96.png": 96,
-        "apple-touch-icon.png": 180, "icon-192.png": 192, "icon-512.png": 512,
+        "icon-192.png": 192, "icon-512.png": 512,
     }
     for name, px in sizes.items():
         render_png(icon_svg, ICON_DIR / name, width=px)
+    render_png(touch_svg, ICON_DIR / "apple-touch-icon.png", width=180)
     frames = []
     for px in (48, 32, 16):
         buf = io.BytesIO()
