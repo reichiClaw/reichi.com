@@ -238,7 +238,7 @@ return [
 
     // ------------------------------------------------------------------
     // Verbundene Projekte – gleiches Template wie auf reichi.com (sections/projects.php).
-    // Logos liegen als Kopien in it/assets/images/logos/ (tools/sync-it-assets.sh); auf dem hellen
+    // Logos liegen als Kopien in it/assets/images/logos/ (tools/sync-site-assets.sh); auf dem hellen
     // Papier werden weiße Logos per 'invert' dunkel gestellt, schwarze bleiben wie sie sind.
     // ------------------------------------------------------------------
     'projects' => [

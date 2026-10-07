@@ -188,3 +188,24 @@ portrait crops exist for the two images that need a different mobile composition
     `sites.it.enforce_host` (`README.md`, section *reichi.it*). The link „reichi.it“ in the
     projects row of reichi.com points at `https://reichi.it/` – it is live only after the
     domain is mapped.
+14. **rstream.at – facts to confirm before go-live**: the texts in `app/content-rstream.php`
+    use only what is known (same media owner, `office@rstream.at`, same phone and address,
+    since 2007 in live production, the old site's one line „Live streaming.“). The service
+    bullets describe a typical live-stream production (multi-camera, vision mixing, lower
+    thirds, encoding to YouTube/Vimeo/Facebook or an own player, bonded/backup internet
+    together with reichi.it, ISO recording, short edits) – **please check them against what you
+    actually offer** and strike what you do not. No references, numbers, platforms you are
+    contracted with, or equipment lists were added; the „Einsatzbereiche“ cards are use cases,
+    not customers. Once there are confirmed productions, a reference section can replace or
+    join the use cases (same card template as reichi.it, `reference` classes). The Impressum
+    states the same business data; the privacy statement's `[BESTÄTIGEN]` marks apply to
+    rstream.at as well (same hosting). The old rstream.at (WordPress) currently answers with
+    an empty 404 page, so nothing was migrated from it.
+15. **rstream.at – domain, mail, redirect**: map the domain (with the `www` alias; the
+    canonical host is `www.rstream.at` as linked from reichi.com) to the `rstream/` folder,
+    create `office@rstream.at` and `website@rstream.at`, test an inquiry, then set
+    `sites.rstream.enforce_host` (`README.md`, section *rstream.at*). If you prefer the bare
+    domain, change `sites.rstream.base_url`, `rstream/robots.txt` and `rstream/sitemap.xml`
+    accordingly. The R-Stream cards on reichi.com and reichi.it keep the old line „Live
+    streaming.“ and the old black logo until the new site is live – then their text can be
+    updated to the new positioning.

@@ -7,8 +7,10 @@ semantic HTML, plain CSS, a few lines of vanilla JavaScript and PHP 8.1+ (tested
 No CMS, database, framework, package manager, build step, external fonts, scripts,
 analytics or CAPTCHA service. Everything the site needs is in this repository.
 
-The same code also serves **reichi.it**, the event-IT department (folder `htdocs/it/`,
-own domain mapped to that folder) – see [reichi.it (IT department)](#reichiit-it-department).
+The same code also serves two department websites, each in its own subfolder that the
+hosting panel maps to its own domain: **reichi.it**, event IT (`htdocs/it/`, see
+[reichi.it (IT department)](#reichiit-it-department)) and **rstream.at**, live-stream
+production (`htdocs/rstream/`, see [rstream.at (streaming department)](#rstreamat-streaming-department)).
 
 - `MIGRATION.md` – what was migrated from the old site, what changed, what is still open
 - `ASSETS.md` – image manifest (source URL, local file, use, credit, concerns)
@@ -58,30 +60,44 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     assets/js/it.js      the animated network plan over the festival ground in the hero
     assets/css/style.css, assets/js/main.js, assets/images/grain.png,
     assets/images/logos/{bleedingstar,rstream}.png
-                         COPIES of the shared files (tools/sync-it-assets.sh)
+                         COPIES of the shared files (tools/sync-site-assets.sh)
     assets/images/festival-ground-{960,640}.webp   the isometric festival ground (hero)
     assets/images/icons/, favicon.ico, share-reichi-it.png, robots.txt, sitemap.xml
+  rstream/               web root of rstream.at – see "rstream.at (streaming department)" below
+    index.php, contact.php, 404.php, impressum/, datenschutz/   same pattern, SITE = 'rstream'
+    .htaccess            404 rewrite that works as own domain and as /rstream/ subfolder
+    assets/css/rstream.css   dark broadcast theme + multiviewer hero (loaded after style.css)
+    assets/js/rstream.js the live vision-mixer in the hero (timecode, cuts, tally, meters, log)
+    assets/css/style.css, assets/js/main.js, assets/images/grain.png,
+    assets/images/logos/{bleedingstar,reichi-it}.png
+                         COPIES of the shared files (tools/sync-site-assets.sh)
+    assets/images/rstream-{mark,wordmark}.svg      logo parts traced from the original logo
+    assets/images/icons/, favicon.ico, share-rstream.png, robots.txt, sitemap.xml
   app/                   PHP code – not reachable from the browser (.htaccess + PHP guard)
     bootstrap.php        shared entry (config, helpers, content, security headers)
     config.example.php   template for config.php
     config.php           your configuration (in the ZIP; not versioned in git)
     content.php          ALL editable copy, references, links, photo + logo metadata
     content-it.php       the same for reichi.it
+    content-rstream.php  the same for rstream.at
     contact.php          form validation, rate limiting, mail()
-    contact-handler.php  the POST flow shared by htdocs/contact.php and it/contact.php
+    contact-handler.php  the POST flow shared by htdocs/contact.php, it/contact.php and rstream/contact.php
     helpers.php          escaping, <picture> rendering, CSRF, session, icons
-    templates/           header.php, footer.php, sections/ (reichi.com), it/ (reichi.it),
-                         partials/contact-form.php, legal/ (Impressum, Datenschutz)
+    templates/           header.php, footer.php, sections/ (reichi.com + the building blocks
+                         shared by the department sites: services, process, why, inquiry,
+                         projects), it/ (reichi.it hero + reference), rstream/ (rstream.at
+                         hero + use cases), partials/contact-form.php, legal/ (Impressum, Datenschutz)
   storage/               writable runtime data – not reachable from the browser
     ratelimit/           one small JSON file per sender hash (auto-pruned)
     logs/mail.log        mail failures (timestamp + error only)
     secret.php           auto-generated secret for hashing IPs (created on first visit)
 assets-src/originals/    untouched originals downloaded from the old site (do not upload)
-assets-src/brand/        reichi.it logo files (SVG + PNG, light and dark) – do not upload
+assets-src/brand/        reichi.it and rstream.at logo files (SVG + PNG, light and dark) – do not upload
 tools/build-images.py    optional dev helper to regenerate image derivatives
 tools/build-it-brand.py  optional dev helper: reichi.it logo, favicons, share image
 tools/build-it-ground.py optional dev helper: keys and crops the festival-ground picture for the reichi.it hero
-tools/sync-it-assets.sh  copies style.css / main.js / grain.png into htdocs/it/assets/
+tools/build-rstream-brand.py  optional dev helper: traces the R-Stream logo, favicons, share image
+tools/sync-site-assets.sh  copies style.css / main.js / grain.png / logos into htdocs/it/ and htdocs/rstream/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 ```
 
@@ -246,7 +262,7 @@ Never paste verification codes or account credentials into chats or the reposito
 | `spam` | built-in content filter, see [Spam protection](#spam-protection): `min_seconds` (5), `max_links` (1, only with JavaScript; 0 without), `reject_scripts` (Unicode scripts that mark a message as spam when they make up more than 40 % of the letters), `blocked_terms` (case-insensitive substrings), `log` (write `storage/logs/spam.log`) |
 | `turnstile` | optional Cloudflare Turnstile: `site_key`, `secret_key` (both empty = off), `appearance` (`'always'` or `'interaction-only'`) |
 | `site_name` | short name used in the inquiry mail text („Neue Anfrage über reichi.com“) |
-| `sites` | per-site overrides, currently `sites.it` for reichi.it – see [reichi.it](#reichiit-it-department). Any key above can be overridden there; in addition `own_domain` (public URLs without the local subfolder) and `enforce_host` (301 to the own domain) |
+| `sites` | per-site overrides: `sites.it` for reichi.it and `sites.rstream` for rstream.at – see [reichi.it](#reichiit-it-department) and [rstream.at](#rstreamat-streaming-department). Any key above can be overridden there; in addition `own_domain` (public URLs without the local subfolder) and `enforce_host` (301 to the own domain) |
 
 `app/config.php` is git-ignored in this repository; the upload ZIP ships it as a copy
 of `config.example.php`. If it is missing the site falls back to the example values.
@@ -280,8 +296,16 @@ overrides from `config.php` → `'sites' => ['it' => […]]`.
 
 Why copies of `style.css`, `main.js` and `grain.png` inside `it/assets/`: once the domain
 points at `it/`, the browser cannot load anything from the parent folder. PHP can (`../app/`),
-static files cannot. After changing one of the shared files run `sh tools/sync-it-assets.sh`;
-`tools/build-zip.sh` refuses to package when the copies are stale.
+static files cannot. After changing one of the shared files run `sh tools/sync-site-assets.sh`
+(it refreshes the copies for reichi.it and rstream.at alike); `tools/build-zip.sh` refuses to
+package when the copies are stale.
+
+The building blocks that both department sites share – Leistungen (`sections/services.php`),
+Ablauf (`sections/process.php`), Warum ich (`sections/why.php`), the card grid used for
+references and use cases, and Anfrage & Kontakt (`sections/inquiry.php`) – live in
+`app/templates/sections/` with their CSS in section 9b of `style.css`. They are coloured
+entirely through the design tokens, so `it.css` and `rstream.css` only redefine `:root`
+and a handful of overrides.
 
 ### What differs by design
 
@@ -311,7 +335,7 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
 - „Verbundene Projekte“ reuses `sections/projects.php` with its own list in `content-it.php`
   (reichi.com, BleedingStar, R-Stream). The reichi.com card is a text wordmark with the
   hexagon mark (`'logo' => ['brand' => …]`), the two logo files are copies kept in sync by
-  `tools/sync-it-assets.sh`; the white BleedingStar logo is inverted for the light page.
+  `tools/sync-site-assets.sh`; the white BleedingStar logo is inverted for the light page.
 - Impressum and Datenschutz use the shared templates in `app/templates/legal/` with the
   same owner data; reichi.it adds one sentence (same media owner as reichi.com) and has
   no image credits.
@@ -320,6 +344,63 @@ static files cannot. After changing one of the shared files run `sh tools/sync-i
   also writes the favicons, the share image and the card logo for reichi.com. Regenerate with
   `python3 tools/build-it-brand.py` (needs `fonttools`, `cairosvg`, `pillow`, `skia-pathops` and
   Inter Bold).
+
+## rstream.at (streaming department)
+
+`htdocs/rstream/` is the third website – **rstream.at**, live-stream production (multi-camera,
+vision mixing, encoding and delivery, recording) – built exactly like reichi.it: the public PHP
+files define `SITE = 'rstream'`, `bootstrap.php` loads `app/content-rstream.php` and the
+overrides from `config.php` → `'sites' => ['rstream' => […]]`; the page renders the shared
+building blocks (`sections/services`, `process`, `why`, `projects`, `inquiry`) around its own
+hero (`app/templates/rstream/hero.php`) and a use-case grid (`rstream/usecases.php`).
+
+### Hosting panel: map the domain to the folder
+
+Same steps as for reichi.it, with these names:
+
+1. Domain **rstream.at** (alias `www.rstream.at`; `base_url` is `https://www.rstream.at`) →
+   document root **`rstream/`** inside the reichi.com web root (e.g. `public_html/rstream`),
+   HTTPS enabled.
+2. Mailboxes or aliases **`office@rstream.at`** (recipient) and **`website@rstream.at`**
+   (sender), preset in `config.php` under `sites.rstream`.
+3. Check `https://www.rstream.at/` (page, Impressum, Datenschutz, test inquiry), then set
+   `sites.rstream.enforce_host` to `'www.rstream.at'`. Until then the folder is reachable as
+   `www.reichi.com/rstream/` with `noindex`.
+4. Optional: Turnstile widget for rstream.at (`sites.rstream.turnstile`), Search Console
+   property and sitemap `https://www.rstream.at/sitemap.xml`.
+
+### What differs by design
+
+- Dark „control room“ base like reichi.com but with a cooler black (`#0b0b10`) and a broadcast
+  violet as accent (`--accent` in `rstream.css` for fills, lines, glows and the primary button
+  with dark type on it; text uses the lighter `--accent-ink`). Tally red (`--live`) is reserved
+  for the on-air indicators, tally green (`--pvw`) for the preview. The header shows the hexagon
+  mark (`logo_mark()`, in the original logo it is the „R“ of R-STREAM) and „STREAM“ as an SVG
+  wordmark traced from the original logo (`brand_wordmark` in `content-rstream.php`).
+- Hero: a stylised multiviewer of a live-stream control room (`rstream/hero.php`): header bar
+  with blinking LIVE badge, timecode and encoder status, a large programme picture with a stereo
+  level meter beside it, four camera tiles with tally (red = programme, green = preview) and a
+  terminal strip. The „pictures“ are CSS gradient scenes (wide shot, vocals, drums, crowd), no
+  photographs. `rstream.js` runs the show: the timecode follows the clock at 25 fps, every 4–8 s
+  the preview is cut (occasionally mixed) into the programme and a new preview is chosen, the
+  meters breathe with a 4/4 pulse and a peak-hold line, the terminal types the status lines from
+  `content-rstream.php` and logs each cut; with a mouse, the tile under the pointer becomes the
+  preview and is taken on the next cut. Levels are written as CSS custom properties
+  (`--level`, `--peak`) – no inline styles, CSP stays strict. Nothing moves with
+  `prefers-reduced-motion`; without JavaScript the panel shows Cam 1 on air, Cam 2 in preview
+  and the first three terminal lines.
+- Sections: Leistungen (Produzieren, Übertragen, Festhalten), Ablauf (Briefing, Konzept &
+  Technik, Probe & Sendung, Aufzeichnung & Übergabe), Warum ich, **Einsatzbereiche** (use-case
+  cards – there are no confirmed streaming references yet, see MIGRATION.md; the last card
+  links to the stage references on reichi.com), Verbundene Projekte (reichi.com, reichi.it,
+  BleedingStar – light logos, nothing inverted), Anfrage (subject select: Livestream,
+  Aufzeichnung, Hybrid-Event, Sonstiges; inquiries go to `office@rstream.at`).
+- Logo: `assets-src/brand/rstream-logo.svg|png` (dark ink, for light surfaces) and
+  `rstream-logo-dark.svg|png` (light ink, for dark surfaces), both traced from the original
+  `assets-src/originals/rstream.png` by `tools/build-rstream-brand.py`, which also writes the
+  header mark and wordmark, favicons, touch icons and the share image. Regenerate with
+  `python3 tools/build-rstream-brand.py` (needs `potracer`, `cairosvg`, `pillow`, `numpy`,
+  `fonttools` and Inter Bold).
 
 ## Editing content
 
@@ -513,7 +594,9 @@ php -S 127.0.0.1:8080 -t htdocs
 php -S 127.0.0.1:8080 -t htdocs -d sendmail_path=/path/to/fakesendmail.sh
 # reichi.it as it will run on its own domain (document root = htdocs/it):
 php -S 127.0.0.1:8082 -t htdocs/it
-# … and as subfolder: http://127.0.0.1:8080/it/ (gets noindex automatically)
+# rstream.at the same way (document root = htdocs/rstream):
+php -S 127.0.0.1:8083 -t htdocs/rstream
+# … and as subfolders: http://127.0.0.1:8080/it/ and /rstream/ (get noindex automatically)
 ```
 
 Note: PHP's built-in server serves unknown extension-less paths through `index.php`
