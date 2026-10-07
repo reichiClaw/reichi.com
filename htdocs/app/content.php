@@ -313,7 +313,7 @@ return [
                 'text' => 'Livestream-Produktion: Mehrkamera, Bildregie und Übertragung für Konzerte und Events.',
                 'url' => 'https://www.rstream.at/',
                 'link_label' => 'rstream.at',
-                // Helle Fassung des nachgezeichneten Logos (tools/build-rstream-brand.py) – passt so auf den dunklen Grund
+                // Nachgezeichnetes Logo (tools/build-rstream-brand.py): Sechseck im Violett von rstream.at, „STREAM“ hell
                 'logo' => ['file' => 'rstream.png', 'width' => 760, 'height' => 186, 'alt' => 'rstream.at'],
             ],
             [

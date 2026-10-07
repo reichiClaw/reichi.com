@@ -15,7 +15,7 @@ SRC="$ROOT/htdocs/assets"
 
 SHARED="css/style.css js/main.js images/grain.png"
 # Logo files are the "Verbundene Projekte" cards of each site.
-FILES_it="$SHARED images/logos/bleedingstar.png images/logos/rstream.png"
+FILES_it="$SHARED images/logos/bleedingstar.png images/logos/rstream-paper.png"
 FILES_rstream="$SHARED images/logos/bleedingstar.png images/logos/reichi-it.png"
 
 status=0

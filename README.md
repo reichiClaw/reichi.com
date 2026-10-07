@@ -59,7 +59,7 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     assets/css/it.css    light theme + reichi.it components (loaded after style.css)
     assets/js/it.js      the animated network plan over the festival ground in the hero
     assets/css/style.css, assets/js/main.js, assets/images/grain.png,
-    assets/images/logos/{bleedingstar,rstream}.png
+    assets/images/logos/{bleedingstar,rstream-paper}.png
                          COPIES of the shared files (tools/sync-site-assets.sh)
     assets/images/festival-ground-{960,640}.webp   the isometric festival ground (hero)
     assets/images/icons/, favicon.ico, share-reichi-it.png, robots.txt, sitemap.xml
@@ -398,8 +398,9 @@ Same steps as for reichi.it, with these names:
 - Logo: `assets-src/brand/rstream-logo.svg|png` (dark ink, for light surfaces) and
   `rstream-logo-dark.svg|png` (light ink, for dark surfaces), both traced from the original
   `assets-src/originals/rstream.png` by `tools/build-rstream-brand.py`, which also writes the
-  header mark and wordmark, favicons, touch icons, the share image and the card logo
-  `htdocs/assets/images/logos/rstream.png` for the projects rows of reichi.com and reichi.it. Regenerate with
+  header mark and wordmark, favicons, touch icons, the share image and the card logos
+  `htdocs/assets/images/logos/rstream.png` (reichi.com) and `rstream-paper.png` (reichi.it) –
+  hexagon in rstream.at's violet as the only accent, „STREAM“ in each site's ink. Regenerate with
   `python3 tools/build-rstream-brand.py` (needs `potracer`, `cairosvg`, `pillow`, `numpy`,
   `fonttools` and Inter Bold).
 
