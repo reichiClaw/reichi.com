@@ -1,0 +1,51 @@
+---
+description: How to deploy to World4You shared hosting via FTPS (FTP root = web root). Apply whenever a task involves uploading, listing or comparing files on a *.world4you.com FTP host, or secrets named <PROJECT>_FTP_HOST/USER/PASS.
+alwaysApply: false
+---
+
+# World4You FTPS deployment
+
+Credentials are Cloud Agent secrets `<PROJECT>_FTP_HOST`, `<PROJECT>_FTP_USER`,
+`<PROJECT>_FTP_PASS` (reichi.com: `REICHI_FTP_*`). Host `ftpNN.world4you.com`, Pure-FTPd.
+The FTP root is the web root of the main domain. Department domains are mapped in the
+hosting panel to subfolders (e.g. `/it/`, `/rstream/`) – that mapping is an owner action.
+
+## Protocol – do exactly this
+- Explicit FTPS on port 21: `AUTH TLS`, `PBSZ 0`, `PROT P`, passive mode. Certificate is valid.
+- **SFTP is not available** for the FTP account (port 22 is open, authentication fails). Do not try.
+- **Cap TLS at 1.2** (`ssl.TLSVersion.TLSv1_2`, `curl --tls-max 1.2`): the server resets
+  TLS 1.3 data connections right after the handshake.
+- Server supports MLSD (with `size`, `modify`, `unix.mode`), MFMT, REST, rename-over-existing.
+- Limits: 8 sessions per user (`421 I can't accept more than 8 connections as the same user`),
+  15 min idle timeout.
+
+## The trap: NAT pool vs. anti-FXP
+Cloud Agent VMs exit through a NAT pool whose public IP changes per TCP connection. Pure-FTPd
+rejects passive data connections from a different IP than the control connection, closes
+them and keeps waiting. Stock clients (curl, lftp, ftplib, FileZilla logic) therefore hang on
+~7/8 of all transfers, and every hung attempt keeps a server session alive until the 8-session
+limit makes *everything* fail. If you hit 421, wait ~15 minutes; nothing local frees them.
+A clear data channel (`--ftp-ssl-control`) does not help – it is the IP check.
+
+Fix: send the transfer command, then reconnect to the passive port in a loop; `select()` on
+control + data socket. Data socket readable with EOF → rejected, reconnect to the same port.
+Control socket shows `150` → accepted; TLS-wrap the data socket now. ~8 attempts per transfer,
+allow up to 400. This leaves no hanging sessions.
+
+Reference implementation: `tools/deploy-ftp.py` in `github.com/reichiClaw/reichi.com`
+(`list` / `diff` / `deploy [--dry-run]`, stdlib only). Copy it into other World4You repos;
+only the protected-paths list and the secret prefix need adjusting.
+
+## Deployment rules
+1. List the server first (read-only) and compare with the local tree. Same-size files are
+   compared by SHA-256 of the downloaded server copy; never re-upload identical files.
+2. Never overwrite the live configuration or runtime data (reichi.com: `app/config.php`,
+   `storage/secret.php`, `storage/ratelimit/*`, `storage/logs/*`).
+3. Never delete anything on the server. List server-only files and ask the owner.
+   Hoster folders like `cal/`, `card/`, `stats/`, `error_logs/` are not part of the project.
+4. Upload static files first, PHP last; upload to `<name>.uploading~`, then rename into place;
+   re-list the touched directories and verify sizes.
+5. Then check live with curl: home, Impressum, Datenschutz, a nonexistent URL (404 page) and
+   every department folder, incl. their own domains if mapped. Look at HTTP status, `<title>`
+   and PHP error strings (`Fatal error|Warning:|Parse error|Notice:|Deprecated:`).
+   `/app/...`, `/storage/...` and `/.htaccess` must answer 403/404.
