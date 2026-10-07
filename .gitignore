@@ -11,6 +11,9 @@ htdocs/storage/logs/*
 dist/
 *.zip
 
+# Hash-Cache von tools/deploy-ftp.py
+.deploy-ftp-cache.json
+
 # System
 .DS_Store
 Thumbs.db

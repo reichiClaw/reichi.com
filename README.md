@@ -99,6 +99,7 @@ tools/build-it-ground.py optional dev helper: keys and crops the festival-ground
 tools/build-rstream-brand.py  optional dev helper: traces the R-Stream logo, favicons, share image
 tools/sync-site-assets.sh  copies style.css / main.js / grain.png / logos into htdocs/it/ and htdocs/rstream/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
+tools/deploy-ftp.py      optional dev helper: list / diff / upload htdocs/ via FTPS (never deletes)
 ```
 
 ## Requirements
@@ -611,3 +612,33 @@ in `app/` work everywhere, so `/app/…` answers 404 locally too.
 `reichi-website/` containing `htdocs/` (upload its contents), the three docs and
 `assets-src/originals/`. It lints all PHP files first, ships `app/config.php` as a copy of
 the example (no secrets), and excludes `.git`, runtime data, `tools/` and `dist/`.
+
+## Deploying from the repository (`tools/deploy-ftp.py`)
+
+Instead of the ZIP you can upload the working tree directly. The script needs Python 3.8+
+(standard library only) and the credentials in the environment – `REICHI_FTP_HOST`,
+`REICHI_FTP_USER`, `REICHI_FTP_PASS` (the Cloud Agent secrets have the same names). The FTP
+root of the account must be the web root.
+
+```
+python3 tools/deploy-ftp.py list                # recursive listing of the server
+python3 tools/deploy-ftp.py diff                # compare with htdocs/, read-only
+python3 tools/deploy-ftp.py deploy --dry-run    # what would be uploaded
+python3 tools/deploy-ftp.py deploy              # upload what differs, verify sizes
+```
+
+It follows the installation chapter above: the server is listed and compared first, files
+with the same size are compared by SHA-256 (so unchanged files are not re-uploaded and a
+same-size edit is still caught), `app/config.php`, `storage/secret.php` and the runtime data
+in `storage/` are never written, nothing is ever deleted (files that exist only on the server
+are listed for you to decide), and every upload goes to `<name>.uploading~` first and is
+renamed into place. Hashes of verified server files are cached in `.deploy-ftp-cache.json`
+(git-ignored) so an interrupted run resumes quickly.
+
+Two host quirks are built in: the server resets TLS 1.3 data connections (TLS is capped
+at 1.2), and it refuses passive data connections that do not come from the control
+connection's IP. From a network with several outgoing IPs (cloud VMs behind a NAT pool)
+ordinary FTP clients therefore hang and leave sessions open until the host's limit of
+8 sessions per user is hit; the script reconnects to the same passive port until the server
+accepts the data connection, so no session is left hanging. After deploying, open the pages
+listed in step 6 above plus `/it/` and `/rstream/` and check that none shows a PHP error.
