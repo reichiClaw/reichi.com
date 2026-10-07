@@ -767,7 +767,9 @@ main:focus { outline: none; }
   background: var(--line);
   border: 1px solid var(--line);
 }
-.projects__item { background: var(--bg); }
+/* Die Zelle ist ein Grid, damit der Link sie ganz ausfüllt: in einer Reihe mit höheren
+   Nachbarn bleibt sonst unter kürzeren Karten ein Streifen, der nicht klickbar ist. */
+.projects__item { display: grid; background: var(--bg); }
 .projects__link {
   display: grid;
   grid-template-columns: minmax(7rem, 11rem) 1fr;
