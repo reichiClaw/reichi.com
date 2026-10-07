@@ -333,9 +333,9 @@ and a handful of overrides.
 - Form: same partial and same protection; the subject is a select (Aufbau, Betrieb vor
   Ort, Beratung, Sonstiges). Inquiries go to `reichi@reichi.it`, redirect anchor `#anfrage`.
 - „Verbundene Projekte“ reuses `sections/projects.php` with its own list in `content-it.php`
-  (reichi.com, BleedingStar, R-Stream). The reichi.com card is a text wordmark with the
+  (reichi.com, BleedingStar, rstream.at). The reichi.com card is a text wordmark with the
   hexagon mark (`'logo' => ['brand' => …]`), the two logo files are copies kept in sync by
-  `tools/sync-site-assets.sh`; the white BleedingStar logo is inverted for the light page.
+  `tools/sync-site-assets.sh`; both are light and inverted for the light page.
 - Impressum and Datenschutz use the shared templates in `app/templates/legal/` with the
   same owner data; reichi.it adds one sentence (same media owner as reichi.com) and has
   no image credits.
@@ -398,7 +398,8 @@ Same steps as for reichi.it, with these names:
 - Logo: `assets-src/brand/rstream-logo.svg|png` (dark ink, for light surfaces) and
   `rstream-logo-dark.svg|png` (light ink, for dark surfaces), both traced from the original
   `assets-src/originals/rstream.png` by `tools/build-rstream-brand.py`, which also writes the
-  header mark and wordmark, favicons, touch icons and the share image. Regenerate with
+  header mark and wordmark, favicons, touch icons, the share image and the card logo
+  `htdocs/assets/images/logos/rstream.png` for the projects rows of reichi.com and reichi.it. Regenerate with
   `python3 tools/build-rstream-brand.py` (needs `potracer`, `cairosvg`, `pillow`, `numpy`,
   `fonttools` and Inter Bold).
 

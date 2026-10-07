@@ -204,7 +204,7 @@ return [
         'title' => 'Kunden',
         'claim' => 'I rocked the crowd with these cool clients!',
         'items' => [
-            // Schwarze Strichzeichnung auf transparent; 'invert' stellt sie per CSS weiß dar (wie das R-Stream-Logo).
+            // Schwarze Strichzeichnung auf transparent; 'invert' stellt sie per CSS weiß dar.
             ['name' => 'KiK – Kunst im Keller', 'url' => 'https://www.kik-ried.com/', 'file' => 'kik.png', 'width' => 227, 'height' => 369, 'alt' => 'KiK – Kunst im Keller, Ried im Innkreis', 'light_bg' => false, 'invert' => true],
             ['name' => 'Woodstock der Blasmusik', 'url' => 'https://www.woodstock.at/', 'file' => 'wdb.webp', 'width' => 755, 'height' => 1024, 'alt' => 'Woodstock der Blasmusik', 'light_bg' => false],
             ['name' => 'Supervision', 'url' => 'https://www.supervision-music.at/', 'file' => 'supervision-400.png', 'file2x' => 'supervision-800.png', 'width' => 400, 'height' => 70, 'alt' => 'Supervision', 'light_bg' => false],
@@ -309,12 +309,12 @@ return [
             ],
             [
                 'id' => 'rstream',
-                'name' => 'R-Stream',
-                'text' => 'Live streaming.',
+                'name' => 'rstream.at',
+                'text' => 'Livestream-Produktion: Mehrkamera, Bildregie und Übertragung für Konzerte und Events.',
                 'url' => 'https://www.rstream.at/',
                 'link_label' => 'rstream.at',
-                // Das Original-Logo ist schwarz auf transparent; 'invert' stellt es per CSS weiß dar.
-                'logo' => ['file' => 'rstream.png', 'width' => 744, 'height' => 182, 'alt' => 'R-Stream', 'invert' => true],
+                // Helle Fassung des nachgezeichneten Logos (tools/build-rstream-brand.py) – passt so auf den dunklen Grund
+                'logo' => ['file' => 'rstream.png', 'width' => 760, 'height' => 186, 'alt' => 'rstream.at'],
             ],
             [
                 'id' => 'reichi-it',
@@ -323,7 +323,7 @@ return [
                 'url' => 'https://reichi.it/',
                 'link_label' => 'reichi.it',
                 // Erzeugt aus assets-src/brand/reichi-it-logo-dark.svg (tools/build-it-brand.py)
-                'logo' => ['file' => 'reichi-it.png', 'width' => 760, 'height' => 188, 'alt' => 'reichi.it'],
+                'logo' => ['file' => 'reichi-it.png', 'width' => 760, 'height' => 175, 'alt' => 'reichi.it'],
             ],
         ],
     ],

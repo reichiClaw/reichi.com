@@ -10,9 +10,12 @@ Erzeugt die Markendateien von rstream.at aus dem vorhandenen R-Stream-Logo
   htdocs/rstream/assets/images/rstream-wordmark.svg   „STREAM“ allein (Kopf- und Fußzeile, brand_wordmark)
   htdocs/rstream/favicon.ico, htdocs/rstream/assets/images/icons/*   Favicons (Sechseck-R in Violett auf Tinte)
   htdocs/rstream/assets/images/share-rstream.png      Social-Sharing-Bild 1200×630
+  htdocs/assets/images/logos/rstream.png              Karte in der Projektzeile von reichi.com
+                                                      (hell, 760 px breit; Kopie für reichi.it
+                                                      über tools/sync-site-assets.sh, dort invertiert)
 
 Quelle ist assets-src/originals/rstream.png (744×182, schwarz auf transparent) – das Logo,
-das schon die alte rstream.at und die Projektzeile von reichi.com verwenden. Es wird mit
+das schon die alte rstream.at und die Projektzeile von reichi.com verwendet haben. Es wird mit
 potrace (reine Python-Portierung „potracer“) in Pfade gewandelt, vierfach hochgerechnet
 für glatte Kurven; die Abweichung zur Pixelvorlage liegt unter 0,2 % der Fläche. Das
 Sechseck ist der linke Teil (x < 170), „STREAM“ der rechte. Die Unterzeile des Sharing-Bilds
@@ -206,8 +209,15 @@ def main() -> None:
     )
     render_png(share, IMG_DIR / "share-rstream.png")
 
+    # Karte in der Projektzeile von reichi.com (dunkler Grund): helles Logo, 760 px breit wie
+    # reichi-it.png. reichi.it bekommt dieselbe Datei als Kopie und invertiert sie auf dem Papier.
+    card = ROOT / "htdocs" / "assets" / "images" / "logos" / "rstream.png"
+    render_png(dark, card, width=760)
+    with Image.open(card) as card_img:
+        print(f"Kartenlogo content.php / content-it.php: 'width' => {card_img.width}, 'height' => {card_img.height}")
+
     for p in sorted(list(BRAND_DIR.glob("rstream-*")) + list(ICON_DIR.iterdir())
-                    + [SITE_DIR / "favicon.ico", IMG_DIR / "share-rstream.png", IMG_DIR / "rstream-mark.svg", IMG_DIR / "rstream-wordmark.svg"]):
+                    + [SITE_DIR / "favicon.ico", IMG_DIR / "share-rstream.png", IMG_DIR / "rstream-mark.svg", IMG_DIR / "rstream-wordmark.svg", card]):
         print(f"{p.relative_to(ROOT)}  {p.stat().st_size} bytes")
 
 

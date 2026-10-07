@@ -166,7 +166,7 @@ portrait crops exist for the two images that need a different mobile composition
 2. **Hosting details** for the privacy statement (`[BESTÄTIGEN]` marks in `htdocs/datenschutz/index.php`): provider name and seat, log retention, whether the mail server is the hoster's or an external mail provider, retention period for inquiries.
 3. **Mail setup**: `mail_from` must exist / be allowed on the domain (SPF, DKIM, DMARC); set `mail_enabled => true` and test.
 4. **Photo credits**: the hooded and studio portraits and the club photo carry EXIF `media.dot`/Martin Mühlbacher; the Prague series carries an MW Design watermark; the blue open-air photo carries `StageShots.at | Christian Reichinger`. The large red-lit stage photo (`11059538_…_o-1.jpg`, a Facebook export) has **no embedded credit** – the photographer and usage rights should be confirmed. Publication on the old site is not proof of a licence for the new one.
-5. **Logo usage**: 12 client/festival logos and the two project logos are reused as on the old site. The R-Stream logo (black on transparent) is displayed inverted (white) via CSS – confirm this is acceptable.
+5. **Logo usage**: 12 client/festival logos and the two project logos are reused as on the old site. The R-Stream card now shows a light rendering of the owner's own logo (traced from the original by `tools/build-rstream-brand.py`) instead of the CSS-inverted black PNG.
 6. **Legal review**: the imprint and privacy texts describe the implementation accurately, but no legal compliance is guaranteed; have them checked if desired.
 7. **Redirects/HTTPS**: activate HTTPS in the hosting panel, then either its „force HTTPS“/domain-forwarding option or the commented redirect block in `.htaccess`; configure alias domains.
 8. **Search Console** (SEO-08): verify the domain property, submit the sitemap, check indexing – steps in `README.md`, section *Search Console*.
@@ -206,6 +206,7 @@ portrait crops exist for the two images that need a different mobile composition
     create `office@rstream.at` and `website@rstream.at`, test an inquiry, then set
     `sites.rstream.enforce_host` (`README.md`, section *rstream.at*). If you prefer the bare
     domain, change `sites.rstream.base_url`, `rstream/robots.txt` and `rstream/sitemap.xml`
-    accordingly. The R-Stream cards on reichi.com and reichi.it keep the old line „Live
-    streaming.“ and the old black logo until the new site is live – then their text can be
-    updated to the new positioning.
+    accordingly. The rstream.at cards on reichi.com and reichi.it already carry the new
+    positioning („Livestream-Produktion: Mehrkamera, Bildregie und Übertragung …“) and the
+    traced light logo; their link points at `https://www.rstream.at/`, which shows the old
+    WordPress 404 until the domain is mapped.

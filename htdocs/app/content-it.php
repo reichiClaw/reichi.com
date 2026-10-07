@@ -239,7 +239,7 @@ return [
     // ------------------------------------------------------------------
     // Verbundene Projekte – gleiches Template wie auf reichi.com (sections/projects.php).
     // Logos liegen als Kopien in it/assets/images/logos/ (tools/sync-site-assets.sh); auf dem hellen
-    // Papier werden weiße Logos per 'invert' dunkel gestellt, schwarze bleiben wie sie sind.
+    // Papier werden die hellen Logos per 'invert' dunkel gestellt.
     // ------------------------------------------------------------------
     'projects' => [
         'eyebrow' => 'Network',
@@ -265,12 +265,12 @@ return [
             ],
             [
                 'id' => 'rstream',
-                'name' => 'R-Stream',
-                'text' => 'Live streaming.',
+                'name' => 'rstream.at',
+                'text' => 'Livestream-Produktion: Mehrkamera, Bildregie und Übertragung für Konzerte und Events.',
                 'url' => 'https://www.rstream.at/',
                 'link_label' => 'rstream.at',
-                // Schwarz auf transparent – passt so auf das Papier
-                'logo' => ['file' => 'rstream.png', 'width' => 744, 'height' => 182, 'alt' => 'R-Stream'],
+                // Helles Logo (tools/build-rstream-brand.py) – auf hellem Grund invertiert
+                'logo' => ['file' => 'rstream.png', 'width' => 760, 'height' => 186, 'alt' => 'rstream.at', 'invert' => true],
             ],
         ],
     ],
