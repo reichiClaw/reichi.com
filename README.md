@@ -19,7 +19,11 @@ production (`htdocs/rstream/`, see [rstream.at (streaming department)](#rstreama
 
 Dark, atmospheric base with a fine film grain over the whole page (`body::after`, tile
 `assets/images/grain.png` from `tools/build-grain.py`; delete that rule to go back to flat
-colour), a warm off-white type colour and one restrained accent inspired by stage
+colour). With JavaScript and without reduced motion the static tile is replaced by a film
+strip (`grain-frames.png`, section 9 of `main.js`): eight uncorrelated frames stepped at
+about 12 fps, so the grain flickers like real film instead of sitting still. Reduced motion
+and no-JS keep the static tile. Delete section 9 to stop the flicker. Type is a warm off-white,
+with one restrained accent inspired by stage
 lighting (`#ff4d3a`). Large system-font typography (`system-ui` stack for
 copy, a monospace stack for labels, numbers and captions – a nod to patch lists and
 stage plots). The existing photographs carry the composition: the hooded black-and-white
@@ -27,7 +31,7 @@ portrait opens the page, the red-lit stage photo sits full-bleed behind the biog
 the Prague/Max the Sax series forms the gallery, the studio portrait anchors the
 booking section. References are set as typographic line-ups, not cards.
 
-Motion is limited to opacity/transform (plus one small canvas) and runs only under
+Motion is limited to opacity/transform (plus the hero canvas and the film-grain frames) and runs only under
 `prefers-reduced-motion: no-preference`: a staggered hero entrance and section reveals on
 scroll, and – on devices with a real mouse only – two pointer reactions in the hero
 (section 7 of `main.js`): the red stage glow (`.hero__spot`) pans slowly toward the pointer
@@ -58,7 +62,8 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     .htaccess            404 rewrite that works as own domain and as /it/ subfolder
     assets/css/it.css    light theme + reichi.it components (loaded after style.css)
     assets/js/it.js      the animated network plan over the festival ground in the hero
-    assets/css/style.css, assets/js/main.js, assets/images/grain.png,
+    assets/css/style.css, assets/js/main.js,
+    assets/images/{grain,grain-frames}.png,
     assets/images/logos/{bleedingstar,rstream-paper}.png
                          COPIES of the shared files (tools/sync-site-assets.sh)
     assets/images/festival-ground-{960,640}.webp   the isometric festival ground (hero)
@@ -68,7 +73,8 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     .htaccess            404 rewrite that works as own domain and as /rstream/ subfolder
     assets/css/rstream.css   dark broadcast theme + multiviewer hero (loaded after style.css)
     assets/js/rstream.js the live vision-mixer in the hero (timecode, cuts, tally, meters, log)
-    assets/css/style.css, assets/js/main.js, assets/images/grain.png,
+    assets/css/style.css, assets/js/main.js,
+    assets/images/{grain,grain-frames}.png,
     assets/images/logos/{bleedingstar,reichi-it}.png
                          COPIES of the shared files (tools/sync-site-assets.sh)
     assets/images/rstream-{mark,wordmark}.svg      logo parts traced from the original logo
@@ -97,7 +103,7 @@ tools/build-images.py    optional dev helper to regenerate image derivatives
 tools/build-it-brand.py  optional dev helper: reichi.it logo, favicons, share image
 tools/build-it-ground.py optional dev helper: keys and crops the festival-ground picture for the reichi.it hero
 tools/build-rstream-brand.py  optional dev helper: traces the R-Stream logo, favicons, share image
-tools/sync-site-assets.sh  copies style.css / main.js / grain.png / logos into htdocs/it/ and htdocs/rstream/
+tools/sync-site-assets.sh  copies style.css / main.js / grain.png / grain-frames.png / logos into htdocs/it/ and htdocs/rstream/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 tools/deploy-ftp.py      optional dev helper: list / diff / upload htdocs/ via FTPS (never deletes)
 ```
@@ -295,7 +301,7 @@ overrides from `config.php` → `'sites' => ['it' => […]]`.
    existing widget) and enter its keys under `sites.it.turnstile`.
 7. Optional: Search Console property for `https://reichi.it/`, sitemap `https://reichi.it/sitemap.xml`.
 
-Why copies of `style.css`, `main.js` and `grain.png` inside `it/assets/`: once the domain
+Why copies of `style.css`, `main.js`, `grain.png` and `grain-frames.png` inside `it/assets/`: once the domain
 points at `it/`, the browser cannot load anything from the parent folder. PHP can (`../app/`),
 static files cannot. After changing one of the shared files run `sh tools/sync-site-assets.sh`
 (it refreshes the copies for reichi.it and rstream.at alike); `tools/build-zip.sh` refuses to

@@ -9,6 +9,7 @@
  *  6. Formular: Interaktions-Token und optional Cloudflare Turnstile (erst bei Nutzung geladen)
  *  7. Hero: Bühnenlicht folgt der Maus (Verfolger), Bühnenkante als Oszilloskop-Linie
  *  8. Hero: Kopf folgt dem Mauszeiger (optional, config 'hero_visual' => 'animation')
+ *  9. Filmkorn: wechselnde Kacheln statt eines feststehenden Musters
  */
 (function () {
   'use strict';
@@ -567,5 +568,83 @@
         if (reduceMotion.matches && ready) { pointerX = -1; paint(-1); }
       });
     }
+  }
+
+  /* 9. Filmkorn ---------------------------------------------------------- */
+  // Echtes Filmkorn ist in jedem Bild ein neues Muster. Der Filmstreifen
+  // (grain-frames.png, tools/build-grain.py) liegt als Kacheln untereinander;
+  // hier wird etwa 12-mal pro Sekunde die nächste Kachel über die Seite gelegt.
+  // Ohne JS oder mit reduzierter Bewegung bleibt die statische Kachel (body::after).
+  // Entfällt der Abschnitt, bleibt ebenfalls nur das statische Korn.
+  var grainSheet = doc.querySelector('link[rel="stylesheet"][href*="css/style.css"]');
+  if (grainSheet && !reduceMotion.matches) {
+    var grainVersion = (grainSheet.getAttribute('href').match(/\?v=[^&#]*/) || [''])[0];
+    var grainUrl = grainSheet.href.replace(/css\/style\.css.*$/, 'images/grain-frames.png') + grainVersion;
+    var grainImage = new Image();
+    grainImage.onload = function () {
+      var tile = grainImage.width;
+      var frameCount = Math.round(grainImage.height / tile);
+      if (!tile || frameCount < 2) { return; }
+      var slices = [];
+      for (var g = 0; g < frameCount; g++) {
+        var slice = doc.createElement('canvas');
+        slice.width = tile;
+        slice.height = tile;
+        slice.getContext('2d').drawImage(grainImage, 0, g * tile, tile, tile, 0, 0, tile, tile);
+        slices.push(slice);
+      }
+      var grain = doc.createElement('canvas');
+      grain.className = 'grain';
+      grain.setAttribute('aria-hidden', 'true');
+      doc.body.appendChild(grain);
+      var grainCtx = grain.getContext('2d');
+      var grainFrame = 0;
+      var grainTimer = 0;
+
+      // Wie die CSS-Kachel: ein Bildpixel je CSS-Pixel, ab 1,5 dppx je Gerätepixel.
+      function grainScale() {
+        var dpr = window.devicePixelRatio || 1;
+        var css = dpr >= 1.5 ? 80 : 160;
+        return (css * dpr) / tile;
+      }
+
+      function paintGrain() {
+        var dpr = window.devicePixelRatio || 1;
+        var w = Math.round(window.innerWidth * dpr);
+        var h = Math.round(window.innerHeight * dpr);
+        if (grain.width !== w || grain.height !== h) {
+          grain.width = w;
+          grain.height = h;
+        }
+        var scale = grainScale();
+        grainCtx.setTransform(1, 0, 0, 1, 0, 0);
+        grainCtx.clearRect(0, 0, w, h);
+        grainCtx.setTransform(scale, 0, 0, scale, 0, 0);
+        grainCtx.fillStyle = grainCtx.createPattern(slices[grainFrame], 'repeat');
+        grainCtx.fillRect(0, 0, w / scale, h / scale);
+      }
+
+      function stopGrain() {
+        window.clearInterval(grainTimer);
+        grain.remove();
+        html.classList.remove('grain-live');
+        window.removeEventListener('resize', paintGrain);
+      }
+
+      paintGrain();
+      html.classList.add('grain-live');
+      grainTimer = window.setInterval(function () {
+        if (doc.hidden) { return; }
+        grainFrame = (grainFrame + 1) % frameCount;
+        paintGrain();
+      }, 83);
+      window.addEventListener('resize', paintGrain);
+      if (reduceMotion.addEventListener) {
+        reduceMotion.addEventListener('change', function () {
+          if (reduceMotion.matches) { stopGrain(); }
+        });
+      }
+    };
+    grainImage.src = grainUrl;
   }
 })();

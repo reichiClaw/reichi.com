@@ -4,7 +4,8 @@
 #
 # Why copies: each domain points at its own folder as document root, so the browser cannot
 # load ../assets/… from the parent folder. PHP code is shared via ../app/, static files have
-# to exist inside each folder. Run after changing style.css, main.js, grain.png or a logo:
+# to exist inside each folder. Run after changing style.css, main.js, grain.png,
+# grain-frames.png or a logo:
 #
 #   sh tools/sync-site-assets.sh          # copy
 #   sh tools/sync-site-assets.sh --check  # exit 1 if a copy is out of date (used by build-zip.sh)
@@ -13,7 +14,7 @@ set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/htdocs/assets"
 
-SHARED="css/style.css js/main.js images/grain.png"
+SHARED="css/style.css js/main.js images/grain.png images/grain-frames.png"
 # Logo files are the "Verbundene Projekte" cards of each site.
 FILES_it="$SHARED images/logos/bleedingstar.png images/logos/rstream-paper.png"
 FILES_rstream="$SHARED images/logos/bleedingstar.png images/logos/reichi-it.png"
