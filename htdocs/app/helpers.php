@@ -72,6 +72,8 @@ function hero_animation(array $config): ?array
         'face_x' => (float) $data['face'][0],
         'face_y' => (float) $data['face'][1],
         'dir' => url('/assets/images/character'),
+        // Gleicher Name bei neuem Bildsatz: die .htaccess cached WebP ein Jahr, daher ?v=
+        'version' => dechex((int) filemtime($file)),
     ];
     return $cache;
 }

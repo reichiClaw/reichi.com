@@ -104,7 +104,7 @@ $jsonLd = $isHome
 <?php if ($isHome && !empty($content['hero']['photo'])): ?>
 <?php $heroPhoto = $content['photos'][$content['hero']['photo']]; $heroAnim = hero_animation($config); ?>
 <?php if ($heroAnim): ?>
-<link rel="preload" as="image" fetchpriority="high" media="<?= e(HERO_MOUSE_MEDIA) ?>" href="<?= e($heroAnim['dir'] . '/center.webp') ?>" type="image/webp">
+<link rel="preload" as="image" fetchpriority="high" media="<?= e(HERO_MOUSE_MEDIA) ?>" href="<?= e($heroAnim['dir'] . '/center.webp?v=' . $heroAnim['version']) ?>" type="image/webp">
 <?php endif; ?>
 <link rel="preload" as="image" fetchpriority="high"<?= $heroAnim ? ' media="not all and ' . e(HERO_MOUSE_MEDIA) . '"' : '' ?> imagesrcset="<?= e(implode(', ', array_map(static fn(int $w): string => url('/assets/images/photos/' . $heroPhoto['file'] . '-' . $w . '.webp') . ' ' . $w . 'w', $heroPhoto['widths']))) ?>" imagesizes="(max-width: 47.99em) 100vw, 42vw" type="image/webp">
 <?php endif; ?>

@@ -412,6 +412,7 @@
     if (characterCtx) {
       var frameCount = parseInt(stage.getAttribute('data-frames'), 10) || 64;
       var frameDir = stage.getAttribute('data-dir');
+      var frameQuery = stage.getAttribute('data-v') ? ('?v=' + stage.getAttribute('data-v')) : '';
       var faceFx = parseFloat(stage.getAttribute('data-face-x')) || 0.5;
       var faceFy = parseFloat(stage.getAttribute('data-face-y')) || 0.45;
       var background = stage.getAttribute('data-background') || '#000000';
@@ -527,9 +528,9 @@
       }
 
       function startCharacter() {
-        var jobs = [load(frameDir + '/center.webp')];
+        var jobs = [load(frameDir + '/center.webp' + frameQuery)];
         for (var i = 0; i < frameCount; i++) {
-          jobs.push(load(frameDir + '/frame-' + (i < 10 ? '0' + i : i) + '.webp'));
+          jobs.push(load(frameDir + '/frame-' + (i < 10 ? '0' + i : i) + '.webp' + frameQuery));
         }
         Promise.all(jobs).then(function (loaded) {
           centerImage = loaded[0];

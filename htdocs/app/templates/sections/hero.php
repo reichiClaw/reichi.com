@@ -38,12 +38,13 @@ $caption = $anim ? $hero['animation']['caption'] : $photo['caption'];
               // Handys/Tablets laden stattdessen das Originalfoto – ein <picture>, ein Download. ?>
         <div class="hero__stage" data-hero-character
              data-frames="<?= (int) $anim['frames'] ?>" data-dir="<?= e($anim['dir']) ?>"
+             data-v="<?= e($anim['version']) ?>"
              data-face-x="<?= e((string) $anim['face_x']) ?>" data-face-y="<?= e((string) $anim['face_y']) ?>"
              data-background="<?= e($anim['background']) ?>">
           <?= picture($photo, [
               'sizes' => '(max-width: 47.99em) 100vw, 42vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'hero__img',
               'alt' => $hero['animation']['alt'],
-              'lead_sources' => '<source media="' . e(HERO_MOUSE_MEDIA) . '" type="image/webp" srcset="' . e($anim['dir'] . '/center.webp') . '" width="' . (int) $anim['width'] . '" height="' . (int) $anim['height'] . '">',
+              'lead_sources' => '<source media="' . e(HERO_MOUSE_MEDIA) . '" type="image/webp" srcset="' . e($anim['dir'] . '/center.webp?v=' . $anim['version']) . '" width="' . (int) $anim['width'] . '" height="' . (int) $anim['height'] . '">',
           ]) ?>
           <canvas class="hero__character" aria-hidden="true" hidden></canvas>
         </div>
