@@ -4,11 +4,18 @@ Erzeugt die Einzelbilder für die Cursor-folgende Kopfanimation im Hero
 (htdocs/assets/images/character/). Entwicklungsrechner, nicht auf dem Server nötig.
 
 Quelle ist ein Video, in dem der Kopf einmal im Kreis durch die acht Himmelsrichtungen
-dreht (assets-src/originals/character-head-turn.mp4, 1280×720, 24 fps, 240 Bilder).
+dreht. Die Bilder im Repo stammen aus
+assets-src/originals/character-head-turn-20261015.m4v (1280×720, 24 fps, 21 s,
+blaue Bühne, Drehung gegen den Uhrzeigersinn). Der ältere Clip
+character-head-turn.mp4 bleibt daneben liegen und kann als Argument übergeben werden.
 
 Ablauf:
-  1. Hintergrundfarbe aus dem Bildrand bestimmen (Median über das ganze Video).
-  2. Gesicht im ersten Bild per Hautfarben-Segmentierung lokalisieren.
+  1. Hintergrundfarbe aus dem dunklen Teil des Bildrands bestimmen (ein Scheinwerfer
+     im Rand verschiebt den Median sonst ins Helle).
+  2. Gesicht im ersten Bild lokalisieren: zuerst über Hautfarbe, und wenn das Licht
+     keine Hautfarbe übrig lässt (z. B. ein blauer Scheinwerfer) über den
+     Gesichtserkenner YuNet (tools/face_detection_yunet_2023mar.onnx, OpenCV Zoo,
+     Apache-2.0).
   3. Merkmalspunkte im Gesicht mit Lucas-Kanade durch das Video verfolgen; die mittlere
      Verschiebung gegenüber Bild 0 ergibt pro Bild Blickwinkel (atan2) und Auslenkung.
   4. Für 64 Zielwinkel (5,625° Schritte, 0 = oben, im Uhrzeigersinn) je ein Bild wählen.
@@ -33,8 +40,9 @@ import cv2
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SRC = ROOT / "assets-src" / "originals" / "character-head-turn.mp4"
+DEFAULT_SRC = ROOT / "assets-src" / "originals" / "character-head-turn-20261015.m4v"
 OUT_DIR = ROOT / "htdocs" / "assets" / "images" / "character"
+FACE_MODEL = Path(__file__).resolve().parent / "face_detection_yunet_2023mar.onnx"
 
 FRAMES = 64
 STEP_DEG = 360 / FRAMES
@@ -69,20 +77,50 @@ def background_hex(frames: list[np.ndarray]) -> tuple[str, tuple[int, int, int]]
     border = []
     for f in frames[::10]:
         border += [f[:30].reshape(-1, 3), f[-30:].reshape(-1, 3), f[:, :30].reshape(-1, 3), f[:, -30:].reshape(-1, 3)]
-    b, g, r = (int(v) for v in np.median(np.concatenate(border), axis=0))
+    pixels = np.concatenate(border).astype(np.float32)
+    # Heller Scheinwerfer im Rand zählt nicht mit: nur die dunklere Hälfte des Rands.
+    luminance = pixels @ np.array([0.114, 0.587, 0.299])
+    dark = pixels[luminance <= np.percentile(luminance, 50)]
+    b, g, r = (int(v) for v in np.median(dark, axis=0))
     return f"#{r:02x}{g:02x}{b:02x}", (b, g, r)
 
 
-def locate_face(frame: np.ndarray) -> tuple[float, float, tuple[int, int, int, int]]:
+def locate_face_skin(frame: np.ndarray) -> tuple[float, float, tuple[int, int, int, int]] | None:
     ycc = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
     skin = cv2.inRange(ycc, (60, 135, 85), (255, 180, 135))
     skin = cv2.morphologyEx(skin, cv2.MORPH_OPEN, np.ones((7, 7), np.uint8))
     count, _, stats, centroids = cv2.connectedComponentsWithStats(skin)
     if count < 2:
-        raise SystemExit("no skin region found – adjust the YCrCb thresholds")
+        return None
     k = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    if stats[k, cv2.CC_STAT_AREA] < 2000:
+        return None
     x, y, w, h = (int(v) for v in stats[k, :4])
     return float(centroids[k][0]), float(centroids[k][1]), (x, y, w, h)
+
+
+def locate_face_detector(frame: np.ndarray) -> tuple[float, float, tuple[int, int, int, int]]:
+    if not FACE_MODEL.is_file():
+        raise SystemExit(f"Gesicht nicht über Hautfarbe gefunden und Modell fehlt: {FACE_MODEL}")
+    height, width = frame.shape[:2]
+    detector = cv2.FaceDetectorYN.create(str(FACE_MODEL), "", (width, height), 0.5, 0.3, 5000)
+    detector.setInputSize((width, height))
+    _, faces = detector.detect(frame)
+    if faces is None or len(faces) == 0:
+        raise SystemExit("no face found")
+    x, y, w, h = (int(v) for v in max(faces, key=lambda f: f[2] * f[3])[:4])
+    pad = int(round(0.08 * max(w, h)))
+    x0, y0 = max(0, x - pad), max(0, y - pad)
+    x1, y1 = min(width, x + w + pad), min(height, y + h + pad)
+    return (x0 + x1) / 2, (y0 + y1) / 2, (x0, y0, x1 - x0, y1 - y0)
+
+
+def locate_face(frame: np.ndarray) -> tuple[float, float, tuple[int, int, int, int]]:
+    found = locate_face_skin(frame)
+    if found is not None:
+        return found
+    print("keine Hautfarbe erkennbar, Gesichtserkenner verwendet")
+    return locate_face_detector(frame)
 
 
 def track(frames: list[np.ndarray], box: tuple[int, int, int, int]) -> np.ndarray:

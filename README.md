@@ -453,21 +453,25 @@ page moves.
 
 How it works (`tools/build-character-frames.py`, section 8 of `main.js`):
 
-- Source is a 10 s video (`assets-src/originals/character-head-turn.mp4`, 1280×720, 24 fps)
-  in which the head turns once clockwise through the eight compass directions. The script
-  reads it with OpenCV, measures the background colour, locates the face, tracks facial
-  features through all 240 frames and derives a gaze angle per frame. It then picks **64
-  frames** at 5.625° steps (index 0 = up, clockwise) – choosing frames so that the
-  excursion changes smoothly around the circle – and writes them as 720×720 WebP crops to
+- Source of the frames in the repo is `assets-src/originals/character-head-turn-20261015.m4v`
+  (1280×720, 24 fps, 21.2 s): the head turns once counter-clockwise through the eight
+  compass directions under a blue spotlight and returns to the camera. The earlier clockwise
+  clip `character-head-turn.mp4` is still in the repo; pass its path to rebuild that version.
+  The script reads the video with OpenCV, measures the background colour from the darker half
+  of the frame border (so a spotlight does not tint it), locates the face by skin colour and,
+  when the light leaves no skin colour, with YuNet (`tools/face_detection_yunet_2023mar.onnx`),
+  tracks facial features and derives a gaze angle per frame. It then picks **64 frames** at
+  5.625° steps (index 0 = up, clockwise) – choosing frames so that the excursion changes
+  smoothly around the circle – and writes them as 720×720 WebP crops to
   `assets/images/character/frame-00…63.webp`, plus `center.webp` (video frame 0, looking into
-  the camera) and `manifest.json` (frame count, background `#010101`, face position).
+  the camera) and `manifest.json` (frame count, background `#291586`, face at 0.50 / 0.45).
   The video is **never** played or seeked in the browser.
 - The template renders one `<picture>`: its first `<source>` serves `center.webp` only on
   devices with a real mouse (`(hover: hover) and (pointer: fine)`); phones and tablets fall
   through to the original photograph exactly as in photo mode (one download either way,
   preload carries the same media condition). An empty `<canvas>` sits on top. After the
   `load` event, on mouse devices without `prefers-reduced-motion`, the 64 frames (~1.6 MB)
-  are fetched and decoded; then the canvas takes over.
+  are fetched and decoded; then the canvas takes over. The current set is about 570 KB.
 - Each animation frame computes the pointer angle to the face (`atan2`), smooths it with a
   shortest-path angular lerp (factor 0.26 → ~35 ms per step), maps it to the nearest of the
   64 frames and draws **exactly one** frame at full opacity with cover fitting – no

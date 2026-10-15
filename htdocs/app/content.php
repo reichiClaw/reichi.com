@@ -100,7 +100,7 @@ return [
         // Tablets zeigen weiterhin das Foto oben; der alt-Text muss deshalb für beide Bilder stimmen.
         // credit: Urheber/Quelle des Videos, aus dem die Bilder stammen – null blendet die Zeile aus.
         'animation' => [
-            'alt' => 'Porträt von Christian Reichinger mit Kapuze vor dunklem Hintergrund',
+            'alt' => 'Porträt von Christian Reichinger',
             'caption' => 'reichi | Christian Reichinger',
             'credit' => null,
         ],
