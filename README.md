@@ -478,11 +478,15 @@ How it works (`tools/build-character-frames.py`, section 8 of `main.js`):
   blending, so no ghosting. Within 12 % of the shorter viewport side around the face the
   centre frame is shown (eye contact). The loop stops as soon as the pose has settled and
   while the hero is off screen or the tab hidden.
-- Touch devices see the photograph (with its credit); mouse users with reduced motion or
-  without JS see the static `center.webp`; if any frame fails to load the still stays.
+- Touch devices, and every device when `'hero_visual'` is `'photo'`, see the black-and-white
+  hood portrait (`portrait-hood`, source `assets-src/originals/portrait-hood-bw.jpg`).
+  Mouse users with reduced motion or without JS see the static `center.webp`; if any frame
+  fails to load the still stays.
 - Texts live in `content.php` under `hero.animation`. The `alt` must be true for both the
-  photo and the still. `credit` is `null` until the owner confirms the source of the video;
-  on mouse devices the „Foto:“ line is then empty, on touch devices it shows the photo credit.
+  photo and the still. `hero.animation.credit` is `null` until the owner confirms the source
+  of the video. The still has no photographer in its file either, so the „Foto:“ line stays
+  hidden in both views until a credit is set. The photo URLs carry `?v=` (mtime of the
+  largest WebP) because jpg/webp responses are cached immutable for a year.
 
 Regenerate frames (development machine only): `pip install opencv-python-headless numpy`,
 then `python3 tools/build-character-frames.py`. The script prints the frame numbers it

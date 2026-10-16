@@ -22,7 +22,9 @@ WEBP_QUALITY = 78
 # name -> (source file, [widths], optional crop definition)
 # crop: dict(ratio=(w, h), cx=0..1 horizontal focus, cy=0..1 vertical focus, widths=[...])
 PHOTOS = {
-    "portrait-hood": dict(src="DSC6295_square.jpg", widths=[480, 600, 800, 1200]),
+    # Owner-supplied black-and-white hood portrait (2000×2000, no EXIF). The older
+    # square DSC6295_square.jpg stays in assets-src/originals/ and is no longer delivered.
+    "portrait-hood": dict(src="portrait-hood-bw.jpg", widths=[480, 600, 800, 1200, 1600, 2000]),
     "stage-red": dict(
         src="11059538_883376491737597_7864039594443423760_o-1.jpg",
         widths=[640, 1024, 1600, 2048],

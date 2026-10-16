@@ -265,7 +265,8 @@ function flash_get(string $key, mixed $default = null): mixed
  *           'alt' => '…', 'portrait' => ['widths' => [540, 900], 'width' => 1092, 'height' => 1365]]
  * $options: sizes (string), loading ('lazy'|'eager'), fetchpriority, class, portrait_media,
  *           alt (überschreibt $photo['alt']), lead_sources (fertige <source>-Elemente, die vor
- *           den Foto-Quellen stehen – z. B. ein anderes Bild für Geräte mit Maus)
+ *           den Foto-Quellen stehen – z. B. ein anderes Bild für Geräte mit Maus),
+ *           version (Cache-Bust, z. B. photo_version(); jpg/webp liegen ein Jahr immutable)
  */
 function picture(array $photo, array $options = []): string
 {
@@ -274,10 +275,12 @@ function picture(array $photo, array $options = []): string
     $loading = $options['loading'] ?? 'lazy';
     $class = $options['class'] ?? '';
     $decoding = $loading === 'eager' ? 'sync' : 'async';
+    $version = (string) ($options['version'] ?? '');
+    $query = $version !== '' ? '?v=' . rawurlencode($version) : '';
 
-    $srcset = static function (string $prefix, array $widths, string $ext): string {
+    $srcset = static function (string $prefix, array $widths, string $ext) use ($query): string {
         return implode(', ', array_map(
-            static fn(int $w): string => "{$prefix}-{$w}.{$ext} {$w}w",
+            static fn(int $w): string => "{$prefix}-{$w}.{$ext}{$query} {$w}w",
             $widths
         ));
     };
@@ -294,7 +297,7 @@ function picture(array $photo, array $options = []): string
     $html .= '<source type="image/webp" srcset="' . e($srcset($base, $photo['widths'], 'webp'))
         . '" sizes="' . e($sizes) . '">';
     $largest = max($photo['widths']);
-    $html .= '<img src="' . e("{$base}-{$largest}.jpg") . '" srcset="'
+    $html .= '<img src="' . e("{$base}-{$largest}.jpg{$query}") . '" srcset="'
         . e($srcset($base, $photo['widths'], 'jpg')) . '" sizes="' . e($sizes) . '"'
         . ' width="' . (int) $photo['width'] . '" height="' . (int) $photo['height'] . '"'
         . ' alt="' . e($options['alt'] ?? $photo['alt']) . '" loading="' . e($loading) . '" decoding="' . $decoding . '"'
@@ -303,6 +306,16 @@ function picture(array $photo, array $options = []): string
         . '>';
     $html .= '</picture>';
     return $html;
+}
+
+/**
+ * Cache-Bust für ein Foto. Hängt an der größten WebP-Variante: die Dateien sind
+ * ein Jahr immutable, ein Austausch unter demselben Namen wäre sonst unsichtbar.
+ */
+function photo_version(array $photo): string
+{
+    $file = PUBLIC_DIR . '/assets/images/photos/' . $photo['file'] . '-' . max($photo['widths']) . '.webp';
+    return is_file($file) ? dechex((int) filemtime($file)) : '';
 }
 
 /** Größte JPEG-Variante eines Fotos (Ziel für Lightbox / „Bild öffnen“). */

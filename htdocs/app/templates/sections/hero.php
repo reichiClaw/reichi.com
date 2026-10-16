@@ -13,6 +13,9 @@ $photo = $content['photos'][$hero['photo']];
 // config.php 'hero_visual': 'photo' (Standard) oder 'animation' (Kopf folgt dem Mauszeiger).
 $anim = hero_animation($config);
 $caption = $anim ? $hero['animation']['caption'] : $photo['caption'];
+$photoVersion = photo_version($photo);
+$photoCredit = (string) ($photo['credit'] ?? '');
+$animCredit = $anim ? (string) ($hero['animation']['credit'] ?? '') : '';
 ?>
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero__spot" aria-hidden="true"></div>
@@ -44,12 +47,13 @@ $caption = $anim ? $hero['animation']['caption'] : $photo['caption'];
           <?= picture($photo, [
               'sizes' => '(max-width: 47.99em) 100vw, 42vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'hero__img',
               'alt' => $hero['animation']['alt'],
+              'version' => $photoVersion,
               'lead_sources' => '<source media="' . e(HERO_MOUSE_MEDIA) . '" type="image/webp" srcset="' . e($anim['dir'] . '/center.webp?v=' . $anim['version']) . '" width="' . (int) $anim['width'] . '" height="' . (int) $anim['height'] . '">',
           ]) ?>
           <canvas class="hero__character" aria-hidden="true" hidden></canvas>
         </div>
       <?php else: ?>
-        <?= picture($photo, ['sizes' => '(max-width: 47.99em) 100vw, 42vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'hero__img']) ?>
+        <?= picture($photo, ['sizes' => '(max-width: 47.99em) 100vw, 42vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'hero__img', 'version' => $photoVersion]) ?>
       <?php endif; ?>
       <figcaption class="hero__caption">
         <span class="hero__caption-label"><?= e($caption) ?></span>
@@ -59,9 +63,9 @@ $caption = $anim ? $hero['animation']['caption'] : $photo['caption'];
       <canvas class="hero__scope" aria-hidden="true"></canvas>
     </figure>
   </div>
-  <?php if ($anim): ?>
-    <p class="hero__credit"><span class="hero__credit--photo">Foto: <?= e($photo['credit']) ?></span><?php if ($hero['animation']['credit']): ?><span class="hero__credit--animation">Foto: <?= e($hero['animation']['credit']) ?></span><?php endif; ?></p>
-  <?php else: ?>
-    <p class="hero__credit">Foto: <?= e($photo['credit']) ?></p>
+  <?php if ($anim && ($photoCredit !== '' || $animCredit !== '')): ?>
+    <p class="hero__credit"><?php if ($photoCredit !== ''): ?><span class="hero__credit--photo">Foto: <?= e($photoCredit) ?></span><?php endif; ?><?php if ($animCredit !== ''): ?><span class="hero__credit--animation">Foto: <?= e($animCredit) ?></span><?php endif; ?></p>
+  <?php elseif (!$anim && $photoCredit !== ''): ?>
+    <p class="hero__credit">Foto: <?= e($photoCredit) ?></p>
   <?php endif; ?>
 </section>
