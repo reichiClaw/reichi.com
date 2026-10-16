@@ -230,8 +230,7 @@ return [
             'file' => 'portrait-hood', 'widths' => [480, 600, 800, 1200, 1600, 2000], 'width' => 2000, 'height' => 2000,
             'alt' => 'Porträt von Christian Reichinger in Schwarz-Weiß, mit Kapuze',
             'caption' => 'reichi | Christian Reichinger',
-            // Vom Betreiber geliefert, keine Fotografen-Angabe in den Bilddaten.
-            'credit' => null,
+            'credit' => 'Lothar Prokop – lotharprokop.com',
         ],
         'portrait-studio' => [
             'file' => 'portrait-studio', 'widths' => [800, 1200, 1600], 'width' => 1600, 'height' => 1068,
@@ -360,12 +359,12 @@ return [
     ],
 
     'footer' => [
-        'credits' => 'Fotos: Martin Mühlbacher – mdot.at · MW Design – michaelawiesinger.at · StageShots.at',
+        'credits' => 'Fotos: Lothar Prokop – lotharprokop.com · Martin Mühlbacher – mdot.at · MW Design – michaelawiesinger.at · StageShots.at',
     ],
 
     // Bildnachweise (Impressum), Text laut alter Website, ergänzt um erkennbare Bildquellen
     'image_credits' => [
-        'Christian Reichinger / Studio-Porträt: Martin Mühlbacher – mdot.at / Schwarz-Weiß-Porträt im Hero: vom Betreiber bereitgestellt',
+        'Christian Reichinger / Studio-Porträt: Martin Mühlbacher – mdot.at / Schwarz-Weiß-Porträt im Hero: Lothar Prokop – lotharprokop.com',
         'Bühnenfotos Metronome Festival Prag: MW Design – MichaelaWiesinger.at',
         'Open-Air-Bühne in blauem Licht: StageShots.at | Christian Reichinger',
         'Logos: die jeweiligen Rechteinhaber',

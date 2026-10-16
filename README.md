@@ -484,9 +484,9 @@ How it works (`tools/build-character-frames.py`, section 8 of `main.js`):
   fails to load the still stays.
 - Texts live in `content.php` under `hero.animation`. The `alt` must be true for both the
   photo and the still. `hero.animation.credit` is `null` until the owner confirms the source
-  of the video. The still has no photographer in its file either, so the „Foto:“ line stays
-  hidden in both views until a credit is set. The photo URLs carry `?v=` (mtime of the
-  largest WebP) because jpg/webp responses are cached immutable for a year.
+  of the video, so mouse devices show no „Foto:“ line. Touch devices and photo mode show
+  the still’s credit, Lothar Prokop – lotharprokop.com. The photo URLs carry `?v=` (mtime of
+  the largest WebP) because jpg/webp responses are cached immutable for a year.
 
 Regenerate frames (development machine only): `pip install opencv-python-headless numpy`,
 then `python3 tools/build-character-frames.py`. The script prints the frame numbers it
