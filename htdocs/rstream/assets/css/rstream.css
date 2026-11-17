@@ -96,7 +96,6 @@
 }
 .rs-hero__tagline::before { content: "// "; color: var(--accent-ink); }
 .rs-hero .hero__roles { margin-top: 1.5rem; }
-.rs-hero .hero__roles li + li::before { color: var(--accent-ink); }
 .hero__figure::after { background: linear-gradient(to bottom, transparent, var(--accent), transparent); }
 
 /* Das Panel: Kopfzeile, Programmbild + Pegel, vier Kamerakacheln */
