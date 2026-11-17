@@ -375,9 +375,18 @@ main:focus { outline: none; }
   margin-left: -0.05em;
 }
 .hero__dot { color: var(--accent); }
-/* Rollen: ein Streifen neonoranges Gaffa, leicht schräg aufgeklebt, die Wörter wie mit Edding
-   darauf geschrieben. Bleibt eine <ul> mit echtem Text; Gewebe und abgerissene Enden sind CSS. */
+/* Rollen: ein Streifen Gaffa, leicht schräg aufgeklebt, die Wörter wie mit Edding darauf
+   geschrieben. Bleibt eine <ul> mit echtem Text; Gewebe und abgerissene Enden sind CSS.
+   Die Rolle ist pro Marke eine andere: hier Neonorange; it.css (Blaugrün) und rstream.css
+   (Violett) überschreiben nur die --tape-* Variablen. */
 .hero__roles {
+  --tape-hi: #ff8440;
+  --tape-mid: #f4622b;
+  --tape-lo: #e75524;
+  --tape-ink: #1a1410;
+  --tape-sep: rgba(26, 20, 16, 0.55);
+  --tape-weave-light: rgba(255, 255, 255, 0.12);
+  --tape-weave-dark: rgba(0, 0, 0, 0.07);
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.2rem 1.4rem;
@@ -391,11 +400,11 @@ main:focus { outline: none; }
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #1a1410;
+  color: var(--tape-ink);
   background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, #ff8440 0%, #f4622b 48%, #e75524 100%);
+    repeating-linear-gradient(90deg, var(--tape-weave-light) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, var(--tape-weave-dark) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--tape-hi) 0%, var(--tape-mid) 48%, var(--tape-lo) 100%);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 6px 14px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   clip-path: polygon(0% 14%, 1.2% 0%, 98.8% 3%, 100% 20%, 99.2% 46%, 100% 64%, 98.6% 100%, 1.6% 97%, 0% 80%, 0.8% 52%);
   rotate: -1.6deg;
@@ -406,7 +415,7 @@ main:focus { outline: none; }
   content: "/";
   position: absolute;
   left: -0.95rem;
-  color: rgba(26, 20, 16, 0.55);
+  color: var(--tape-sep);
 }
 /* Schmale Bildschirme: statt eines langen Streifens drei kurze Stücke Tape, untereinander
    und jedes etwas anders schief geklebt. Gleiche Tape-Optik, Trennstriche entfallen. */
@@ -425,9 +434,9 @@ main:focus { outline: none; }
   .hero__roles li {
     padding: 0.4rem 1.1rem 0.38rem 1rem;
     background:
-      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px),
-      linear-gradient(180deg, #ff8440 0%, #f4622b 48%, #e75524 100%);
+      repeating-linear-gradient(90deg, var(--tape-weave-light) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg, var(--tape-weave-dark) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, var(--tape-hi) 0%, var(--tape-mid) 48%, var(--tape-lo) 100%);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 5px 12px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     clip-path: polygon(0% 14%, 2% 0%, 98% 4%, 100% 22%, 98.5% 48%, 100% 66%, 97.5% 100%, 2.5% 96%, 0% 78%, 1.5% 50%);
     transform-origin: 0 50%;

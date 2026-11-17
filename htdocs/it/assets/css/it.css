@@ -98,7 +98,18 @@ code { background: var(--bg-3); }
 }
 .it-hero__tagline::before { content: "// "; color: var(--accent-ink); }
 .it-hero .hero__roles { margin-top: 1.5rem; }
-.it-hero .hero__roles li + li::before { color: var(--accent-ink); }
+/* Gaffa-Streifen der Leistungen in der Rolle von reichi.it: elektrisches Blaugrün, Tinte darauf */
+.it-hero .hero__roles {
+  font-size: var(--step--1); /* vier Leistungen passen so in eine Zeile */
+  letter-spacing: 0.08em;
+  --tape-hi: #3df2d6;
+  --tape-mid: var(--accent);
+  --tape-lo: #00c6a8;
+  --tape-ink: #0f1a18;
+  --tape-sep: rgba(15, 26, 24, 0.5);
+  --tape-weave-light: rgba(255, 255, 255, 0.16);
+  --tape-weave-dark: rgba(0, 0, 0, 0.06);
+}
 /* Canvas für Funken und Kriechstrom um die Überschrift (it.js, Teil 5). Ragt 3rem über den
    Textblock hinaus, damit Funken am Rand nicht abgeschnitten werden; der Rand ist für die
    Positionsrechnung in it.js maßgeblich (gemessen, nicht angenommen). */
