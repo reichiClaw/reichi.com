@@ -96,15 +96,16 @@
 }
 .rs-hero__tagline::before { content: "// "; color: var(--accent-ink); }
 .rs-hero .hero__roles { margin-top: 1.5rem; }
-/* Gaffa-Streifen der Leistungen in der Rolle von rstream.at: Violett, helle Tinte darauf */
+/* Gaffa-Streifen der Leistungen in der Rolle von rstream.at: Violett, dunkle Tinte darauf wie am
+   Hauptknopf; der Verlauf endet in --accent, damit die Tinte überall mindestens 5:1 hat */
 .rs-hero .hero__roles {
   font-size: var(--step--1); /* vier Leistungen passen so in eine Zeile */
   letter-spacing: 0.08em;
   --tape-hi: #c276ff;
   --tape-mid: var(--accent);
-  --tape-lo: #9a36ea;
-  --tape-ink: #f6f0ff;
-  --tape-sep: rgba(246, 240, 255, 0.55);
+  --tape-lo: var(--accent);
+  --tape-ink: #0b0b10;
+  --tape-sep: rgba(11, 11, 16, 0.55);
   --tape-weave-light: rgba(255, 255, 255, 0.1);
   --tape-weave-dark: rgba(0, 0, 0, 0.12);
 }
