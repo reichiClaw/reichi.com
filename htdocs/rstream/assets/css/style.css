@@ -602,61 +602,156 @@ main:focus { outline: none; }
   .about__facts { grid-template-columns: 1fr; padding-top: 0.4rem; }
 }
 
-/* 5.4 Referenzen */
-.portfolio { border-top: 1px solid var(--line); padding-bottom: 0; }
-.refs { display: grid; gap: clamp(2rem, 4vw, 3rem); }
-.refs__group { border-top: 1px solid var(--line-strong); padding-top: 1.25rem; }
-.refs__title {
+/* 5.4 Referenzen – Setlisten mit Gaffa an die Wand geklebt
+   Die Wand ist der Abschnitt selbst (etwas heller als --bg, mit leichter Vignette), jedes
+   Blatt ein <article class="sheet"> aus Papier (--paper), minimal verdreht und oben mit zwei
+   Streifen schwarzem Gaffa (::before/::after) fixiert. Die Namen sind eine nummerierte Liste
+   in schwerer Versalschrift wie auf einer gedruckten Setlist. Alles CSS, kein Bild; der Text
+   bleibt für Suchmaschinen und Screenreader lesbar. */
+.portfolio {
+  border-top: 1px solid var(--line);
+  padding-bottom: 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(243, 239, 231, 0.045), transparent 60%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 85%);
+}
+.setlist {
+  display: grid;
+  gap: clamp(3rem, 6vw, 4.5rem) clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+  padding-top: 1rem;
+}
+
+.sheet {
+  --tilt: 0deg;
+  position: relative;
+  container-type: inline-size;
+  padding: clamp(1.5rem, 4cqi, 2.5rem) clamp(1.25rem, 4cqi, 2.25rem) clamp(1.5rem, 4cqi, 2.25rem);
+  rotate: var(--tilt);
+  color: var(--paper-ink);
+  background:
+    /* Papierkorn: dieselbe Rauschkachel wie das Filmkorn, sehr zart */
+    url("../images/grain.png") 0 0 / 120px 120px repeat,
+    linear-gradient(180deg, #f7f3ea 0%, var(--paper) 55%, #ebe6dc 100%);
+  background-blend-mode: multiply, normal;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 12px 28px -10px rgba(0, 0, 0, 0.7),
+    0 30px 60px -30px rgba(0, 0, 0, 0.8);
+}
+.sheet--foh { --tilt: -1.1deg; }
+.sheet--collab { --tilt: 1.3deg; }
+.sheet--venues { --tilt: -0.7deg; }
+
+/* Gaffa: mattes Schwarz mit Gewebestruktur, Enden unregelmäßig abgerissen */
+.sheet::before,
+.sheet::after {
+  content: "";
+  position: absolute;
+  top: -0.85rem;
+  width: clamp(5.5rem, 22cqi, 7.5rem);
+  height: 1.9rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3a3a41 0%, #2b2b31 45%, #232329 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  clip-path: polygon(
+    0% 12%, 3% 0%, 97% 4%, 100% 18%, 98% 42%, 100% 60%, 97% 100%, 4% 96%, 0% 78%, 2% 50%
+  );
+  opacity: 0.96;
+  pointer-events: none;
+}
+.sheet::before { left: clamp(0.75rem, 6cqi, 1.75rem); rotate: -9deg; }
+.sheet::after { right: clamp(0.75rem, 6cqi, 1.75rem); rotate: 7deg; }
+.sheet--collab::before { rotate: 11deg; }
+.sheet--collab::after { rotate: -5deg; }
+.sheet--venues::before { left: auto; right: 38%; rotate: 3deg; }
+.sheet--venues::after { right: clamp(0.5rem, 4cqi, 1.25rem); rotate: -12deg; }
+
+.sheet__head {
+  margin-bottom: clamp(1rem, 3cqi, 1.5rem);
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--paper-ink);
+}
+.sheet__meta {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin: 0 0 0.6rem;
   font-family: var(--font-mono);
   font-size: var(--step--1);
-  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent-ink);
+  color: rgba(12, 12, 15, 0.62);
 }
-.refs__count { color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
-.refs__list {
+.sheet__title {
+  font-size: clamp(1.5rem, 8cqi, 2.4rem);
+  font-weight: 850;
+  font-stretch: condensed;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.sheet__list {
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0;
-  font-size: var(--step-1);
-  font-weight: 650;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
-  color: var(--ink);
+  counter-reset: song;
+  font-weight: 800;
+  font-stretch: condensed;
+  font-size: clamp(1.35rem, 6cqi, 1.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
-.refs__list li { display: inline-flex; align-items: center; }
-.refs__list li:not(:last-child)::after {
-  content: "";
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 0.75rem;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.8;
+.sheet__list li {
+  counter-increment: song;
+  display: grid;
+  grid-template-columns: 2ch 1fr;
+  gap: 0.6em;
+  align-items: baseline;
+  padding: 0.3em 0;
+  border-bottom: 1px solid rgba(12, 12, 15, 0.1);
+  break-inside: avoid;
+  overflow-wrap: anywhere;
 }
-#refs-collab .refs__list,
-#refs-venues .refs__list { font-size: var(--step-0); font-weight: 550; color: var(--ink-2); }
-#refs-foh .refs__list { font-size: var(--step-2); }
+.sheet__list li::before {
+  content: counter(song, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.6em;
+  letter-spacing: 0;
+  color: rgba(12, 12, 15, 0.5);
+  text-align: right;
+}
+.sheet__foot {
+  margin: 1.25rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(12, 12, 15, 0.55);
+}
+.sheet__foot::before { content: "→ "; }
 
-/* Schmale Bildschirme: zweispaltige Liste statt Fließtext mit Trennpunkten */
-@media (max-width: 39.99em) {
-  .refs__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem 1rem; }
-  .refs__list li { display: block; overflow-wrap: anywhere; }
-  .refs__list li:not(:last-child)::after { display: none; }
-  #refs-foh .refs__list { font-size: var(--step-1); }
+/* Breite Blätter bekommen zwei Spalten */
+@container (min-width: 34rem) {
+  .sheet__list { columns: 2; column-gap: clamp(1.5rem, 5cqi, 3rem); }
 }
 
-@media (min-width: 64em) {
-  .refs { grid-template-columns: 1fr 1fr; }
-  #refs-foh { grid-column: 1 / -1; }
+/* Die Wand: am Handy eine Spalte; am Tablet unterschiedlich breite Blätter untereinander,
+   versetzt wie an eine Wand geklebt; am Desktop eine lockere Collage aus drei Spalten */
+@media (min-width: 48em) and (max-width: 74.99em) {
+  .sheet--collab { width: min(100%, 36rem); justify-self: end; }
+  .sheet--venues { width: 90%; margin-top: -0.5rem; }
+}
+@media (min-width: 75em) {
+  .setlist { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sheet--foh { grid-column: 1 / 3; }
+  .sheet--collab { grid-column: 3; margin-top: 2.5rem; }
+  .sheet--venues { grid-column: 2 / 4; margin-top: -1rem; }
 }
 
 .clients {
@@ -1228,11 +1323,11 @@ main:focus { outline: none; }
   .js [data-reveal].is-visible { opacity: 1; transform: none; }
   .js .skills__item:nth-child(2),
   .js .gallery__item:nth-child(2),
-  .js .refs__group:nth-child(2),
+  .js .sheet:nth-child(2),
   .js .projects__item:nth-child(2) { transition-delay: 90ms; }
   .js .skills__item:nth-child(3),
   .js .gallery__item:nth-child(3),
-  .js .refs__group:nth-child(3) { transition-delay: 180ms; }
+  .js .sheet:nth-child(3) { transition-delay: 180ms; }
   .js .skills__item:nth-child(4),
   .js .gallery__item:nth-child(4) { transition-delay: 270ms; }
   .js .skills__item:nth-child(5),

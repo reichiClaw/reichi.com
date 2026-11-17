@@ -422,7 +422,10 @@ Everything editable lives in **`app/content.php`**, one PHP array with comments:
   (do not put HTML in them).
 - **References**: `portfolio.groups[*].items` – three separate lists (FOH mixed for /
   worked together with / festivals & venues). Add or remove names; counts update
-  automatically.
+  automatically. They are rendered as set lists on paper taped to the wall with gaffer
+  tape (`sections/portfolio.php`, CSS block 5.4 – pure CSS, no images, the names stay
+  plain text in numbered lists). Optional per group: `set_label` (small line top left),
+  `count_label` (word after the count), `footer` (line under the list).
 - **Client logos**: `clients.items` – name, URL (or `null`), file in `assets/images/logos/`,
   intrinsic width/height, alt text, `light_bg => true` for logos that ship with a white
   background (they are placed on a light plate).

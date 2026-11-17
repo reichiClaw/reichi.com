@@ -159,7 +159,9 @@ return [
     ],
 
     // ------------------------------------------------------------------
-    // Referenzen (Kategorien exakt wie auf der alten Website getrennt)
+    // Referenzen (Kategorien exakt wie auf der alten Website getrennt). Dargestellt als
+    // Setlisten auf Papier (sections/portfolio.php): 'set_label' steht klein oben links,
+    // 'count_label' hinter der Anzahl, 'footer' als Zeile unter der Liste – alles optional.
     // ------------------------------------------------------------------
     'portfolio' => [
         'title' => 'Referenzen',
@@ -169,6 +171,9 @@ return [
                 'id' => 'foh',
                 'title' => 'FOH gemischt für',
                 'source_title' => 'I mixed FOH for:',
+                'set_label' => 'Set 1 · FOH',
+                'count_label' => 'Acts',
+                'footer' => 'Zugabe auf Zuruf',
                 'items' => [
                     'Max the Sax', 'Supervision', 'SoulSanity', 'Lumidee', 'Soul Delight', 'Noemi Waysfeld',
                     'The Grandmas', 'Yet Another Floyd', 'i Tüpfe Rider', 'Red Machete', 'Hoamspü', 'Blonder Engel',
@@ -179,6 +184,8 @@ return [
                 'id' => 'collab',
                 'title' => 'Zusammengearbeitet mit',
                 'source_title' => 'I worked together with:',
+                'set_label' => 'Set 2 · Crew & Support',
+                'count_label' => 'Acts',
                 'items' => [
                     'Moop Mama', 'Turbobier', 'LaBrassBanda', 'Stefan Dettl', 'Vaunted', 'Promise',
                     'Back to Felicity', 'Loving the Alien', 'Jacobs Moor',
@@ -188,6 +195,9 @@ return [
                 'id' => 'venues',
                 'title' => 'Festivals & Venues',
                 'source_title' => 'I worked at:',
+                'set_label' => 'Set 3 · On Tour',
+                'count_label' => 'Shows',
+                'footer' => 'Changeover 15 min',
                 'items' => [
                     'Woodstock der Blasmusik', 'Chiemsee Reggae Festival', 'SummArock Festival',
                     'Freundlich & Kompetent (Hamburg)', 'Kufstein unlimited', 'Zipf Air', 'Bludenzer Jazztage',
