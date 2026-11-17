@@ -417,14 +417,18 @@ main:focus { outline: none; }
   left: -0.95rem;
   color: var(--tape-sep);
 }
-/* Schmale Bildschirme: statt eines langen Streifens drei kurze Stücke Tape, untereinander
-   und jedes etwas anders schief geklebt. Gleiche Tape-Optik, Trennstriche entfallen. */
+/* Schmale Bildschirme: statt eines langen Streifens ein kurzes Stück Tape pro Begriff. Die
+   Stücke fließen: was nebeneinander Platz hat, klebt nebeneinander, die Zeilen sind zentriert –
+   ein einzelnes Stück in der letzten Zeile landet damit mittig. Jedes etwas anders schief,
+   Trennstriche entfallen. */
 @media (max-width: 47.99em) {
   .hero__roles {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem 0.75rem;
+    width: 100%;
     padding: 0;
     background: none;
     box-shadow: none;
@@ -439,11 +443,12 @@ main:focus { outline: none; }
       linear-gradient(180deg, var(--tape-hi) 0%, var(--tape-mid) 48%, var(--tape-lo) 100%);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 5px 12px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     clip-path: polygon(0% 14%, 2% 0%, 98% 4%, 100% 22%, 98.5% 48%, 100% 66%, 97.5% 100%, 2.5% 96%, 0% 78%, 1.5% 50%);
-    transform-origin: 0 50%;
+    transform-origin: 50% 50%;
   }
-  .hero__roles li:nth-child(1) { rotate: -2deg; }
-  .hero__roles li:nth-child(2) { rotate: 1.4deg; margin-left: 0.9rem; }
-  .hero__roles li:nth-child(3) { rotate: -1deg; margin-left: 0.3rem; }
+  .hero__roles li:nth-child(4n + 1) { rotate: -2deg; }
+  .hero__roles li:nth-child(4n + 2) { rotate: 1.4deg; }
+  .hero__roles li:nth-child(4n + 3) { rotate: -1deg; }
+  .hero__roles li:nth-child(4n + 4) { rotate: 1.8deg; }
   .hero__roles li + li::before { display: none; }
 }
 .hero__intro {
