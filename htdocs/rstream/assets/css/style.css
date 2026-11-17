@@ -375,24 +375,81 @@ main:focus { outline: none; }
   margin-left: -0.05em;
 }
 .hero__dot { color: var(--accent); }
+/* Rollen: ein Streifen Gaffa, leicht schräg aufgeklebt, die Wörter wie mit Edding darauf
+   geschrieben. Bleibt eine <ul> mit echtem Text; Gewebe und abgerissene Enden sind CSS.
+   Die Rolle ist pro Marke eine andere: hier Neonorange; it.css (Blaugrün) und rstream.css
+   (Violett) überschreiben nur die --tape-* Variablen. */
 .hero__roles {
-  display: flex;
+  --tape-hi: #ff8440;
+  --tape-mid: #f4622b;
+  --tape-lo: #e75524;
+  --tape-ink: #1a1410;
+  --tape-sep: rgba(26, 20, 16, 0.55);
+  --tape-weave-light: rgba(255, 255, 255, 0.12);
+  --tape-weave-dark: rgba(0, 0, 0, 0.07);
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
-  margin: 1.25rem 0 1.75rem;
+  gap: 0.2rem 1.4rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.4rem 0 1.9rem;
+  padding: 0.55rem 1.4rem 0.5rem 1.25rem;
   list-style: none;
   font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.08em;
+  font-size: clamp(0.9rem, 0.82rem + 0.35vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--tape-ink);
+  background:
+    repeating-linear-gradient(90deg, var(--tape-weave-light) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, var(--tape-weave-dark) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--tape-hi) 0%, var(--tape-mid) 48%, var(--tape-lo) 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 6px 14px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  clip-path: polygon(0% 14%, 1.2% 0%, 98.8% 3%, 100% 20%, 99.2% 46%, 100% 64%, 98.6% 100%, 1.6% 97%, 0% 80%, 0.8% 52%);
+  rotate: -1.6deg;
+  transform-origin: 0 50%;
 }
-.hero__roles li { position: relative; }
+.hero__roles li { position: relative; white-space: nowrap; }
 .hero__roles li + li::before {
   content: "/";
   position: absolute;
-  left: -0.85rem;
-  color: var(--accent);
+  left: -0.95rem;
+  color: var(--tape-sep);
+}
+/* Schmale Bildschirme: statt eines langen Streifens ein kurzes Stück Tape pro Begriff. Die
+   Stücke fließen: was nebeneinander Platz hat, klebt nebeneinander, die Zeilen sind zentriert –
+   ein einzelnes Stück in der letzten Zeile landet damit mittig. Jedes etwas anders schief,
+   Trennstriche entfallen. */
+@media (max-width: 47.99em) {
+  .hero__roles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem 0.75rem;
+    width: 100%;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    clip-path: none;
+    rotate: 0deg;
+  }
+  .hero__roles li {
+    padding: 0.4rem 1.1rem 0.38rem 1rem;
+    background:
+      repeating-linear-gradient(90deg, var(--tape-weave-light) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg, var(--tape-weave-dark) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, var(--tape-hi) 0%, var(--tape-mid) 48%, var(--tape-lo) 100%);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 5px 12px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    clip-path: polygon(0% 14%, 2% 0%, 98% 4%, 100% 22%, 98.5% 48%, 100% 66%, 97.5% 100%, 2.5% 96%, 0% 78%, 1.5% 50%);
+    transform-origin: 50% 50%;
+  }
+  .hero__roles li:nth-child(4n + 1) { rotate: -2deg; }
+  .hero__roles li:nth-child(4n + 2) { rotate: 1.4deg; }
+  .hero__roles li:nth-child(4n + 3) { rotate: -1deg; }
+  .hero__roles li:nth-child(4n + 4) { rotate: 1.8deg; }
+  .hero__roles li + li::before { display: none; }
 }
 .hero__intro {
   max-width: 34rem;
@@ -602,61 +659,210 @@ main:focus { outline: none; }
   .about__facts { grid-template-columns: 1fr; padding-top: 0.4rem; }
 }
 
-/* 5.4 Referenzen */
-.portfolio { border-top: 1px solid var(--line); padding-bottom: 0; }
-.refs { display: grid; gap: clamp(2rem, 4vw, 3rem); }
-.refs__group { border-top: 1px solid var(--line-strong); padding-top: 1.25rem; }
-.refs__title {
+/* 5.4 Referenzen – Setlisten mit Gaffa an die Wand geklebt
+   Die Wand ist der Abschnitt selbst (etwas heller als --bg, mit leichter Vignette), jedes
+   Blatt ein <article class="sheet"> aus Papier (--paper): schief geschnitten, einmal gefaltet,
+   mit Eselsohr (::after), minimal verdreht und mit zwei Streifen Gaffa (.sheet__tape, je Blatt
+   eine andere Rolle) nahe den Ecken fixiert. Die Namen sind eine nummerierte Liste in schwerer
+   Versalschrift wie auf einer gedruckten Setlist. Alles CSS, kein Bild; der Text bleibt für
+   Suchmaschinen und Screenreader lesbar. */
+.portfolio {
+  border-top: 1px solid var(--line);
+  padding-bottom: 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(243, 239, 231, 0.045), transparent 60%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 85%);
+}
+.setlist {
+  display: grid;
+  gap: clamp(3rem, 6vw, 4.5rem) clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+  padding-top: 1rem;
+}
+
+.sheet {
+  --tilt: 0deg;
+  --wall: #121216;          /* Wandfarbe hinter dem Eselsohr (≈ Verlauf des Abschnitts) */
+  --fold: 54%;              /* Höhe des Knicks */
+  /* optionaler Kaffeering (sheet--venues): immer drei Ebenen, damit background-blend-mode passt */
+  --stain: linear-gradient(transparent, transparent), linear-gradient(transparent, transparent), linear-gradient(transparent, transparent);
+  position: relative;
+  container-type: inline-size;
+  padding: clamp(1.5rem, 4cqi, 2.5rem) clamp(1.25rem, 4cqi, 2.25rem) clamp(1.75rem, 4.5cqi, 2.5rem);
+  rotate: var(--tilt);
+  color: var(--paper-ink);
+  /* Papier: leicht schief geschnittene Kanten, ungleichmäßig belichtet, einmal gefaltet (Knick
+     mit Licht- und Schattenkante, untere Hälfte minimal dunkler), Rauschkachel als Faser */
+  border-radius: 2px 4px 3px 5px / 4px 2px 5px 3px;
+  background:
+    var(--stain),
+    linear-gradient(180deg,
+      transparent calc(var(--fold) - 0.35rem),
+      rgba(0, 0, 0, 0.075) calc(var(--fold) - 0.05rem),
+      rgba(255, 255, 255, 0.75) var(--fold),
+      rgba(255, 255, 255, 0.75) calc(var(--fold) + 0.1rem),
+      transparent calc(var(--fold) + 0.6rem)),
+    linear-gradient(180deg, transparent var(--fold), rgba(0, 0, 0, 0.035) var(--fold)),
+    radial-gradient(80% 60% at 18% 8%, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(70% 55% at 90% 95%, rgba(110, 80, 35, 0.11), transparent 70%),
+    url("../images/grain.png") 0 0 / 120px 120px repeat,
+    linear-gradient(170deg, #f8f4ec 0%, var(--paper) 50%, #e9e3d7 100%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal, multiply, normal;
+  box-shadow:
+    inset 0 0 2.5rem rgba(60, 40, 10, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 10px 24px -10px rgba(0, 0, 0, 0.75),
+    0 32px 56px -28px rgba(0, 0, 0, 0.85);
+}
+/* Eselsohr unten rechts: äußeres Dreieck zeigt die Wand, das umgeschlagene Eck liegt darüber */
+.sheet::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0 0 3px 0;
+  background: linear-gradient(to top left, var(--wall) 50%, #d9d3c6 50%, #f2eee5 68%, #e4dfd3 100%);
+  box-shadow: -2px -2px 4px -2px rgba(0, 0, 0, 0.35);
+}
+.sheet--foh { --tilt: -1.1deg; --fold: 52%; }
+.sheet--collab { --tilt: 1.3deg; --fold: 57%; padding-top: clamp(2.25rem, 6cqi, 3rem); /* Platz unter den schrägen Streifen */ }
+.sheet--venues {
+  --tilt: -0.7deg;
+  --fold: 50%;
+  /* Kaffeering: zwei leicht versetzte, unterschiedlich kräftige Ränder und ein hauchdünner Film innen */
+  --stain:
+    radial-gradient(circle at 82% 13%, transparent 2.85rem, rgba(110, 70, 25, 0.22) 2.95rem, rgba(110, 70, 25, 0.1) 3.1rem, transparent 3.25rem),
+    radial-gradient(circle at 82.5% 13.6%, transparent 2.95rem, rgba(110, 70, 25, 0.12) 3.05rem, rgba(110, 70, 25, 0.04) 3.3rem, transparent 3.45rem),
+    radial-gradient(circle at 82% 13%, rgba(110, 70, 25, 0.045) 2.6rem, rgba(110, 70, 25, 0.02) 2.85rem, transparent 2.9rem);
+}
+.sheet--foh::after { width: 2rem; height: 2rem; }
+
+/* Gaffa: je Blatt eine andere Rolle – matt schwarz, silbergrau, Neonorange – immer nahe den
+   Ecken. Gewebestruktur aus zwei feinen Rastern, Enden unregelmäßig abgerissen (clip-path). */
+.sheet__tape {
+  --tape-w: clamp(5.5rem, 22cqi, 7.5rem);
+  position: absolute;
+  width: var(--tape-w);
+  height: 1.9rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    var(--tape);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  clip-path: polygon(0% 12%, 3% 0%, 97% 4%, 100% 18%, 98% 42%, 100% 60%, 97% 100%, 4% 96%, 0% 78%, 2% 50%);
+  opacity: 0.96;
+  pointer-events: none;
+}
+/* Rolle 1 – schwarzes Gaffa, zwei Streifen waagrecht über die obere Kante */
+.sheet--foh .sheet__tape { --tape: linear-gradient(180deg, #3a3a41 0%, #2b2b31 45%, #232329 100%); }
+.sheet--foh .sheet__tape--a { top: -0.85rem; left: clamp(0.5rem, 4cqi, 1.25rem); rotate: -8deg; }
+.sheet--foh .sheet__tape--b { top: -0.8rem; right: clamp(0.5rem, 4cqi, 1.25rem); rotate: 6deg; }
+/* Rolle 2 – silbergraues Gaffa, schräg über die oberen Ecken geklebt */
+.sheet--collab .sheet__tape {
+  --tape: linear-gradient(180deg, #c3c3c8 0%, #a9a9af 40%, #9b9ba1 60%, #b4b4b9 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  opacity: 0.98;
+}
+.sheet--collab .sheet__tape--a { top: 0; left: calc(var(--tape-w) * -0.36); rotate: -45deg; }
+.sheet--collab .sheet__tape--b { top: 0; right: calc(var(--tape-w) * -0.36); rotate: 45deg; }
+/* Rolle 3 – Neonorange (Markierungs-Gaffa), oben rechts waagrecht, unten links schräg übers Eck */
+.sheet--venues .sheet__tape {
+  --tape: linear-gradient(180deg, #ff7a3a 0%, #f4602a 50%, #e85524 100%);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 3px),
+    var(--tape);
+  opacity: 0.95;
+}
+.sheet--venues .sheet__tape--a { top: -0.9rem; right: clamp(0.5rem, 4cqi, 1.25rem); rotate: -5deg; }
+.sheet--venues .sheet__tape--b { bottom: 0.3rem; left: calc(var(--tape-w) * -0.3); rotate: 45deg; }
+.sheet--venues::after { display: none; } /* das Tape unten links genügt, kein Eselsohr dazu */
+
+.sheet__head {
+  margin-bottom: clamp(1rem, 3cqi, 1.5rem);
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--paper-ink);
+}
+.sheet__meta {
   display: flex;
-  align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin: 0 0 0.6rem;
   font-family: var(--font-mono);
   font-size: var(--step--1);
-  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent-ink);
+  color: rgba(12, 12, 15, 0.62);
 }
-.refs__count { color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
-.refs__list {
+.sheet__title {
+  font-size: clamp(1.5rem, 8cqi, 2.4rem);
+  font-weight: 850;
+  font-stretch: condensed;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.sheet__list {
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0;
-  font-size: var(--step-1);
-  font-weight: 650;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
-  color: var(--ink);
+  counter-reset: song;
+  font-weight: 800;
+  font-stretch: condensed;
+  font-size: clamp(1.35rem, 6cqi, 1.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
-.refs__list li { display: inline-flex; align-items: center; }
-.refs__list li:not(:last-child)::after {
-  content: "";
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin: 0 0.75rem;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.8;
+.sheet__list li {
+  counter-increment: song;
+  display: grid;
+  grid-template-columns: 2ch 1fr;
+  gap: 0.6em;
+  align-items: baseline;
+  padding: 0.3em 0;
+  border-bottom: 1px solid rgba(12, 12, 15, 0.1);
+  break-inside: avoid;
+  overflow-wrap: anywhere;
 }
-#refs-collab .refs__list,
-#refs-venues .refs__list { font-size: var(--step-0); font-weight: 550; color: var(--ink-2); }
-#refs-foh .refs__list { font-size: var(--step-2); }
+.sheet__list li::before {
+  content: counter(song, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.6em;
+  letter-spacing: 0;
+  color: rgba(12, 12, 15, 0.5);
+  text-align: right;
+}
+.sheet__foot {
+  margin: 1.25rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(12, 12, 15, 0.55);
+}
+.sheet__foot::before { content: "→ "; }
 
-/* Schmale Bildschirme: zweispaltige Liste statt Fließtext mit Trennpunkten */
-@media (max-width: 39.99em) {
-  .refs__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem 1rem; }
-  .refs__list li { display: block; overflow-wrap: anywhere; }
-  .refs__list li:not(:last-child)::after { display: none; }
-  #refs-foh .refs__list { font-size: var(--step-1); }
+/* Breite Blätter bekommen zwei Spalten */
+@container (min-width: 34rem) {
+  .sheet__list { columns: 2; column-gap: clamp(1.5rem, 5cqi, 3rem); }
 }
 
-@media (min-width: 64em) {
-  .refs { grid-template-columns: 1fr 1fr; }
-  #refs-foh { grid-column: 1 / -1; }
+/* Die Wand: am Handy eine Spalte; am Tablet unterschiedlich breite Blätter untereinander,
+   versetzt wie an eine Wand geklebt; am Desktop eine lockere Collage aus drei Spalten */
+@media (min-width: 48em) and (max-width: 74.99em) {
+  .sheet--collab { width: min(100%, 36rem); justify-self: end; }
+  .sheet--venues { width: 90%; margin-top: -0.5rem; }
+}
+@media (min-width: 75em) {
+  .setlist { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sheet--foh { grid-column: 1 / 3; }
+  .sheet--collab { grid-column: 3; margin-top: 2.5rem; }
+  .sheet--venues { grid-column: 2 / 4; margin-top: -1rem; }
 }
 
 .clients {
@@ -1228,11 +1434,11 @@ main:focus { outline: none; }
   .js [data-reveal].is-visible { opacity: 1; transform: none; }
   .js .skills__item:nth-child(2),
   .js .gallery__item:nth-child(2),
-  .js .refs__group:nth-child(2),
+  .js .sheet:nth-child(2),
   .js .projects__item:nth-child(2) { transition-delay: 90ms; }
   .js .skills__item:nth-child(3),
   .js .gallery__item:nth-child(3),
-  .js .refs__group:nth-child(3) { transition-delay: 180ms; }
+  .js .sheet:nth-child(3) { transition-delay: 180ms; }
   .js .skills__item:nth-child(4),
   .js .gallery__item:nth-child(4) { transition-delay: 270ms; }
   .js .skills__item:nth-child(5),

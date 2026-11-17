@@ -77,7 +77,7 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
     assets/images/{grain,grain-frames}.png,
     assets/images/logos/{bleedingstar,reichi-it}.png
                          COPIES of the shared files (tools/sync-site-assets.sh)
-    assets/images/rstream-{mark,wordmark}.svg      logo parts traced from the original logo
+    assets/images/rstream-{mark,wordmark}.svg      hexagon (sharp vector) and „STREAM“ (traced from the original logo)
     assets/images/icons/, favicon.ico, share-rstream.png, robots.txt, sitemap.xml
   app/                   PHP code – not reachable from the browser (.htaccess + PHP guard)
     bootstrap.php        shared entry (config, helpers, content, security headers)
@@ -100,9 +100,11 @@ htdocs/                  <- the web root: upload the CONTENTS of this folder via
 assets-src/originals/    untouched originals downloaded from the old site (do not upload)
 assets-src/brand/        reichi.it and rstream.at logo files (SVG + PNG, light and dark) – do not upload
 tools/build-images.py    optional dev helper to regenerate image derivatives
+tools/mark.py            the hexagon „R“ as path data (normalised from assets-src/originals/reichi-mark.svg), used by the brand scripts
+tools/build-mark.py      optional dev helper: reichi.com favicons, touch icons and safari-pinned-tab.svg from the mark
 tools/build-it-brand.py  optional dev helper: reichi.it logo, favicons, share image
 tools/build-it-ground.py optional dev helper: keys and crops the festival-ground picture for the reichi.it hero
-tools/build-rstream-brand.py  optional dev helper: traces the R-Stream logo, favicons, share image
+tools/build-rstream-brand.py  optional dev helper: traces „STREAM“ from the R-Stream logo, adds the hexagon, favicons, share image
 tools/sync-site-assets.sh  copies style.css / main.js / grain.png / grain-frames.png / logos into htdocs/it/ and htdocs/rstream/
 tools/build-zip.sh       optional dev helper to build the upload ZIP
 tools/deploy-ftp.py      optional dev helper: list / diff / upload htdocs/ via FTPS (never deletes)
@@ -403,8 +405,9 @@ Same steps as for reichi.it, with these names:
   BleedingStar – light logos, nothing inverted), Anfrage (subject select: Livestream,
   Aufzeichnung, Hybrid-Event, Sonstiges; inquiries go to `office@rstream.at`).
 - Logo: `assets-src/brand/rstream-logo.svg|png` (dark ink, for light surfaces) and
-  `rstream-logo-dark.svg|png` (light ink, for dark surfaces), both traced from the original
-  `assets-src/originals/rstream.png` by `tools/build-rstream-brand.py`, which also writes the
+  `rstream-logo-dark.svg|png` (light ink, for dark surfaces): „STREAM“ traced from the original
+  `assets-src/originals/rstream.png`, the hexagon „R“ from `tools/mark.py`, by
+  `tools/build-rstream-brand.py`, which also writes the
   header mark and wordmark, favicons, touch icons, the share image and the card logos
   `htdocs/assets/images/logos/rstream.png` (reichi.com) and `rstream-paper.png` (reichi.it) –
   hexagon in rstream.at's violet as the only accent, „STREAM“ in each site's ink. Regenerate with
@@ -419,7 +422,10 @@ Everything editable lives in **`app/content.php`**, one PHP array with comments:
   (do not put HTML in them).
 - **References**: `portfolio.groups[*].items` – three separate lists (FOH mixed for /
   worked together with / festivals & venues). Add or remove names; counts update
-  automatically.
+  automatically. They are rendered as set lists on paper taped to the wall with gaffer
+  tape (`sections/portfolio.php`, CSS block 5.4 – pure CSS, no images, the names stay
+  plain text in numbered lists). Optional per group: `set_label` (small line top left),
+  `count_label` (word after the count), `footer` (line under the list).
 - **Client logos**: `clients.items` – name, URL (or `null`), file in `assets/images/logos/`,
   intrinsic width/height, alt text, `light_bg => true` for logos that ship with a white
   background (they are placed on a light plate).

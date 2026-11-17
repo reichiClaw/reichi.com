@@ -1,5 +1,10 @@
 <?php
-/** Referenzen: drei getrennte Listen + Logo-Zeile „Clients“. */
+/**
+ * Referenzen als Setlisten: drei Blätter Papier, mit Gaffa an die Wand geklebt (CSS, .sheet;
+ * die beiden leeren Spans sind die Klebestreifen, das Blatt selbst zeichnet Knick und Eselsohr),
+ * dazu die Logo-Zeile „Clients“. Die Namen bleiben echter Text in nummerierten Listen,
+ * damit Suchmaschinen und Screenreader sie wie bisher lesen.
+ */
 
 declare(strict_types=1);
 
@@ -10,6 +15,7 @@ if (!defined('PUBLIC_DIR')) {
 
 $portfolio = $content['portfolio'];
 $clients = $content['clients'];
+$sheetCount = count($portfolio['groups']);
 ?>
 <section class="section portfolio" id="portfolio" aria-labelledby="portfolio-title">
   <div class="section__inner">
@@ -19,19 +25,27 @@ $clients = $content['clients'];
       <p class="section__note"><?= e($portfolio['claim']) ?></p>
     </header>
 
-    <div class="refs">
-      <?php foreach ($portfolio['groups'] as $group): ?>
-        <div class="refs__group" id="refs-<?= e($group['id']) ?>" data-reveal>
-          <h3 class="refs__title">
-            <?= e($group['title']) ?>
-            <span class="refs__count" aria-hidden="true"><?= count($group['items']) ?></span>
-          </h3>
-          <ul class="refs__list">
+    <div class="setlist">
+      <?php foreach ($portfolio['groups'] as $i => $group): ?>
+        <article class="sheet sheet--<?= e($group['id']) ?>" id="refs-<?= e($group['id']) ?>" data-reveal>
+          <span class="sheet__tape sheet__tape--a" aria-hidden="true"></span>
+          <span class="sheet__tape sheet__tape--b" aria-hidden="true"></span>
+          <header class="sheet__head">
+            <p class="sheet__meta">
+              <span><?= e($group['set_label'] ?? sprintf('Set %d/%d', $i + 1, $sheetCount)) ?></span>
+              <span><?= count($group['items']) ?> <?= e($group['count_label'] ?? 'Titel') ?></span>
+            </p>
+            <h3 class="sheet__title"><?= e($group['title']) ?></h3>
+          </header>
+          <ol class="sheet__list">
             <?php foreach ($group['items'] as $name): ?>
               <li><?= e($name) ?></li>
             <?php endforeach; ?>
-          </ul>
-        </div>
+          </ol>
+          <?php if (!empty($group['footer'])): ?>
+            <p class="sheet__foot"><?= e($group['footer']) ?></p>
+          <?php endif; ?>
+        </article>
       <?php endforeach; ?>
     </div>
   </div>
