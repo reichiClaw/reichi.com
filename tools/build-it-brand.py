@@ -16,7 +16,7 @@ fett, eng gesetzt); als Datei wird sie mit Inter Bold (SIL Open Font License) in
 umgewandelt, damit sie überall gleich aussieht. „reichi“ steht in Tinte, „.it“ als
 Negativform in einem abgerundeten Farbfeld (wie ein Kabel-Tag; Boolesche Pfade mit
 skia-pathops). Der Blitz lebt in Favicon und Abzeichen.
-Das Sechseck-R stammt aus dem vorhandenen safari-pinned-tab.svg der alten reichi.com.
+Das Sechseck-R ist das Zeichen mit scharfen Kanten aus tools/mark.py (assets-src/originals/reichi-mark.svg).
 Die Website bindet htdocs/it/assets/images/reichi-it-wordmark.svg ein (brand_word_html).
 
     pip install fonttools cairosvg pillow skia-pathops
@@ -36,6 +36,9 @@ from fontTools.ttLib import TTFont
 import pathops
 from PIL import Image
 
+# Sechseck-R mit scharfen Kanten: mark_svg(x, y, size, color) zeichnet das Zeichen, hexagon_svg() nur den Ring
+from mark import hexagon_svg, mark_svg
+
 ROOT = Path(__file__).resolve().parent.parent
 FONT = Path("/usr/share/fonts/truetype/macos/Inter-Bold.ttf")
 BRAND_DIR = ROOT / "assets-src" / "brand"
@@ -47,40 +50,6 @@ INK = "#15151a"
 ACCENT = "#00e6c3"        # elektrisches Blaugrün – nur für Flächen und Grafik
 ACCENT_INK = "#00705f"    # dunkle Variante für Text auf Papier (5.4:1)
 LIGHT_INK = "#f3efe7"
-
-# Sechseck-R aus safari-pinned-tab.svg (100×100, y nach oben → Transform im <g>); erster Pfad = Ring
-MARK_RING = (
-    '<path d="M290 883 c-107 -63 -202 -118 -210 -123 -12 -7 -15 -47 -16 -242 -1 -128 1 -242 3 -254 '
-    '4 -18 71 -62 248 -160 11 -6 54 -31 95 -56 41 -25 83 -44 93 -42 19 3 419 231 427 244 3 5 5 119 '
-    '5 255 0 206 -3 248 -15 255 -70 45 -402 231 -417 234 -10 1 -106 -49 -213 -111z m373 -90 c83 -49 '
-    '157 -94 162 -101 10 -13 14 -376 5 -385 -13 -13 -321 -187 -330 -187 -15 0 -313 172 -325 188 -6 8 '
-    '-10 85 -10 192 0 147 3 183 16 195 20 21 301 184 317 184 7 1 81 -38 165 -86z"/>'
-)
-MARK_R = (
-    '<path d="M380 709 c-58 -34 -108 -66 -112 -72 -12 -19 -9 -265 3 -272 6 -4 13 -5 15 -2 3 3 6 56 '
-    '6 119 0 62 4 121 9 130 9 18 178 118 199 118 14 0 180 -92 180 -100 0 -3 -40 -29 -90 -58 -64 -37 '
-    '-90 -58 -90 -72 0 -14 29 -36 103 -79 96 -57 137 -73 137 -52 0 8 -37 37 -65 51 -49 25 -125 74 '
-    '-125 80 0 4 37 30 83 56 111 65 118 77 64 108 -137 81 -184 106 -197 106 -8 0 -62 -27 -120 -61z"/>'
-)
-
-
-def _mark_group(x: float, y: float, size: float, color: str, paths: str) -> str:
-    s = size / 100
-    return (
-        f'<g transform="translate({x:.2f} {y + size:.2f}) scale({s * 0.1:.5f} {-s * 0.1:.5f})" fill="{color}">'
-        + paths + "</g>"
-    )
-
-
-def mark_svg(x: float, y: float, size: float, color: str) -> str:
-    """Das Sechseck-R mit linker oberer Ecke (x, y) und Kantenlänge size."""
-    return _mark_group(x, y, size, color, MARK_RING + MARK_R)
-
-
-def hexagon_svg(x: float, y: float, size: float, color: str) -> str:
-    """Nur der Sechseck-Ring (ohne R) – Rahmen für das Abzeichen der IT-Abteilung."""
-    return _mark_group(x, y, size, color, MARK_RING)
-
 
 # Blitz: eine Form, zwei parallele Schenkel (Steigung 1:2), waagrechte Schultern, Spitze unten.
 # Kasten 52×100; die Schenkelstärke (21 Einheiten waagrecht ≈ 19 senkrecht zur Kante) entspricht
