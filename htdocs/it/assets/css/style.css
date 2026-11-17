@@ -408,6 +408,35 @@ main:focus { outline: none; }
   left: -0.95rem;
   color: rgba(26, 20, 16, 0.55);
 }
+/* Schmale Bildschirme: statt eines langen Streifens drei kurze Stücke Tape, untereinander
+   und jedes etwas anders schief geklebt. Gleiche Tape-Optik, Trennstriche entfallen. */
+@media (max-width: 47.99em) {
+  .hero__roles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    clip-path: none;
+    rotate: 0deg;
+  }
+  .hero__roles li {
+    padding: 0.4rem 1.1rem 0.38rem 1rem;
+    background:
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #ff8440 0%, #f4622b 48%, #e75524 100%);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), 0 5px 12px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    clip-path: polygon(0% 14%, 2% 0%, 98% 4%, 100% 22%, 98.5% 48%, 100% 66%, 97.5% 100%, 2.5% 96%, 0% 78%, 1.5% 50%);
+    transform-origin: 0 50%;
+  }
+  .hero__roles li:nth-child(1) { rotate: -2deg; }
+  .hero__roles li:nth-child(2) { rotate: 1.4deg; margin-left: 0.9rem; }
+  .hero__roles li:nth-child(3) { rotate: -1deg; margin-left: 0.3rem; }
+  .hero__roles li + li::before { display: none; }
+}
 .hero__intro {
   max-width: 34rem;
   font-size: var(--step-1);
