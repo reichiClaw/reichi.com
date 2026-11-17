@@ -604,10 +604,11 @@ main:focus { outline: none; }
 
 /* 5.4 Referenzen – Setlisten mit Gaffa an die Wand geklebt
    Die Wand ist der Abschnitt selbst (etwas heller als --bg, mit leichter Vignette), jedes
-   Blatt ein <article class="sheet"> aus Papier (--paper), minimal verdreht und oben mit zwei
-   Streifen schwarzem Gaffa (::before/::after) fixiert. Die Namen sind eine nummerierte Liste
-   in schwerer Versalschrift wie auf einer gedruckten Setlist. Alles CSS, kein Bild; der Text
-   bleibt für Suchmaschinen und Screenreader lesbar. */
+   Blatt ein <article class="sheet"> aus Papier (--paper): schief geschnitten, einmal gefaltet,
+   mit Eselsohr (::after), minimal verdreht und mit zwei Streifen Gaffa (.sheet__tape, je Blatt
+   eine andere Rolle) nahe den Ecken fixiert. Die Namen sind eine nummerierte Liste in schwerer
+   Versalschrift wie auf einer gedruckten Setlist. Alles CSS, kein Bild; der Text bleibt für
+   Suchmaschinen und Screenreader lesbar. */
 .portfolio {
   border-top: 1px solid var(--line);
   padding-bottom: 0;
@@ -624,50 +625,103 @@ main:focus { outline: none; }
 
 .sheet {
   --tilt: 0deg;
+  --wall: #121216;          /* Wandfarbe hinter dem Eselsohr (≈ Verlauf des Abschnitts) */
+  --fold: 54%;              /* Höhe des Knicks */
+  /* optionaler Kaffeering (sheet--venues): immer drei Ebenen, damit background-blend-mode passt */
+  --stain: linear-gradient(transparent, transparent), linear-gradient(transparent, transparent), linear-gradient(transparent, transparent);
   position: relative;
   container-type: inline-size;
-  padding: clamp(1.5rem, 4cqi, 2.5rem) clamp(1.25rem, 4cqi, 2.25rem) clamp(1.5rem, 4cqi, 2.25rem);
+  padding: clamp(1.5rem, 4cqi, 2.5rem) clamp(1.25rem, 4cqi, 2.25rem) clamp(1.75rem, 4.5cqi, 2.5rem);
   rotate: var(--tilt);
   color: var(--paper-ink);
+  /* Papier: leicht schief geschnittene Kanten, ungleichmäßig belichtet, einmal gefaltet (Knick
+     mit Licht- und Schattenkante, untere Hälfte minimal dunkler), Rauschkachel als Faser */
+  border-radius: 2px 4px 3px 5px / 4px 2px 5px 3px;
   background:
-    /* Papierkorn: dieselbe Rauschkachel wie das Filmkorn, sehr zart */
+    var(--stain),
+    linear-gradient(180deg,
+      transparent calc(var(--fold) - 0.35rem),
+      rgba(0, 0, 0, 0.075) calc(var(--fold) - 0.05rem),
+      rgba(255, 255, 255, 0.75) var(--fold),
+      rgba(255, 255, 255, 0.75) calc(var(--fold) + 0.1rem),
+      transparent calc(var(--fold) + 0.6rem)),
+    linear-gradient(180deg, transparent var(--fold), rgba(0, 0, 0, 0.035) var(--fold)),
+    radial-gradient(80% 60% at 18% 8%, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(70% 55% at 90% 95%, rgba(110, 80, 35, 0.11), transparent 70%),
     url("../images/grain.png") 0 0 / 120px 120px repeat,
-    linear-gradient(180deg, #f7f3ea 0%, var(--paper) 55%, #ebe6dc 100%);
-  background-blend-mode: multiply, normal;
+    linear-gradient(170deg, #f8f4ec 0%, var(--paper) 50%, #e9e3d7 100%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal, multiply, normal;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.35),
-    0 12px 28px -10px rgba(0, 0, 0, 0.7),
-    0 30px 60px -30px rgba(0, 0, 0, 0.8);
+    inset 0 0 2.5rem rgba(60, 40, 10, 0.06),
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 10px 24px -10px rgba(0, 0, 0, 0.75),
+    0 32px 56px -28px rgba(0, 0, 0, 0.85);
 }
-.sheet--foh { --tilt: -1.1deg; }
-.sheet--collab { --tilt: 1.3deg; }
-.sheet--venues { --tilt: -0.7deg; }
-
-/* Gaffa: mattes Schwarz mit Gewebestruktur, Enden unregelmäßig abgerissen */
-.sheet::before,
+/* Eselsohr unten rechts: äußeres Dreieck zeigt die Wand, das umgeschlagene Eck liegt darüber */
 .sheet::after {
   content: "";
   position: absolute;
-  top: -0.85rem;
-  width: clamp(5.5rem, 22cqi, 7.5rem);
+  right: 0;
+  bottom: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0 0 3px 0;
+  background: linear-gradient(to top left, var(--wall) 50%, #d9d3c6 50%, #f2eee5 68%, #e4dfd3 100%);
+  box-shadow: -2px -2px 4px -2px rgba(0, 0, 0, 0.35);
+}
+.sheet--foh { --tilt: -1.1deg; --fold: 52%; }
+.sheet--collab { --tilt: 1.3deg; --fold: 57%; padding-top: clamp(2.25rem, 6cqi, 3rem); /* Platz unter den schrägen Streifen */ }
+.sheet--venues {
+  --tilt: -0.7deg;
+  --fold: 50%;
+  /* Kaffeering: zwei leicht versetzte, unterschiedlich kräftige Ränder und ein hauchdünner Film innen */
+  --stain:
+    radial-gradient(circle at 82% 13%, transparent 2.85rem, rgba(110, 70, 25, 0.22) 2.95rem, rgba(110, 70, 25, 0.1) 3.1rem, transparent 3.25rem),
+    radial-gradient(circle at 82.5% 13.6%, transparent 2.95rem, rgba(110, 70, 25, 0.12) 3.05rem, rgba(110, 70, 25, 0.04) 3.3rem, transparent 3.45rem),
+    radial-gradient(circle at 82% 13%, rgba(110, 70, 25, 0.045) 2.6rem, rgba(110, 70, 25, 0.02) 2.85rem, transparent 2.9rem);
+}
+.sheet--foh::after { width: 2rem; height: 2rem; }
+
+/* Gaffa: je Blatt eine andere Rolle – matt schwarz, silbergrau, Neonorange – immer nahe den
+   Ecken. Gewebestruktur aus zwei feinen Rastern, Enden unregelmäßig abgerissen (clip-path). */
+.sheet__tape {
+  --tape-w: clamp(5.5rem, 22cqi, 7.5rem);
+  position: absolute;
+  width: var(--tape-w);
   height: 1.9rem;
   background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, #3a3a41 0%, #2b2b31 45%, #232329 100%);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  clip-path: polygon(
-    0% 12%, 3% 0%, 97% 4%, 100% 18%, 98% 42%, 100% 60%, 97% 100%, 4% 96%, 0% 78%, 2% 50%
-  );
+    var(--tape);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  clip-path: polygon(0% 12%, 3% 0%, 97% 4%, 100% 18%, 98% 42%, 100% 60%, 97% 100%, 4% 96%, 0% 78%, 2% 50%);
   opacity: 0.96;
   pointer-events: none;
 }
-.sheet::before { left: clamp(0.75rem, 6cqi, 1.75rem); rotate: -9deg; }
-.sheet::after { right: clamp(0.75rem, 6cqi, 1.75rem); rotate: 7deg; }
-.sheet--collab::before { rotate: 11deg; }
-.sheet--collab::after { rotate: -5deg; }
-.sheet--venues::before { left: auto; right: 38%; rotate: 3deg; }
-.sheet--venues::after { right: clamp(0.5rem, 4cqi, 1.25rem); rotate: -12deg; }
+/* Rolle 1 – schwarzes Gaffa, zwei Streifen waagrecht über die obere Kante */
+.sheet--foh .sheet__tape { --tape: linear-gradient(180deg, #3a3a41 0%, #2b2b31 45%, #232329 100%); }
+.sheet--foh .sheet__tape--a { top: -0.85rem; left: clamp(0.5rem, 4cqi, 1.25rem); rotate: -8deg; }
+.sheet--foh .sheet__tape--b { top: -0.8rem; right: clamp(0.5rem, 4cqi, 1.25rem); rotate: 6deg; }
+/* Rolle 2 – silbergraues Gaffa, schräg über die oberen Ecken geklebt */
+.sheet--collab .sheet__tape {
+  --tape: linear-gradient(180deg, #c3c3c8 0%, #a9a9af 40%, #9b9ba1 60%, #b4b4b9 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  opacity: 0.98;
+}
+.sheet--collab .sheet__tape--a { top: 0; left: calc(var(--tape-w) * -0.36); rotate: -45deg; }
+.sheet--collab .sheet__tape--b { top: 0; right: calc(var(--tape-w) * -0.36); rotate: 45deg; }
+/* Rolle 3 – Neonorange (Markierungs-Gaffa), oben rechts waagrecht, unten links schräg übers Eck */
+.sheet--venues .sheet__tape {
+  --tape: linear-gradient(180deg, #ff7a3a 0%, #f4602a 50%, #e85524 100%);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 3px),
+    var(--tape);
+  opacity: 0.95;
+}
+.sheet--venues .sheet__tape--a { top: -0.9rem; right: clamp(0.5rem, 4cqi, 1.25rem); rotate: -5deg; }
+.sheet--venues .sheet__tape--b { bottom: 0.3rem; left: calc(var(--tape-w) * -0.3); rotate: 45deg; }
+.sheet--venues::after { display: none; } /* das Tape unten links genügt, kein Eselsohr dazu */
 
 .sheet__head {
   margin-bottom: clamp(1rem, 3cqi, 1.5rem);

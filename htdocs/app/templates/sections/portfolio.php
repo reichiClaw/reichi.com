@@ -1,6 +1,7 @@
 <?php
 /**
- * Referenzen als Setlisten: drei Blätter Papier, mit Gaffa an die Wand geklebt (CSS, .sheet),
+ * Referenzen als Setlisten: drei Blätter Papier, mit Gaffa an die Wand geklebt (CSS, .sheet;
+ * die beiden leeren Spans sind die Klebestreifen, das Blatt selbst zeichnet Knick und Eselsohr),
  * dazu die Logo-Zeile „Clients“. Die Namen bleiben echter Text in nummerierten Listen,
  * damit Suchmaschinen und Screenreader sie wie bisher lesen.
  */
@@ -27,6 +28,8 @@ $sheetCount = count($portfolio['groups']);
     <div class="setlist">
       <?php foreach ($portfolio['groups'] as $i => $group): ?>
         <article class="sheet sheet--<?= e($group['id']) ?>" id="refs-<?= e($group['id']) ?>" data-reveal>
+          <span class="sheet__tape sheet__tape--a" aria-hidden="true"></span>
+          <span class="sheet__tape sheet__tape--b" aria-hidden="true"></span>
           <header class="sheet__head">
             <p class="sheet__meta">
               <span><?= e($group['set_label'] ?? sprintf('Set %d/%d', $i + 1, $sheetCount)) ?></span>
