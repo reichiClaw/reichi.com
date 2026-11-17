@@ -20,8 +20,11 @@ Quelle ist assets-src/originals/rstream.png (744×182, schwarz auf transparent) 
 das schon die alte rstream.at und die Projektzeile von reichi.com verwendet haben. Es wird mit
 potrace (reine Python-Portierung „potracer“) in Pfade gewandelt, vierfach hochgerechnet
 für glatte Kurven; die Abweichung zur Pixelvorlage liegt unter 0,2 % der Fläche. Das
-Sechseck ist der linke Teil (x < 170), „STREAM“ der rechte. Die Unterzeile des Sharing-Bilds
-ist Inter Bold (SIL Open Font License) als Pfade.
+Sechseck ist der linke Teil (x < 170), „STREAM“ der rechte. Verwendet wird von der
+Nachzeichnung nur noch „STREAM“: das Sechseck-R kommt mit scharfen Kanten aus tools/mark.py
+(assets-src/originals/reichi-mark.svg) und wird in Höhe und Mitte des nachgezeichneten
+Sechsecks gesetzt. Die Unterzeile des Sharing-Bilds ist Inter Bold (SIL Open Font License)
+als Pfade.
 
     pip install potracer fonttools cairosvg pillow numpy
     python3 tools/build-rstream-brand.py
@@ -39,6 +42,9 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 from PIL import Image
+
+# Sechseck-R mit scharfen Kanten (tools/mark.py) – ersetzt das nachgezeichnete Sechseck der Vorlage
+from mark import mark_svg
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "assets-src" / "originals" / "rstream.png"
@@ -126,7 +132,6 @@ def main() -> None:
     img = Image.open(SRC).convert("RGBA")
     w, h = img.size
     contours = trace(img)
-    mark = [d for d, bb in contours if bb[2] < MARK_SPLIT]
     word = [d for d, bb in contours if bb[2] >= MARK_SPLIT]
     bbox = lambda sel: (  # noqa: E731
         min(bb[0] for d, bb in contours if (bb[2] < MARK_SPLIT) == sel),
@@ -134,17 +139,28 @@ def main() -> None:
         max(bb[2] for d, bb in contours if (bb[2] < MARK_SPLIT) == sel),
         max(bb[3] for d, bb in contours if (bb[2] < MARK_SPLIT) == sel),
     )
-    mx0, my0, mx1, my1 = bbox(True)
+    tx0, ty0, tx1, ty1 = bbox(True)
     wx0, wy0, wx1, wy1 = bbox(False)
-    print(f"Sechseck {mx0:.1f} {my0:.1f} {mx1:.1f} {my1:.1f} · Wortmarke {wx0:.1f} {wy0:.1f} {wx1:.1f} {wy1:.1f}")
+    print(f"Sechseck (Nachzeichnung) {tx0:.1f} {ty0:.1f} {tx1:.1f} {ty1:.1f} · Wortmarke {wx0:.1f} {wy0:.1f} {wx1:.1f} {wy1:.1f}")
+
+    # Scharfes Sechseck-R an die Stelle der Nachzeichnung: gleiche Höhe, gleiche Mitte. Im
+    # 100er-Kasten von mark.py ist der Ring 100 hoch und reicht von x 6.33 bis 93.67.
+    size = ty1 - ty0
+    kx = (tx0 + tx1) / 2 - size / 2
+    ky = ty0
+    mx0, mx1, my0, my1 = kx + 0.0633 * size, kx + 0.9367 * size, ky, ky + size
+
+    def mark_el(color: str, transform: str = "") -> str:
+        g = mark_svg(kx, ky, size, color)
+        return f'<g transform="{transform}">{g}</g>' if transform else g
 
     BRAND_DIR.mkdir(parents=True, exist_ok=True)
     IMG_DIR.mkdir(parents=True, exist_ok=True)
     ICON_DIR.mkdir(parents=True, exist_ok=True)
 
     # Vollständiges Logo, hell und dunkel
-    light = svg_doc(w, h, path_svg(mark + word, DARK_INK))
-    dark = svg_doc(w, h, path_svg(mark + word, LIGHT_INK))
+    light = svg_doc(w, h, mark_el(DARK_INK) + path_svg(word, DARK_INK))
+    dark = svg_doc(w, h, mark_el(LIGHT_INK) + path_svg(word, LIGHT_INK))
     (BRAND_DIR / "rstream-logo.svg").write_text(light, encoding="utf-8")
     (BRAND_DIR / "rstream-logo-dark.svg").write_text(dark, encoding="utf-8")
     render_png(light, BRAND_DIR / "rstream-logo.png", width=2400)
@@ -153,11 +169,11 @@ def main() -> None:
     # Kopf- und Fußzeile: Zeichen und Wortmarke getrennt, hell (dunkle Website). Die Wortmarke
     # wird in der Höhe der Versalien beschnitten, damit sie wie Text in der Zeile sitzt.
     pad = 1.0
-    mark_svg = svg_doc(mx1 - mx0 + 2 * pad, my1 - my0 + 2 * pad, path_svg(mark, LIGHT_INK),
+    mark_doc = svg_doc(mx1 - mx0 + 2 * pad, my1 - my0 + 2 * pad, mark_el(LIGHT_INK),
                        view=(mx0 - pad, my0 - pad, mx1 - mx0 + 2 * pad, my1 - my0 + 2 * pad))
     word_svg = svg_doc(wx1 - wx0 + 2 * pad, wy1 - wy0 + 2 * pad, path_svg(word, LIGHT_INK),
                        view=(wx0 - pad, wy0 - pad, wx1 - wx0 + 2 * pad, wy1 - wy0 + 2 * pad), label="STREAM")
-    (IMG_DIR / "rstream-mark.svg").write_text(mark_svg, encoding="utf-8")
+    (IMG_DIR / "rstream-mark.svg").write_text(mark_doc, encoding="utf-8")
     (IMG_DIR / "rstream-wordmark.svg").write_text(word_svg, encoding="utf-8")
     print(f"brand_mark_size in content-rstream.php: [{round(mx1 - mx0 + 2 * pad)}, {round(my1 - my0 + 2 * pad)}]")
     print(f"brand_wordmark_size in content-rstream.php: [{round(wx1 - wx0 + 2 * pad)}, {round(wy1 - wy0 + 2 * pad)}]")
@@ -168,7 +184,7 @@ def main() -> None:
     # Grund, weil iOS Transparenz schwarz füllt.
     mh = my1 - my0
     s = 90 / mh
-    mark_centered = path_svg(mark, ACCENT, f"translate({50 - (mx1 - mx0) * s / 2 - mx0 * s:.3f} {5 - my0 * s:.3f}) scale({s:.5f})")
+    mark_centered = mark_el(ACCENT, f"translate({50 - (mx1 - mx0) * s / 2 - mx0 * s:.3f} {5 - my0 * s:.3f}) scale({s:.5f})")
     icon_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
         f"{mark_centered}"
@@ -178,7 +194,7 @@ def main() -> None:
     touch_svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
         f'<rect width="100" height="100" fill="{LIGHT_INK}"/>'
-        f'{path_svg(mark, ACCENT, f"translate({50 - (mx1 - mx0) * s_touch / 2 - mx0 * s_touch:.3f} {13 - my0 * s_touch:.3f}) scale({s_touch:.5f})")}'
+        f'{mark_el(ACCENT, f"translate({50 - (mx1 - mx0) * s_touch / 2 - mx0 * s_touch:.3f} {13 - my0 * s_touch:.3f}) scale({s_touch:.5f})")}'
         "</svg>"
     )
     sizes = {
@@ -198,7 +214,7 @@ def main() -> None:
     s2 = 100 / mh
     pinned = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">'
-        f'{path_svg(mark, "#000000", f"translate({50 - (mx1 - mx0) * s2 / 2 - mx0 * s2:.3f} {-my0 * s2:.3f}) scale({s2:.5f})")}'
+        f'{mark_el("#000000", f"translate({50 - (mx1 - mx0) * s2 / 2 - mx0 * s2:.3f} {-my0 * s2:.3f}) scale({s2:.5f})")}'
         "</svg>"
     )
     (ICON_DIR / "safari-pinned-tab.svg").write_text(pinned, encoding="utf-8")
@@ -214,7 +230,7 @@ def main() -> None:
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {sw} {sh}" width="{sw}" height="{sh}">'
         f'<rect width="{sw}" height="{sh}" fill="{INK}"/>'
         f'<rect x="0" y="0" width="{sw}" height="6" fill="{ACCENT}"/>'
-        f'{path_svg(mark + word, LIGHT_INK, f"translate({(sw - w * ls) / 2:.2f} 200) scale({ls:.5f})")}'
+        f'<g transform="translate({(sw - w * ls) / 2:.2f} 200) scale({ls:.5f})">{mark_el(LIGHT_INK)}{path_svg(word, LIGHT_INK)}</g>'
         f'<path transform="translate({(sw - sub_w) / 2:.2f} 455)" fill="{LIGHT_INK}" fill-opacity="0.78" d="{sub_d}"/>'
         f'<rect x="{sw / 2 - 36}" y="490" width="72" height="4" fill="{ACCENT}"/>'
         "</svg>"
@@ -228,8 +244,8 @@ def main() -> None:
     logos = ROOT / "htdocs" / "assets" / "images" / "logos"
     card = logos / "rstream.png"
     card_paper = logos / "rstream-paper.png"
-    render_png(svg_doc(w, h, path_svg(mark, ACCENT) + path_svg(word, LIGHT_INK)), card, width=760)
-    render_png(svg_doc(w, h, path_svg(mark, ACCENT) + path_svg(word, DARK_INK)), card_paper, width=760)
+    render_png(svg_doc(w, h, mark_el(ACCENT) + path_svg(word, LIGHT_INK)), card, width=760)
+    render_png(svg_doc(w, h, mark_el(ACCENT) + path_svg(word, DARK_INK)), card_paper, width=760)
     with Image.open(card) as card_img:
         print(f"Kartenlogo content.php / content-it.php: 'width' => {card_img.width}, 'height' => {card_img.height}")
 
